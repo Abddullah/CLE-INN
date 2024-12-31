@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "960910998663",
+    "project_id": "puliziedicasa-7",
+    "storage_bucket": "puliziedicasa-7.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:960910998663:android:c4c5d409a0a2ac3f9fcc22",
+        "android_client_info": {
+          "package_name": "com.puliziedicasa"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDKuB80NKrDD0C4lVMkySK9SQ6enWH1eM0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
