@@ -19,7 +19,6 @@ import Feather from 'react-native-vector-icons/Feather';
 import { useTheme } from '../../../ThemeContext';
 import { LightThemeColors, DarkThemeColors } from '../../utilities/constants';
 import { Typography } from '../../utilities/constants/constant.style';
-import { MapSmall } from '../../assets/icons';
 import CTAButton1 from '../../components/CTA_BUTTON1';
 import CustomHeader from '../../components/Header';
 import WeekTimeSelector from '../../components/WeekTimeSelector';
@@ -32,6 +31,7 @@ import HorizontalList from '../../components/horizontalList';
 import AdditionalServices from '../../components/AdditionalServices';
 import { showError } from '../../store/actions/action';
 import SmallMap from '../../components/smallMap';
+import Toast from 'react-native-toast-message';
 
 const deviceWidth = screenResolution.screenWidth;
 
@@ -93,6 +93,30 @@ const CreateService = ({ navigation }) => {
 
     const [productImages, setProductImages] = useState([{ imagURL: '' }, { imagURL: '' }, { imagURL: '' }, { imagURL: '' }, { imagURL: '' }, { imagURL: '' },]);
 
+    // const [date, setDate] = useState(new Date())
+    const [date, setDate] = useState(new Date())
+    const [openBs, setopenBs] = useState(false)
+    const [showBs, setshowBs] = useState(false)
+    const [dateSelected, setDateSelected] = useState(false);
+
+    const [timeStart, settimeStart] = useState(new Date())
+    const [timeStartOpen, settimeStartOpen] = useState(false)
+    const [timeStartShow, settimeStartShow] = useState(false)
+    const [timeStartSelected, settimeStartSelected] = useState(false);
+
+    const [timeEnd, settimeEnd] = useState(new Date())
+    const [timeEndOpen, settimeEndOpen] = useState(false)
+    const [timeEndShow, settimeEndShow] = useState(false)
+    const [timeEndSelected, settimeEndSelected] = useState(false);
+
+    const [location, setlocation] = useState('')
+
+    const [instructions, setinstructions] = useState('');
+
+    const [rates, setrates] = useState('');
+    const [description, setdescription] = useState('');
+    const [isLoader, setisLoader] = useState(false);
+
 
     useEffect(() => {
         let previousTotal = previousSelectedHour * previousHourlyRates * previousSelectedProfessional;
@@ -147,53 +171,7 @@ const CreateService = ({ navigation }) => {
         setPreviousAdditionalServices(itemValue);
     }
 
-    const [rates, setrates] = useState('');
-    const [description, setdescription] = useState('');
-    const [location, setlocation] = useState('')
-    const [instructions, setinstructions] = useState('');
 
-    const [date, setDate] = useState(new Date())
-    const [openBs, setopenBs] = useState(false)
-    const [showBs, setshowBs] = useState(false)
-    const [timeSlots, settimeSlots] = useState([
-        {
-            startTime: '08:00 am',
-            endTime: '10:00 am',
-            isSelected: false
-        },
-        {
-            startTime: '10:00 am',
-            endTime: '12:00 pm',
-            isSelected: false
-        },
-        {
-            startTime: '12:00 pm',
-            endTime: '02:00 pm',
-            isSelected: false
-        },
-        {
-            startTime: '02:00 pm',
-            endTime: '04:00 pm',
-            isSelected: false
-        },
-        {
-            startTime: '04:00 pm',
-            endTime: '06:00 pm',
-            isSelected: false
-        },
-        {
-            startTime: '06:00 pm',
-            endTime: '08:00 pm',
-            isSelected: false
-        },
-        {
-            startTime: '08:00 pm',
-            endTime: '10:00 pm',
-            isSelected: false
-        },
-    ])
-
-    const [isLoader, setisLoader] = useState(false);
 
 
 
@@ -341,24 +319,23 @@ const CreateService = ({ navigation }) => {
         }
     };
 
-
     const stepsHandler = () => {
         if (isJobCreate ? step < 4 : step < 2) {
             if (step === 0) {
                 if (selectedCategories === '') {
-                    alert('Please select category')
+                    Toast.show({ type: 'error', text1: t('Pleaseselectcategory'), position: 'bottom' });
                 }
                 else if (selectedsubcategories === '') {
-                    alert('Please select sub category')
+                    Toast.show({ type: 'error', text1: t('Pleaseselectsubcategory'), position: 'bottom' });
                 }
                 else if (selectedCategories === 'Cleaning and Hygiene Services' && roomsize === '') {
-                    alert('Please select room size')
+                    Toast.show({ type: 'error', text1: t('Pleaseselectroomsize'), position: 'bottom' });
                 }
                 else if (selectedCategories === 'Cleaning and Hygiene Services' && roomsQty === '') {
-                    alert('Please select room quantity')
+                    Toast.show({ type: 'error', text1: t('Pleaseselectroomquantity'), position: 'bottom' });
                 }
                 else if (selectedCategories === 'Cleaning and Hygiene Services' && needCleaningMaterials === '') {
-                    alert('Please select cleaning material')
+                    Toast.show({ type: 'error', text1: t('Pleaseselectcleaningmaterial'), position: 'bottom' });
                 }
                 else {
                     setstep(step + 1)
@@ -366,17 +343,41 @@ const CreateService = ({ navigation }) => {
             }
             if (step === 1) {
                 if (productImages[0].imagURL === '') {
-                    alert('Please select image')
+                    Toast.show({ type: 'error', text1: t('Pleaseselectimage'), position: 'bottom' });
                 }
                 else {
                     setstep(step + 1)
                 }
             }
+            if (step === 2) {
+                if (!dateSelected) {
+                    Toast.show({ type: 'error', text1: t('Pleaseselectadate'), position: 'bottom' });
+                }
+                else if (!timeStart || isNaN(new Date(timeStart).getTime())) {
+                    Toast.show({ type: 'error', text1: t('Pleaseselectavalidstarttime'), position: 'bottom' });
+                } else if (!timeEnd || isNaN(new Date(timeEnd).getTime())) {
+                    Toast.show({ type: 'error', text1: t('Pleaseselectavalidendtime'), position: 'bottom' });
 
+                } else if (new Date(timeStart) >= new Date(timeEnd)) {
+                    Toast.show({ type: 'error', text1: t('Starttimemustbebeforeendtime'), position: 'bottom' });
+                }
+                else {
+                    setstep(step + 1)
+                }
+            }
+            if (step === 3) {
+                if (location === '') {
+                    Toast.show({ type: 'error', text1: t('Pleasetypelocation'), position: 'bottom' });
+                }
+                else if (instructions === '') {
+                    Toast.show({ type: 'error', text1: t('Pleasetypeinstructions'), position: 'bottom' });
+                }
+                else {
+                    setstep(step + 1)
+                }
+            }
             // setstep(step + 1)
             dispatch(showError())
-
-            setstep(step + 1)
 
         } else {
             if (isJobCreate) {
@@ -402,8 +403,6 @@ const CreateService = ({ navigation }) => {
         }
     }
 
-
-
     const backHandler = () => {
         if (step === 0) {
             navigation.goBack()
@@ -411,14 +410,6 @@ const CreateService = ({ navigation }) => {
             setstep(step - 1)
         }
     }
-
-    // const timeSlotHandler = (index) => {
-    //     const updatedTimeSlots = timeSlots.map((slot, i) => ({
-    //         ...slot,
-    //         isSelected: i === index,
-    //     }));
-    //     settimeSlots(updatedTimeSlots);
-    // };
 
     return (
         <View style={styles.container}>
@@ -808,7 +799,7 @@ const CreateService = ({ navigation }) => {
                             <View style={{ width: '100%', marginTop: 10 }}>
                                 <View style={{ flexDirection: 'row' }}>
                                     <Text style={[styles.fieldHeading, { color: colors.Neutral_01 }]}>{t('selectDate')}</Text>
-                                    {isError && <Text style={{ top: 3, color: "red", top: -1 }}>*</Text>}
+                                    {isError && !dateSelected && <Text style={{ top: 3, color: "red", top: -1 }}>*</Text>}
                                 </View>
 
                                 <View style={styles.list1}>
@@ -829,6 +820,7 @@ const CreateService = ({ navigation }) => {
                                                 setopenBs(false);
                                                 setDate(date);
                                                 setshowBs(true);
+                                                setDateSelected(true);
                                             }}
                                             onCancel={() => {
                                                 setopenBs(false);
@@ -844,76 +836,83 @@ const CreateService = ({ navigation }) => {
                                 </View>
                             </View>
 
-                            {/* Time Section */}
+                            {/* Time Section start*/}
                             <View style={{ width: '100%', marginTop: 10 }}>
                                 <View style={{ flexDirection: 'row' }}>
-                                    <Text style={[styles.fieldHeading, { color: colors.Neutral_01 }]}>{t('selectTime')}</Text>
-                                    {isError && <Text style={{ top: 3, color: "red", top: -1 }}>*</Text>}
+                                    <Text style={[styles.fieldHeading, { color: colors.Neutral_01 }]}>{t('selectTimeStart')}</Text>
+                                    {isError && !timeStartSelected && <Text style={{ top: 3, color: "red", top: -1 }}>*</Text>}
                                 </View>
                                 <View style={styles.list1}>
                                     <View style={styles.dob}>
                                         {/* Date Picker */}
-                                        <TouchableOpacity onPress={() => { setopenBs(true) }}  >
-                                            {!showBs && <Text style={[styles.listText, { marginLeft: 10, color: colors.Neutral_01 }]}>{t('selectTime')}</Text>}
-                                            {showBs && <Text style={[styles.listText, { marginLeft: 10, color: colors.black }]}>{moment(date).format('DD MM YYYY')}</Text>}
+                                        <TouchableOpacity onPress={() => { settimeStartOpen(true) }}  >
+                                            {!timeStartShow && <Text style={[styles.listText, { marginLeft: 10, color: colors.Neutral_01 }]}>{t('selectTime')}</Text>}
+                                            {timeStartShow && <Text style={[styles.listText, { marginLeft: 10, color: colors.black }]}>{moment(timeStart).format('LT')}</Text>}
                                         </TouchableOpacity>
-
                                         <DatePicker
-                                            minimumDate={new Date()}
+                                            // minimumDate={new Date()}
                                             mode='time'
                                             modal
-                                            open={openBs}
-                                            date={date}
+                                            open={timeStartOpen}
+                                            date={timeStart}
                                             onConfirm={(date) => {
-                                                setopenBs(false);
-                                                setDate(date);
-                                                setshowBs(true);
+                                                settimeStart(date);
+                                                settimeStartOpen(false);
+                                                settimeStartShow(true);
+                                                settimeStartSelected(true);
                                             }}
                                             onCancel={() => {
-                                                setopenBs(false);
-                                                setshowBs(false);
+                                                settimeStartOpen(false);
+                                                settimeStartShow(false);
                                             }}
                                         />
-
                                         {/* Date Icon */}
-                                        <TouchableOpacity onPress={() => { setopenBs(true) }}>
+                                        <TouchableOpacity onPress={() => { settimeStartOpen(true) }}>
                                             <Fontisto name="date" style={styles.listIcon} />
                                         </TouchableOpacity>
                                     </View>
                                 </View>
                             </View>
 
-                            {/* Time Section */}
-                            {/* <View style={styles.heading}>
-                                <Text style={[styles.listText, { color: colors.Neutral_01 }]}>{t('selectTime')}</Text>
-                            </View> */}
-
-                            {/* Time Slots */}
-                            {/* <FlatList
-                                data={timeSlots}
-                                contentContainerStyle={[styles.timeFlatList,]}
-                                numColumns={3}
-                                columnWrapperStyle={{ justifyContent: 'flex-start', alignItems: 'flex-start' }}
-                                showsVerticalScrollIndicator={false}
-                                renderItem={({ item, index }) => (
-                                    <TouchableOpacity
-                                        activeOpacity={.8}
-                                        style={[
-                                            styles.timeContainer,
-                                            { borderColor: item.isSelected ? colors.White_Primary_01 : colors.Neutral_02 },
-                                        ]}
-                                        onPress={() => timeSlotHandler(index)}
-                                    >
-                                        <Text style={[styles.listText, { color: colors.black, fontSize: RFValue(12, screenResolution.screenHeight) }]}>{item.startTime}</Text>
-                                        <Text style={[styles.listText, { color: colors.black, fontSize: RFValue(12, screenResolution.screenHeight) }]}>{t('to')}</Text>
-                                        <Text style={[styles.listText, { color: colors.black, fontSize: RFValue(12, screenResolution.screenHeight) }]}>{item.endTime}</Text>
-                                    </TouchableOpacity>
-                                )}
-                            /> */}
-
+                            {/* Time Section end */}
+                            <View style={{ width: '100%', marginTop: 10 }}>
+                                <View style={{ flexDirection: 'row' }}>
+                                    <Text style={[styles.fieldHeading, { color: colors.Neutral_01 }]}>{t('selectTimeEnd')}</Text>
+                                    {isError && !timeEndSelected && <Text style={{ top: 3, color: "red", top: -1 }}>*</Text>}
+                                </View>
+                                <View style={styles.list1}>
+                                    <View style={styles.dob}>
+                                        {/* Date Picker */}
+                                        <TouchableOpacity onPress={() => { settimeEndOpen(true) }}  >
+                                            {!timeEndShow && <Text style={[styles.listText, { marginLeft: 10, color: colors.Neutral_01 }]}>{t('selectTime')}</Text>}
+                                            {timeEndShow && <Text style={[styles.listText, { marginLeft: 10, color: colors.black }]}>{moment(timeEnd).format('LT')}</Text>}
+                                        </TouchableOpacity>
+                                        <DatePicker
+                                            // minimumDate={new Date()}
+                                            mode='time'
+                                            modal
+                                            open={timeEndOpen}
+                                            date={timeEnd}
+                                            onConfirm={(date) => {
+                                                settimeEnd(date);
+                                                settimeEndOpen(false);
+                                                settimeEndShow(true);
+                                                settimeEndSelected(true);
+                                            }}
+                                            onCancel={() => {
+                                                settimeEndOpen(false);
+                                                settimeEndShow(false);
+                                            }}
+                                        />
+                                        {/* Date Icon */}
+                                        <TouchableOpacity onPress={() => { settimeEndOpen(true) }}>
+                                            <Fontisto name="date" style={styles.listIcon} />
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
+                            </View>
                         </View>
                     }
-
                 </View>
             }
 
@@ -923,6 +922,9 @@ const CreateService = ({ navigation }) => {
                     <View style={{ width: '90%', }}>
                         <View style={styles.heading}>
                             <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('location')}</Text>
+                            {
+                                isError && location == '' && <Text style={{ top: 3, color: colors.Error_Red }}>*</Text>
+                            }
                         </View>
                         <View style={styles.inputContiner}>
                             <TextInput
@@ -937,6 +939,9 @@ const CreateService = ({ navigation }) => {
                         </View>
                         <View style={styles.heading}>
                             <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('anyspecificinstruction')}</Text>
+                            {
+                                isError && instructions == '' && <Text style={{ top: 3, color: colors.Error_Red }}>*</Text>
+                            }
                         </View>
                         <View style={styles.textAreaContainer}>
                             <TextInput

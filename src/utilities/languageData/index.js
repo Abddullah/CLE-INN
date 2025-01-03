@@ -135,6 +135,8 @@ export const languageData = [
             whenwouldyoulike: 'When would you like to schedule your service?',
             selectDate: 'Select Date',
             selectTime: 'Select Time',
+            selectTimeStart: 'Select Time Start',
+            selectTimeEnd: 'Select Time End',
             to: 'to',
             addNote: 'Add Note',
             pay: 'Pay',
@@ -299,6 +301,19 @@ export const languageData = [
             SpongCloth: 'Spong Cloth',
             Securingpad: 'Securing pad',
 
+            Pleaseselectcategory: 'Please select category',
+            Pleaseselectsubcategory: 'Please select sub category',
+            Pleaseselectroomsize: 'Please select room size',
+            Pleaseselectroomquantity: 'Please select room quantity',
+            Pleaseselectcleaningmaterial: 'Please select cleaning material',
+            Pleaseselectimage: 'Please select image',
+            Pleaseselectadate: 'Please select a date',
+            Pleaseselectavalidstarttime: 'Please select a valid start time',
+            Pleaseselectavalidendtime: 'Please select a valid end time',
+            Starttimemustbebeforeendtime: 'Start time must be before end time',
+            Pleasetypelocation: 'Please type location',
+            Pleasetypeinstructions: 'Please type instructions',
+
         }
     },
     {
@@ -437,6 +452,8 @@ export const languageData = [
             whenwouldyoulike: 'Quando desideri programmare il servizio?',
             selectDate: 'Seleziona Data',
             selectTime: 'Seleziona Ora',
+            selectTimeStart: 'Seleziona Ora Inizio',
+            selectTimeEnd: 'Seleziona Ora di fine',
             to: 'A',
             addNote: 'Aggiungi nota',
             pay: 'PAGA',
@@ -605,6 +622,20 @@ export const languageData = [
             MicrofiberCloth: 'Panno in Microfibra',
             SpongCloth: 'Panno Spugna',
             Securingpad: 'Tappetino di sicurezza',
+
+            Pleaseselectcategory: 'Please select category',
+            Pleaseselectsubcategory: 'Please select sub category',
+            Pleaseselectroomsize: 'Please select room size',
+            Pleaseselectroomquantity: 'Please select room quantity',
+            Pleaseselectcleaningmaterial: 'Please select cleaning material',
+            Pleaseselectimage: 'Please select image',
+            Pleaseselectadate: 'Please select a date',
+            Pleaseselectavalidstarttime: 'Please select a valid start time',
+            Pleaseselectavalidendtime: 'Please select a valid end time',
+            Pleaseselectavalidendtime: 'Please select a valid end time',
+            Starttimemustbebeforeendtime: 'Start time must be before end time',
+            Pleasetypelocation: 'Please type location',
+            Pleasetypeinstructions: 'Please type instructions',
 
 
         }
