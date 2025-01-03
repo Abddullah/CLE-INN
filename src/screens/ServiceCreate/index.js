@@ -52,11 +52,6 @@ const CreateService = ({ navigation }) => {
     let roomSizes = useSelector((state) => state.reducer.roomSize);
     let noOfRooms = useSelector((state) => state.reducer.noOfRooms);
 
-    // console.log(allcategories, "allcategories");
-    // console.log(hourlyRates, "hourlyRates");
-    // console.log(roomSizes, "roomSize");
-    // console.log(noOfRooms, "noOfRooms");
-
     const [step, setstep] = useState(0);
     // repeate service modal state
     const [modalVisible, setModalVisible] = useState(true);
@@ -964,58 +959,58 @@ const CreateService = ({ navigation }) => {
                     <View style={{ width: '90%', }}>
 
                         <View style={[styles.heading, { marginTop: 20 }]}>
-                            <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('service')}</Text>
-                            <Text style={[Typography.text_paragraph_1, styles.editText]}>{'Cleaning at Home'}</Text>
+                            <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('service') + ' '}</Text>
+                            <Text style={[Typography.text_paragraph_1, styles.editText]}>{selectedCategories}</Text>
                         </View>
 
                         <View style={[styles.heading, { marginTop: 20 }]}>
-                            <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('description')}</Text>
-                            <Text style={[Typography.text_paragraph_1, styles.editText]}>{'This is text description'}</Text>
+                            <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('description') + ' '}</Text>
+                            <Text style={[Typography.text_paragraph_1, styles.editText]}>{instructions}</Text>
                         </View>
 
                         <View style={[styles.heading, { marginTop: 20 }]}>
-                            <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('cleaners')}</Text>
-                            <Text style={[Typography.text_paragraph_1, styles.editText]}>{'3'}</Text>
+                            <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('cleaners') + ' '}</Text>
+                            <Text style={[Typography.text_paragraph_1, styles.editText]}>{selectedProfessional}</Text>
                         </View>
 
                         <View style={[styles.heading, { marginTop: 20 }]}>
-                            <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('workFrequency')}</Text>
-                            <Text style={[Typography.text_paragraph_1, styles.editText]}>{'Weekly'}</Text>
+                            <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('workFrequency') + ' '}</Text>
+                            <Text style={[Typography.text_paragraph_1, styles.editText]}>{repeateService}</Text>
                         </View>
 
                         <View style={[styles.heading, { marginTop: 20 }]}>
-                            <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('areaSize')}</Text>
-                            <Text style={[Typography.text_paragraph_1, styles.editText]}>{'51 - 100 m2'}</Text>
+                            <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('areaSize') + ' '}</Text>
+                            <Text style={[Typography.text_paragraph_1, styles.editText]}>{roomsize}</Text>
                         </View>
 
                         <View style={[styles.heading, { marginTop: 20 }]}>
-                            <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('roomsNumber')}</Text>
-                            <Text style={[Typography.text_paragraph_1, styles.editText]}>{'1 Room'}</Text>
+                            <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('roomsNumber') + ' '}</Text>
+                            <Text style={[Typography.text_paragraph_1, styles.editText]}>{roomsQty}</Text>
                         </View>
 
                         <View style={[styles.heading, { marginTop: 20 }]}>
-                            <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('needCleaningMaterials')}</Text>
-                            <Text style={[Typography.text_paragraph_1, styles.editText]}>{'Yes Please'}</Text>
+                            <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('needCleaningMaterials') + ' '}</Text>
+                            <Text style={[Typography.text_paragraph_1, styles.editText]}>{needCleaningMaterials}</Text>
                         </View>
 
                         <View style={[styles.heading, { marginTop: 20 }]}>
-                            <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('price')}</Text>
-                            <Text style={[Typography.text_paragraph_1, styles.editText]}>{'€30/hr'}</Text>
+                            <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('price') + ' '}</Text>
+                            <Text style={[Typography.text_paragraph_1, styles.editText]}>{'€' + totalPrice}</Text>
                         </View>
 
                         <View style={[styles.heading, { marginTop: 20 }]}>
-                            <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('selectDate')}</Text>
-                            <Text style={[Typography.text_paragraph_1, styles.editText,]}>{'8 Jan, 2024'}</Text>
+                            <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('selectDate') + ' '}</Text>
+                            <Text style={[Typography.text_paragraph_1, styles.editText,]}>{moment(date).format('DD MM YYYY')}</Text>
                         </View>
 
                         <View style={[styles.heading, { marginTop: 20 }]}>
-                            <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('selectTime')}</Text>
-                            <Text style={[Typography.text_paragraph_1, styles.editText]}>{'10:00 AM - 12:00 AM'}</Text>
+                            <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('selectTime') + ' '}</Text>
+                            <Text style={[Typography.text_paragraph_1, styles.editText]}>{moment(timeStart).format('LT') + ' - ' + moment(timeEnd).format('LT')}</Text>
                         </View>
 
                         <View style={[styles.heading, { marginTop: 20 }]}>
-                            <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('location')}</Text>
-                            <Text style={[Typography.text_paragraph_1, styles.editText]}>{'Jameria Residence'}</Text>
+                            <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('location') + ' '}</Text>
+                            <Text style={[Typography.text_paragraph_1, styles.editText]}>{location}</Text>
                         </View>
 
                         <View style={styles.taxContainer}>
@@ -1023,7 +1018,7 @@ const CreateService = ({ navigation }) => {
 
                             <View style={styles.taxContainer_C1}>
                                 <Text style={[Typography.text_CTA1, { color: colors.Neutral_01, }]}>{t('amount')}</Text>
-                                <Text style={[Typography.text_CTA1, { color: colors.black, }]}>{'€450'}</Text>
+                                <Text style={[Typography.text_CTA1, { color: colors.black, }]}>{'€' + totalPrice}</Text>
                             </View>
 
                             <View style={styles.taxContainer_C1}>
