@@ -112,7 +112,6 @@ const CreateService = ({ navigation }) => {
     const [description, setdescription] = useState('');
     const [isLoader, setisLoader] = useState(false);
 
-
     useEffect(() => {
         let previousTotal = previousSelectedHour * previousHourlyRates * previousSelectedProfessional;
         let newTotal = selectedHour * hourlyRates * selectedProfessional;
