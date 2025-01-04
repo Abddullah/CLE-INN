@@ -623,19 +623,19 @@ export const languageData = [
             SpongCloth: 'Panno Spugna',
             Securingpad: 'Tappetino di sicurezza',
 
-            Pleaseselectcategory: 'Please select category',
-            Pleaseselectsubcategory: 'Please select sub category',
-            Pleaseselectroomsize: 'Please select room size',
-            Pleaseselectroomquantity: 'Please select room quantity',
-            Pleaseselectcleaningmaterial: 'Please select cleaning material',
-            Pleaseselectimage: 'Please select image',
-            Pleaseselectadate: 'Please select a date',
-            Pleaseselectavalidstarttime: 'Please select a valid start time',
-            Pleaseselectavalidendtime: 'Please select a valid end time',
-            Pleaseselectavalidendtime: 'Please select a valid end time',
-            Starttimemustbebeforeendtime: 'Start time must be before end time',
-            Pleasetypelocation: 'Please type location',
-            Pleasetypeinstructions: 'Please type instructions',
+            Pleaseselectcategory: 'Seleziona una categoria',
+            Pleaseselectsubcategory: 'Seleziona una sottocategoria',
+            Pleaseselectroomsize: 'Seleziona la dimensione della stanza',
+            Pleaseselectroomquantity: 'Seleziona la quantità di stanze',
+            Pleaseselectcleaningmaterial: 'Seleziona il materiale per la pulizia',
+            Pleaseselectimage: 'Seleziona un’immagine',
+            Pleaseselectadate: 'Seleziona una data',
+            Pleaseselectavalidstarttime: 'Seleziona un orario di inizio valido',
+            Pleaseselectavalidendtime: 'Seleziona un orario di fine valido',
+            Starttimemustbebeforeendtime: 'L’orario di inizio deve essere precedente all’orario di fine',
+            Pleasetypelocation: 'Digita una posizione',
+            Pleasetypeinstructions: 'Digita le istruzioni',
+
 
 
         }
