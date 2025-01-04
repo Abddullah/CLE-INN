@@ -640,7 +640,7 @@ const CreateService = ({ navigation }) => {
 
                         {
                             isJobCreate && selectedCategories === 'Cleaning and Hygiene Services' &&
-                            <AdditionalServices onSelectedServicesChange={(e) => { additionalServicesHandler(e) }} />
+                            <AdditionalServices onSelectedServicesChange={(e) => { additionalServicesHandler(e) }} selectedService={aditionalSelectedServices} />
                         }
 
                     </View>
@@ -992,13 +992,14 @@ const CreateService = ({ navigation }) => {
                             <Text style={[Typography.text_paragraph_1, styles.editText]}>{needCleaningMaterials}</Text>
                         </View>
                         <View style={[styles.heading, { marginTop: 20 }]}>
-                            <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('additionalService') + ' '}</Text>
-                            {/* <Text style={[Typography.text_paragraph_1, styles.editText]}>{needCleaningMaterials}</Text> */}
-                            {/* {
-                                aditionalSelectedServices.map((service, index) => (
-                                    <Text key={index} style={[Typography.text_paragraph_1, styles.editText]}>{service}</Text>
-                                ))
-                            } */}
+                            <View style={{ flexDirection: 'column', flexWrap: 'wrap', }}>
+                                <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('additionalService') + ' '}</Text>
+                                {
+                                    aditionalSelectedServices.map((service, index) => (
+                                        <Text key={index} style={[Typography.text_paragraph_1, styles.editText]}>{service.title}</Text>
+                                    ))
+                                }
+                            </View>
                         </View>
 
                         <View style={[styles.heading, { marginTop: 20 }]}>

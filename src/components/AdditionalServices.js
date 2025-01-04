@@ -9,7 +9,7 @@ import { useTheme } from '../../ThemeContext';
 import { LightThemeColors, DarkThemeColors } from '../utilities/constants';
 import screenResolution from '../utilities/constants/screenResolution';
 
-const AdditionalServices = ({ onSelectedServicesChange }) => {
+const AdditionalServices = ({ onSelectedServicesChange, selectedService = [] }) => {
   const { theme } = useTheme();
   const colors = theme === 'dark' ? DarkThemeColors : LightThemeColors;
   const styles = createStyles(colors);
@@ -18,8 +18,13 @@ const AdditionalServices = ({ onSelectedServicesChange }) => {
   const [services, setServices] = useState([]);
 
   useEffect(() => {
-    setServices(additionalService)
-  }, [additionalService])
+    // Merge `additionalService` with `selectedService`
+    const mergedServices = additionalService.map((service) => {
+      const matchedService = selectedService.find((selected) => selected.id === service.id);
+      return matchedService ? { ...service, ...matchedService } : service;
+    });
+    setServices(mergedServices);
+  }, [additionalService, selectedService]);
 
   const toggleCheckbox = (index) => {
     const updatedServices = services.map((item, i) =>
@@ -44,7 +49,6 @@ const AdditionalServices = ({ onSelectedServicesChange }) => {
               />
               <Text style={styles.optionText}>
                 {service.title}
-                {/* - ${service.price} */}
               </Text>
             </View>
           ))}
@@ -92,4 +96,3 @@ const createStyles = (colors) => {
 };
 
 export default AdditionalServices;
-
