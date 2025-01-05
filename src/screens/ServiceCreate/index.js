@@ -429,6 +429,31 @@ const CreateService = ({ navigation }) => {
         }
     }
 
+
+    const createJob = () => {
+        let data = {
+            repeateService: repeateService,
+            howManyHourDoYouNeed: selectedHour,
+            howManyProfessionalDoYouNeed: selectedProfessional,
+            category: selectedCategories,
+            subCategory: selectedsubcategories,
+            roomSize: roomsize,
+            roomsQty: roomsQty,
+            needCleaningMaterials: needCleaningMaterials,
+            aditionalServices: aditionalSelectedServices,
+            totalPrice: totalPrice,
+            totalPriceWithTax: totalPriceWithTax,
+            images: productImages,
+            bookingDate: date,
+            bookingStart: timeStart,
+            bookingEnd: timeEnd,
+            location: location,
+            instructions: instructions,
+            addStatus: 'pending',
+            addType: 'job',
+        }
+    }
+
     return (
         <View style={styles.container}>
             <CustomHeader
@@ -1076,7 +1101,7 @@ const CreateService = ({ navigation }) => {
 
                             <View style={styles.taxContainer_C1}>
                                 <Text style={[Typography.text_CTA1, { color: colors.Neutral_01, }]}>{t('total')}</Text>
-                                <Text style={[Typography.text_CTA1, { color: colors.black, }]}>{'€' + totalPriceWithTax}</Text>
+                                <Text style={[Typography.text_CTA1, { color: colors.black, }]}>{'€' + totalPriceWithTax.toFixed(1)}</Text>
                             </View>
                         </View>
                     </View>
