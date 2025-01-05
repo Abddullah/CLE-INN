@@ -319,30 +319,6 @@ const CreateBooking = ({ navigation }) => {
                         <View style={styles.heading}>
                             <Text style={[styles.listText, { color: colors.Neutral_01 }]}>{t('selectTime')}</Text>
                         </View>
-
-                        {/* Time Slots */}
-                        {/* <FlatList
-                            data={timeSlots}
-                            contentContainerStyle={[styles.timeFlatList, { paddingBottom: 200 }]}
-                            numColumns={3}
-                            columnWrapperStyle={{ justifyContent: 'space-between', paddingHorizontal: '5%', alignItems: 'flex-start' }}
-                            showsVerticalScrollIndicator={false}
-                            renderItem={({ item, index }) => (
-                                <TouchableOpacity
-                                    activeOpacity={.8}
-                                    style={[
-                                        styles.timeContainer,
-                                        { borderColor: item.isSelected ? colors.White_Primary_01 : colors.Neutral_02 },
-                                    ]}
-                                    onPress={() => timeSlotHandler(index)}
-                                >
-                                    <Text style={[styles.listText, { color: colors.black, fontSize: RFValue(12, screenResolution.screenHeight) }]}>{item.startTime}</Text>
-                                    <Text style={[styles.listText, { color: colors.black, fontSize: RFValue(12, screenResolution.screenHeight) }]}>{t('to')}</Text>
-                                    <Text style={[styles.listText, { color: colors.black, fontSize: RFValue(12, screenResolution.screenHeight) }]}>{item.endTime}</Text>
-                                </TouchableOpacity>
-                            )}
-                        /> */}
-
                         <FlatList
                             data={timeSlots}
                             contentContainerStyle={[styles.timeFlatList,]}
@@ -485,9 +461,9 @@ const CreateBooking = ({ navigation }) => {
                     </View>
                 </ScrollView>
             }
+
             <View style={styles.footer}>
                 <View style={{ width: '90%', flexDirection: 'row', justifyContent: 'space-between', }}>
-
                     {
                         (roomsQty != '') ? (
                             <>
@@ -510,7 +486,6 @@ const CreateBooking = ({ navigation }) => {
 
                         ) : (<CTAButton1 title={step < 4 ? t('next') : t('book')} submitHandler={() => { stepsHandler() }} />)
                     }
-                    {/* <CTAButton1 title={step < 3 ? t('next') : t('book')} submitHandler={() => { stepsHandler() }} /> */}
                 </View>
             </View>
 
@@ -519,6 +494,7 @@ const CreateBooking = ({ navigation }) => {
 };
 
 export default CreateBooking;
+
 const createStyles = (colors, theme, deviceWidth) => {
     return StyleSheet.create({
         container: {

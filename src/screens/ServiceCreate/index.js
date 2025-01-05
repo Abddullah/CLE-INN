@@ -34,6 +34,7 @@ import SmallMap from '../../components/smallMap';
 import Toast from 'react-native-toast-message';
 
 const deviceWidth = screenResolution.screenWidth;
+const CleaningAndHygineService = "Cleaning and Hygiene Services";
 
 const CreateService = ({ navigation }) => {
     // styling themes state
@@ -84,7 +85,6 @@ const CreateService = ({ navigation }) => {
     const [previousAdditionalServices, setPreviousAdditionalServices] = useState([]);
 
     const [totalPrice, settotalPrice] = useState('0');
-    console.log(aditionalSelectedServices, "aditionalSelectedServices");
 
     const [productImages, setProductImages] = useState([{ imagURL: '' }, { imagURL: '' }, { imagURL: '' }, { imagURL: '' }, { imagURL: '' }, { imagURL: '' },]);
 
@@ -113,6 +113,7 @@ const CreateService = ({ navigation }) => {
     const [isLoader, setisLoader] = useState(false);
 
     useEffect(() => {
+        setneedCleaningMaterials(t('noIhavethem'));
         let previousTotal = previousSelectedHour * previousHourlyRates * previousSelectedProfessional;
         let newTotal = selectedHour * hourlyRates * selectedProfessional;
         let total = Number(totalPrice) - previousTotal + newTotal;
@@ -156,6 +157,21 @@ const CreateService = ({ navigation }) => {
         setPreviousRoomQtyPrice(Number(find.price));
     }
 
+    const cleaningMaterialHandler = (itemValue) => {
+        // noIhavethem: 'No, I have them',
+        // yesPlease: 'Yes, Please',
+        // noIhavethem: 'No, li ho',
+        // yesPlease: 'Sì, per favore',
+        if (itemValue === 'No, I have them' || itemValue === 'No, li ho') {
+            let total = Number(totalPrice) - 6;
+            settotalPrice(total);
+        } else {
+            let total = Number(totalPrice) + 6;
+            settotalPrice(total);
+        }
+        setneedCleaningMaterials(itemValue);
+    }
+
     const additionalServicesHandler = (itemValue) => {
         let total = Number(totalPrice);
         previousAdditionalServices.forEach(item => { total -= Number(item.price); });
@@ -164,11 +180,6 @@ const CreateService = ({ navigation }) => {
         settotalPrice(total);
         setPreviousAdditionalServices(itemValue);
     }
-
-
-
-
-
 
     useEffect(() => {
         if (route?.params?.item) {
@@ -322,13 +333,13 @@ const CreateService = ({ navigation }) => {
                 else if (selectedsubcategories === '') {
                     Toast.show({ type: 'error', text1: t('Pleaseselectsubcategory'), position: 'bottom' });
                 }
-                else if (selectedCategories === 'Cleaning and Hygiene Services' && roomsize === '') {
+                else if (selectedCategories === CleaningAndHygineService && roomsize === '') {
                     Toast.show({ type: 'error', text1: t('Pleaseselectroomsize'), position: 'bottom' });
                 }
-                else if (selectedCategories === 'Cleaning and Hygiene Services' && roomsQty === '') {
+                else if (selectedCategories === CleaningAndHygineService && roomsQty === '') {
                     Toast.show({ type: 'error', text1: t('Pleaseselectroomquantity'), position: 'bottom' });
                 }
-                else if (selectedCategories === 'Cleaning and Hygiene Services' && needCleaningMaterials === '') {
+                else if (selectedCategories === CleaningAndHygineService && needCleaningMaterials === '') {
                     Toast.show({ type: 'error', text1: t('Pleaseselectcleaningmaterial'), position: 'bottom' });
                 }
                 else {
@@ -543,7 +554,7 @@ const CreateService = ({ navigation }) => {
                         }
 
                         {
-                            isJobCreate && selectedCategories === 'Cleaning and Hygiene Services' &&
+                            isJobCreate && selectedCategories === CleaningAndHygineService &&
                             <>
                                 <View style={styles.heading}>
                                     <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('areaSize')}</Text>
@@ -581,7 +592,7 @@ const CreateService = ({ navigation }) => {
                         }
 
                         {
-                            isJobCreate && selectedCategories === 'Cleaning and Hygiene Services' &&
+                            isJobCreate && selectedCategories === CleaningAndHygineService &&
                             <>
                                 <View style={styles.heading}>
                                     <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('roomsNumber')}</Text>
@@ -604,7 +615,6 @@ const CreateService = ({ navigation }) => {
                                         color={colors.Neutral_01}
                                         mt={1} onValueChange={itemValue => roomQtyHandler(itemValue)}
                                     >
-
                                         {
                                             noOfRooms.length && noOfRooms.map((key, index) => (
                                                 <Select.Item
@@ -620,7 +630,7 @@ const CreateService = ({ navigation }) => {
                         }
 
                         {
-                            isJobCreate && selectedCategories === 'Cleaning and Hygiene Services' &&
+                            isJobCreate && selectedCategories === CleaningAndHygineService &&
                             <>
                                 <TouchableOpacity
                                     onPress={() => { setinformationPopup1(!informationPopup1) }}
@@ -632,14 +642,14 @@ const CreateService = ({ navigation }) => {
                                 </TouchableOpacity>
 
                                 <View style={{ width: '100%', flexDirection: 'row', marginTop: 20 }}>
-                                    <BookingStatusTab selectedState={needCleaningMaterials} setselectedState={setneedCleaningMaterials} title={t('noIhavethem')} />
-                                    <BookingStatusTab selectedState={needCleaningMaterials} setselectedState={setneedCleaningMaterials} title={t('yesPlease')} />
+                                    <BookingStatusTab selectedState={needCleaningMaterials} setselectedState={(e) => cleaningMaterialHandler(e)} title={t('noIhavethem')} />
+                                    <BookingStatusTab selectedState={needCleaningMaterials} setselectedState={(e) => cleaningMaterialHandler(e)} title={t('yesPlease')} />
                                 </View>
                             </>
                         }
 
                         {
-                            isJobCreate && selectedCategories === 'Cleaning and Hygiene Services' &&
+                            isJobCreate && selectedCategories === CleaningAndHygineService &&
                             <AdditionalServices onSelectedServicesChange={(e) => { additionalServicesHandler(e) }} selectedService={aditionalSelectedServices} />
                         }
 
@@ -977,30 +987,35 @@ const CreateService = ({ navigation }) => {
                             <Text style={[Typography.text_paragraph_1, styles.editText]}>{repeateService}</Text>
                         </View>
 
-                        <View style={[styles.heading, { marginTop: 20 }]}>
-                            <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('areaSize') + ' '}</Text>
-                            <Text style={[Typography.text_paragraph_1, styles.editText]}>{roomsize}</Text>
-                        </View>
+                        {
+                            selectedCategories === CleaningAndHygineService &&
+                            <>
+                                <View style={[styles.heading, { marginTop: 20 }]}>
+                                    <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('areaSize') + ' '}</Text>
+                                    <Text style={[Typography.text_paragraph_1, styles.editText]}>{roomsize}</Text>
+                                </View>
 
-                        <View style={[styles.heading, { marginTop: 20 }]}>
-                            <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('roomsNumber') + ' '}</Text>
-                            <Text style={[Typography.text_paragraph_1, styles.editText]}>{roomsQty}</Text>
-                        </View>
+                                <View style={[styles.heading, { marginTop: 20 }]}>
+                                    <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('roomsNumber') + ' '}</Text>
+                                    <Text style={[Typography.text_paragraph_1, styles.editText]}>{roomsQty}</Text>
+                                </View>
 
-                        <View style={[styles.heading, { marginTop: 20 }]}>
-                            <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('needCleaningMaterials') + ' '}</Text>
-                            <Text style={[Typography.text_paragraph_1, styles.editText]}>{needCleaningMaterials}</Text>
-                        </View>
-                        <View style={[styles.heading, { marginTop: 20 }]}>
-                            <View style={{ flexDirection: 'column', flexWrap: 'wrap', }}>
-                                <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('additionalService') + ' '}</Text>
-                                {
-                                    aditionalSelectedServices.map((service, index) => (
-                                        <Text key={index} style={[Typography.text_paragraph_1, styles.editText]}>{service.title}</Text>
-                                    ))
-                                }
-                            </View>
-                        </View>
+                                <View style={[styles.heading, { marginTop: 20 }]}>
+                                    <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('needCleaningMaterials') + ' '}</Text>
+                                    <Text style={[Typography.text_paragraph_1, styles.editText]}>{needCleaningMaterials}</Text>
+                                </View>
+                                <View style={[styles.heading, { marginTop: 20 }]}>
+                                    <View style={{ flexDirection: 'column', flexWrap: 'wrap', }}>
+                                        <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('additionalService') + ' '}</Text>
+                                        {
+                                            aditionalSelectedServices.map((service, index) => (
+                                                <Text key={index} style={[Typography.text_paragraph_1, styles.editText]}>{service.title}</Text>
+                                            ))
+                                        }
+                                    </View>
+                                </View>
+                            </>
+                        }
 
                         <View style={[styles.heading, { marginTop: 20 }]}>
                             <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('price') + ' '}</Text>
@@ -1037,7 +1052,7 @@ const CreateService = ({ navigation }) => {
 
                             <View style={styles.taxContainer_C1}>
                                 <Text style={[Typography.text_CTA1, { color: colors.Neutral_01, }]}>{t('total')}</Text>
-                                <Text style={[Typography.text_CTA1, { color: colors.black, }]}>{'€500'}</Text>
+                                <Text style={[Typography.text_CTA1, { color: colors.black, }]}>{'€' + totalPrice}</Text>
                             </View>
                         </View>
                     </View>
@@ -1053,13 +1068,7 @@ const CreateService = ({ navigation }) => {
                                     <View style={{ flexDirection: 'row' }}>
                                         <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('total') + ': '}</Text>
                                         <Text style={[Typography.text_paragraph_1, styles.headingText]}>{'€' + ' '}</Text>
-
-                                        {
-                                            needCleaningMaterials === t('yesPlease') && <Text style={[Typography.text_paragraph_1, styles.headingText]}>{totalPrice + 5}</Text>
-                                        }
-                                        {
-                                            needCleaningMaterials !== t('yesPlease') && <Text style={[Typography.text_paragraph_1, styles.headingText]}>{totalPrice}</Text>
-                                        }
+                                        <Text style={[Typography.text_paragraph_1, styles.headingText]}>{totalPrice}</Text>
                                     </View>
                                 </View>
                                 <View style={{ width: '45%', }}>
