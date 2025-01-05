@@ -52,6 +52,8 @@ const CreateService = ({ navigation }) => {
     let hourlyRates = useSelector((state) => state.reducer.hourlyRates);
     let roomSizes = useSelector((state) => state.reducer.roomSize);
     let noOfRooms = useSelector((state) => state.reducer.noOfRooms);
+    let taxes = useSelector((state) => state.reducer.taxes);
+    console.log('taxes', taxes);
 
     const [step, setstep] = useState(0);
     // repeate service modal state
@@ -85,10 +87,10 @@ const CreateService = ({ navigation }) => {
     const [previousAdditionalServices, setPreviousAdditionalServices] = useState([]);
 
     const [totalPrice, settotalPrice] = useState('0');
+    const [totalPriceWithTax, settotalPriceWithTax] = useState('0');
 
     const [productImages, setProductImages] = useState([{ imagURL: '' }, { imagURL: '' }, { imagURL: '' }, { imagURL: '' }, { imagURL: '' }, { imagURL: '' },]);
 
-    // const [date, setDate] = useState(new Date())
     const [date, setDate] = useState(new Date())
     const [openBs, setopenBs] = useState(false)
     const [showBs, setshowBs] = useState(false)
@@ -122,7 +124,12 @@ const CreateService = ({ navigation }) => {
         setPreviousHourlyRates(hourlyRates);
         setPreviousSelectedHour(selectedHour);
         setPreviousSelectedProfessional(selectedProfessional);
+        taxHandler();
     }, [hourlyRates, selectedHour, selectedProfessional, aditionalSelectedServices]);
+
+    useEffect(() => {
+        taxHandler();
+    }, [totalPrice]);
 
     const categoryHandler = (categoryName) => {
         setselectedCategories(categoryName);
@@ -158,10 +165,6 @@ const CreateService = ({ navigation }) => {
     }
 
     const cleaningMaterialHandler = (itemValue) => {
-        // noIhavethem: 'No, I have them',
-        // yesPlease: 'Yes, Please',
-        // noIhavethem: 'No, li ho',
-        // yesPlease: 'Sì, per favore',
         if (itemValue === 'No, I have them' || itemValue === 'No, li ho') {
             let total = Number(totalPrice) - 6;
             settotalPrice(total);
@@ -215,7 +218,6 @@ const CreateService = ({ navigation }) => {
         updatedImages[index].imagURL = '';
         setProductImages(updatedImages);
     };
-
 
     const uploadImageToStorage = async (path, name) => {
         try {
@@ -322,6 +324,17 @@ const CreateService = ({ navigation }) => {
         } catch (err) {
             console.log('Error in pickImages:', err);
         }
+    };
+
+    const taxHandler = () => {
+        let total = Number(totalPrice);
+        let tax = 0;
+        for (let i = 0; i < taxes.length; i++) {
+            let taxPercentage = Number(taxes[i].percentage);
+            let taxAmount = (total * taxPercentage) / 100;
+            tax += taxAmount;
+        }
+        settotalPriceWithTax(Number(total + tax));
     };
 
     const stepsHandler = () => {
@@ -1045,14 +1058,25 @@ const CreateService = ({ navigation }) => {
                                 <Text style={[Typography.text_CTA1, { color: colors.black, }]}>{'€' + totalPrice}</Text>
                             </View>
 
-                            <View style={styles.taxContainer_C1}>
+                            {
+                                taxes.map((key, index) => {
+                                    return (
+                                        <View key={index} style={styles.taxContainer_C1}>
+                                            <Text style={[Typography.text_CTA1, { color: colors.Neutral_01, }]}>{key.name + ' ' + key.percentage + '%'}</Text>
+                                            <Text style={[Typography.text_CTA1, { color: colors.black, }]}>{'€' + Number(totalPrice / 100 * key.percentage).toFixed(1)}</Text>
+                                        </View>
+                                    )
+                                })
+                            }
+
+                            {/* <View style={styles.taxContainer_C1}>
                                 <Text style={[Typography.text_CTA1, { color: colors.Neutral_01, }]}>{t('vat')}</Text>
                                 <Text style={[Typography.text_CTA1, { color: colors.black, }]}>{'€50'}</Text>
-                            </View>
+                            </View> */}
 
                             <View style={styles.taxContainer_C1}>
                                 <Text style={[Typography.text_CTA1, { color: colors.Neutral_01, }]}>{t('total')}</Text>
-                                <Text style={[Typography.text_CTA1, { color: colors.black, }]}>{'€' + totalPrice}</Text>
+                                <Text style={[Typography.text_CTA1, { color: colors.black, }]}>{'€' + totalPriceWithTax}</Text>
                             </View>
                         </View>
                     </View>
