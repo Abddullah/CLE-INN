@@ -36,6 +36,7 @@ export const getCurrentUser = (navigation) => async dispatch => {
   dispatch(fetchRoomAreaSize());
   dispatch(fetchNoOfRooms());
   dispatch(fetchAditionalService());
+  dispatch(fetchPayments());
 };
 
 export const loginUser = (credentials, isSelectedRemember, navigation) => async (dispatch) => {
@@ -251,6 +252,21 @@ export const fetchAditionalService = (navigation) => async (dispatch) => {
     const snapshot = await firestore().collection('additionalServices').get();
     const additionalServices = snapshot.docs.map((doc) => ({ ...doc.data(), }));
     dispatch({ type: 'SET_ADITIONAL_SERVICE', payload: additionalServices });
+    dispatch({ type: 'IS_LOADER', payload: false });
+  } catch (error) {
+    console.log(error, 'fetchAditionalService_error');
+    dispatch({ type: 'IS_LOADER', payload: false });
+    const errorMessage = await getFirebaseErrorMessage(error.code);
+    Toast.show({ type: 'error', text1: errorMessage, position: 'bottom' });
+  }
+};
+
+export const fetchPayments = (navigation) => async (dispatch) => {
+  try {
+    dispatch({ type: 'IS_LOADER', payload: true });
+    const snapshot = await firestore().collection('payments').get();
+    const taxes = snapshot.docs.map((doc) => ({ ...doc.data(), }));
+    dispatch({ type: 'SET_TAXES', payload: taxes[0]?.tax });
     dispatch({ type: 'IS_LOADER', payload: false });
   } catch (error) {
     console.log(error, 'fetchAditionalService_error');

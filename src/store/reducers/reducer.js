@@ -14,6 +14,7 @@ const initState = {
   roomSize: [],
   noOfRooms: [],
   additionalService: [],
+  taxes: [],
 };
 
 const reducer = (state = initState, action) => {
@@ -72,6 +73,11 @@ const reducer = (state = initState, action) => {
       return {
         ...state,
         additionalService: action.payload,
+      }
+    case 'SET_TAXES':
+      return {
+        ...state,
+        taxes: action.payload,
       }
     default:
       return state;

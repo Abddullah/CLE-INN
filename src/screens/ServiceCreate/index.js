@@ -1072,10 +1072,10 @@ const CreateService = ({ navigation }) => {
                                     </View>
                                 </View>
                                 <View style={{ width: '45%', }}>
-                                    <CTAButton1 title={step < 4 ? t('next') : t('book')} submitHandler={() => { stepsHandler() }} />
+                                    <CTAButton1 title={step < 4 ? t('next') : isJobCreate ? t('createJob') : t('createService')} submitHandler={() => { stepsHandler() }} />
                                 </View>
                             </>
-                        ) : (<CTAButton1 title={step < 4 ? t('next') : t('book')} submitHandler={() => { stepsHandler() }} />)
+                        ) : (<CTAButton1 title={step < 4 ? t('next') : isJobCreate ? t('createJob') : t('createService')} submitHandler={() => { stepsHandler() }} />)
                     }
                 </View>
             </View>
