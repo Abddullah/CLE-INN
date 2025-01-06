@@ -14,7 +14,7 @@ const ChatBox = ({ messages }) => {
 
     return (
         <ScrollView style={styles.wrapper} contentContainerStyle={{ paddingBottom: 30 }}>
-            {messages.map((msg, index) => (
+            {messages && messages.length != 0 && messages.map((msg, index) => (
                 <View
                     key={index}
                     style={[

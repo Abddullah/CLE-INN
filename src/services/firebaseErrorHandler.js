@@ -31,6 +31,7 @@ const translations = {
         "User registered successfully!": "User registered successfully!",
         "Password reset email sent successfully.": "Password reset email sent successfully.",
         "User update successfully!": "User update successfully!",
+        "jobCreatedSuccess": 'Job created successfully!',
         "": "",
     },
     it: {
@@ -63,6 +64,7 @@ const translations = {
         "User registered successfully!": "Utente registrato con successo!",
         "Password reset email sent successfully.": "Email di reimpostazione della password inviata con successo.",
         "User update successfully!": "Utente aggiornato con successo!",
+        "jobCreatedSuccess": "Lavoro creato con successo!",
         "": "",
     }
 };

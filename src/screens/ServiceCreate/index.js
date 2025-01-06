@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, ScrollView, TextInput, TouchableOpacity, FlatList, ActivityIndicator, Image } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
+import firestore from '@react-native-firebase/firestore';
 import { useRoute } from '@react-navigation/native';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { Select } from 'native-base';
@@ -29,7 +30,7 @@ import InformationPopup from '../../components/Information_Popup';
 import BookingStatusTab from '../../components/BookingStatusTab';
 import HorizontalList from '../../components/horizontalList';
 import AdditionalServices from '../../components/AdditionalServices';
-import { showError } from '../../store/actions/action';
+import { createJob, showError, } from '../../store/actions/action';
 import SmallMap from '../../components/smallMap';
 import Toast from 'react-native-toast-message';
 
@@ -394,12 +395,10 @@ const CreateService = ({ navigation }) => {
                     setstep(step + 1)
                 }
             }
-            // setstep(step + 1)
             dispatch(showError())
-
         } else {
             if (isJobCreate) {
-                navigation.navigate('Home')
+                createJobHandler()
             }
             else {
                 const data = ([
@@ -429,8 +428,8 @@ const CreateService = ({ navigation }) => {
         }
     }
 
-
-    const createJob = () => {
+    const createJobHandler = () => {
+        const geoPoint = new firestore.GeoPoint(savedCords[0], savedCords[1]);
         let data = {
             repeateService: repeateService,
             howManyHourDoYouNeed: selectedHour,
@@ -444,14 +443,16 @@ const CreateService = ({ navigation }) => {
             totalPrice: totalPrice,
             totalPriceWithTax: totalPriceWithTax,
             images: productImages,
-            bookingDate: date,
-            bookingStart: timeStart,
-            bookingEnd: timeEnd,
-            location: location,
+            bookingDate: new Date(date).getTime(),
+            bookingStart: new Date(timeStart).getTime(),
+            bookingEnd: new Date(timeEnd).getTime(),
+            address: location,
+            geoPoint: geoPoint,
             instructions: instructions,
             addStatus: 'pending',
             addType: 'job',
         }
+        dispatch(createJob(data, navigation))
     }
 
     return (
@@ -1094,15 +1095,11 @@ const CreateService = ({ navigation }) => {
                                 })
                             }
 
-                            {/* <View style={styles.taxContainer_C1}>
-                                <Text style={[Typography.text_CTA1, { color: colors.Neutral_01, }]}>{t('vat')}</Text>
-                                <Text style={[Typography.text_CTA1, { color: colors.black, }]}>{'€50'}</Text>
-                            </View> */}
-
                             <View style={styles.taxContainer_C1}>
                                 <Text style={[Typography.text_CTA1, { color: colors.Neutral_01, }]}>{t('total')}</Text>
                                 <Text style={[Typography.text_CTA1, { color: colors.black, }]}>{'€' + totalPriceWithTax.toFixed(1)}</Text>
                             </View>
+
                         </View>
                     </View>
                 </ScrollView>

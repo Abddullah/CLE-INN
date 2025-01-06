@@ -637,7 +637,6 @@ export const languageData = [
             Pleasetypeinstructions: 'Digita le istruzioni',
 
 
-
         }
     },
 ];
