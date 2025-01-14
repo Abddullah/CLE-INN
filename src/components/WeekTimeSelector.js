@@ -4,11 +4,9 @@ import CheckBox from '@react-native-community/checkbox';
 import DatePicker from 'react-native-date-picker';
 import { t } from 'i18next';
 import screenResolution from '../utilities/constants/screenResolution';
-import { RFPercentage, RFValue } from "react-native-responsive-fontsize";
+import { RFValue } from "react-native-responsive-fontsize";
 
-const deviceWidth = screenResolution.screenWidth;
-
-const WeekdayTimeSelector = ({ theme, colors }) => {
+const WeekdayTimeSelector = ({ theme, colors, onSelectedDaysChange }) => {
     const [days, setDays] = useState({
         Monday: { enabled: false, openingTime: null, closingTime: null },
         Tuesday: { enabled: false, openingTime: null, closingTime: null },
@@ -31,10 +29,13 @@ const WeekdayTimeSelector = ({ theme, colors }) => {
     };
 
     const handleTimeChange = (day, type, time) => {
-        setDays((prevDays) => ({
-            ...prevDays,
-            [day]: { ...prevDays[day], [type]: time },
-        }));
+        const milliseconds = time.getHours() * 3600000 + time.getMinutes() * 60000; // Convert time to milliseconds since midnight
+        const updatedDays = {
+            ...days,
+            [day]: { ...days[day], [type]: milliseconds },
+        };
+        setDays(updatedDays);
+        sendDataToParent(updatedDays); // Pass raw milliseconds to parent
         setPickerVisible(false);
     };
 
@@ -42,6 +43,25 @@ const WeekdayTimeSelector = ({ theme, colors }) => {
         setSelectedDay(day);
         setSelectedType(type);
         setPickerVisible(true);
+    };
+
+    const sendDataToParent = (updatedDays) => {
+        const selectedDays = Object.keys(updatedDays)
+            .filter((day) => updatedDays[day].enabled)
+            .map((day) => ({
+                day,
+                openingTime: updatedDays[day].openingTime, // Raw milliseconds
+                closingTime: updatedDays[day].closingTime, // Raw milliseconds
+            }));
+        onSelectedDaysChange(selectedDays);
+    };
+
+    const formatTime = (milliseconds) => {
+        if (milliseconds === null) return 'Select Time';
+        const date = new Date();
+        date.setHours(Math.floor(milliseconds / 3600000));
+        date.setMinutes((milliseconds % 3600000) / 60000);
+        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }); // AM/PM format
     };
 
     const renderDayRow = (day) => (
@@ -73,9 +93,7 @@ const WeekdayTimeSelector = ({ theme, colors }) => {
                     <Text style={{
                         color: colors.Neutral_01, fontSize: RFValue(12, screenResolution.screenHeight),
                     }}>
-                        {days[day].openingTime
-                            ? days[day].openingTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                            : 'Select Time'}
+                        {formatTime(days[day].openingTime)}
                     </Text>
                 </TouchableOpacity>
             </View>
@@ -91,9 +109,7 @@ const WeekdayTimeSelector = ({ theme, colors }) => {
                     onPress={() => showTimePicker(day, 'closingTime')}
                 >
                     <Text style={{ color: colors.Neutral_01, fontSize: RFValue(12, screenResolution.screenHeight) }}>
-                        {days[day].closingTime
-                            ? days[day].closingTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                            : 'Select Time'}
+                        {formatTime(days[day].closingTime)}
                     </Text>
                 </TouchableOpacity>
             </View>
@@ -124,7 +140,7 @@ const WeekdayTimeSelector = ({ theme, colors }) => {
                     <DatePicker
                         modal
                         open={isPickerVisible}
-                        date={days[selectedDay][selectedType] || new Date()}
+                        date={selectedType ? new Date(days[selectedDay][selectedType]) : new Date()}
                         mode="time"
                         onConfirm={(time) => handleTimeChange(selectedDay, selectedType, time)}
                         onCancel={() => setPickerVisible(false)}
@@ -139,27 +155,21 @@ const styles = StyleSheet.create({
     container: {
         flexDirection: 'column',
         padding: 10,
-        // backgroundColor: 'green'
     },
     headerRow: {
         flexDirection: 'row',
         alignItems: 'center',
         marginBottom: 10,
-        // backgroundColor: 'yellow'
     },
     row: {
         flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
-        // justifyContent:'space-between',
         marginBottom: 10,
-        // backgroundColor: 'red'
     },
     column: {
         flex: 1,
         alignItems: 'center',
-        // backgroundColor: 'purple'
-        // marginHorizontal: deviceWidth < 360 ? 5 : 10,
     },
     heading: {
         fontSize: RFValue(12, screenResolution.screenHeight),
@@ -173,14 +183,9 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         justifyContent: 'center',
         alignItems: 'center',
-        // paddingVertical: deviceWidth < 360 ? 6 : 8,
-        // paddingHorizontal: deviceWidth < 360 ? 10 : 12,
-        // minWidth: deviceWidth < 360 ? 80 : 100,
-
         paddingVertical: 6,
         paddingHorizontal: 10,
         minWidth: 90,
-        // backgroundColor: 'gray'
     },
 });
 

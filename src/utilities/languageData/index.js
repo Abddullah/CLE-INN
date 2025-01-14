@@ -314,6 +314,9 @@ export const languageData = [
             Pleasetypelocation: 'Please type location',
             Pleasetypeinstructions: 'Please type instructions',
 
+            Pleaseselectrates: 'Please select rates',
+            Pleasetypedescription: 'Please type decription',
+
         }
     },
     {
@@ -635,7 +638,8 @@ export const languageData = [
             Starttimemustbebeforeendtime: 'L’orario di inizio deve essere precedente all’orario di fine',
             Pleasetypelocation: 'Digita una posizione',
             Pleasetypeinstructions: 'Digita le istruzioni',
-
+            Pleaseselectrates: 'Seleziona le tariffe',
+            Pleasetypedescription: 'Scrivi la descrizione',
 
         }
     },

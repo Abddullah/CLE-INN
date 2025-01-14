@@ -37,6 +37,7 @@ export const getCurrentUser = (navigation) => async dispatch => {
   dispatch(fetchNoOfRooms());
   dispatch(fetchAditionalService());
   dispatch(fetchPayments());
+  dispatch(fetchFixedRatesForServices());
 };
 
 export const loginUser = (credentials, isSelectedRemember, navigation) => async (dispatch) => {
@@ -276,17 +277,36 @@ export const fetchPayments = (navigation) => async (dispatch) => {
   }
 };
 
+export const fetchFixedRatesForServices = (navigation) => async (dispatch) => {
+  try {
+    dispatch({ type: 'IS_LOADER', payload: true });
+    const snapshot = await firestore().collection('fixRates').get();
+    const fixRates = snapshot.docs.map((doc) => ({ ...doc.data(), }));
+    fixRates.sort((a, b) => a.rate - b.rate);
+    dispatch({ type: 'SET_FIXED_RATES', payload: fixRates });
+    dispatch({ type: 'IS_LOADER', payload: false });
+  } catch (error) {
+    console.log(error, 'fetchAditionalService_error');
+    dispatch({ type: 'IS_LOADER', payload: false });
+    const errorMessage = await getFirebaseErrorMessage(error.code);
+    Toast.show({ type: 'error', text1: errorMessage, position: 'bottom' });
+  }
+};
+
 export const createJob = (data, navigation) => async (dispatch) => {
   try {
     dispatch({ type: 'IS_LOADER', payload: true });
     const docRef = firestore().collection('jobs').doc();
-    await docRef.set(data);
+    const jobId = docRef.id;
+    const updatedData = { ...data, jobId: jobId };
+    // Save the data with the jobId in Firestore
+    await docRef.set(updatedData);
     dispatch({ type: 'IS_LOADER', payload: false });
     const customMessage = await getFirebaseErrorMessage('jobCreatedSuccess');
     Toast.show({ type: 'success', text1: customMessage, position: 'bottom' });
-    navigation.navigate('Home')
+    navigation.navigate('Home');
   } catch (error) {
-    console.log(error, 'fetchAditionalService_error');
+    console.log(error, 'createJob_error');
     dispatch({ type: 'IS_LOADER', payload: false });
     const errorMessage = await getFirebaseErrorMessage(error.code);
     Toast.show({ type: 'error', text1: errorMessage, position: 'bottom' });

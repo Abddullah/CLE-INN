@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, ScrollView, TextInput, TouchableOpacity, FlatList, ActivityIndicator, Image } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import firestore from '@react-native-firebase/firestore';
-import { useRoute } from '@react-navigation/native';
+import { CurrentRenderContext, useRoute } from '@react-navigation/native';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { Select } from 'native-base';
 import { RFValue } from 'react-native-responsive-fontsize';
@@ -54,7 +54,7 @@ const CreateService = ({ navigation }) => {
     let roomSizes = useSelector((state) => state.reducer.roomSize);
     let noOfRooms = useSelector((state) => state.reducer.noOfRooms);
     let taxes = useSelector((state) => state.reducer.taxes);
-    console.log('taxes', taxes);
+    let fixRates = useSelector((state) => state.reducer.fixRates);
 
     const [step, setstep] = useState(0);
     // repeate service modal state
@@ -66,10 +66,10 @@ const CreateService = ({ navigation }) => {
 
     const [previousHourlyRates, setPreviousHourlyRates] = useState(0);
 
-    const [selectedHour, setselectedHour] = useState('1');
+    const [selectedHour, setselectedHour] = useState(isJobCreate ? '1' : '0');
     const [previousSelectedHour, setPreviousSelectedHour] = useState(0);
 
-    const [selectedProfessional, setselectedProfessional] = useState('1');
+    const [selectedProfessional, setselectedProfessional] = useState(isJobCreate ? '1' : '0');
     const [previousSelectedProfessional, setPreviousSelectedProfessional] = useState(0);
 
     const [selectedCategories, setselectedCategories] = useState('');
@@ -110,9 +110,10 @@ const CreateService = ({ navigation }) => {
     const [location, setlocation] = useState('')
 
     const [instructions, setinstructions] = useState('');
-
-    const [rates, setrates] = useState('');
     const [description, setdescription] = useState('');
+
+    const [selectedDays, setSelectedDays] = useState([]);
+
     const [isLoader, setisLoader] = useState(false);
 
     useEffect(() => {
@@ -327,6 +328,11 @@ const CreateService = ({ navigation }) => {
         }
     };
 
+    const handleSelectedDaysChange = (data) => {
+        console.log('Selected Days:', data);
+        setSelectedDays(data);
+    };
+
     const taxHandler = () => {
         let total = Number(totalPrice);
         let tax = 0;
@@ -339,7 +345,7 @@ const CreateService = ({ navigation }) => {
     };
 
     const stepsHandler = () => {
-        if (isJobCreate ? step < 4 : step < 2) {
+        if (isJobCreate) {
             if (step === 0) {
                 if (selectedCategories === '') {
                     Toast.show({ type: 'error', text1: t('Pleaseselectcategory'), position: 'bottom' });
@@ -395,12 +401,12 @@ const CreateService = ({ navigation }) => {
                     setstep(step + 1)
                 }
             }
-            dispatch(showError())
-        } else {
-            if (isJobCreate) {
+            if (step === 4) {
                 createJobHandler()
             }
-            else {
+            dispatch(showError())
+        } else {
+            if (step === 2) {
                 const data = ([
                     {
                         title: 'Cleaning at Company',
@@ -417,6 +423,47 @@ const CreateService = ({ navigation }) => {
                 setstep(0)
                 navigation.navigate('AdFullView', { item: data[0], isBooking: false, isReviewBooking: true, isJobCreate: isJobCreate, })
             }
+            else {
+                setstep(step + 1)
+            }
+
+            // if (step === 0) {
+            //     if (selectedCategories === '') {
+            //         Toast.show({ type: 'error', text1: t('Pleaseselectcategory'), position: 'bottom' });
+            //     }
+            //     else if (selectedsubcategories === '') {
+            //         Toast.show({ type: 'error', text1: t('Pleaseselectsubcategory'), position: 'bottom' });
+            //     }
+            //     else {
+            //         setstep(step + 1)
+            //     }
+            // }
+            // if (step === 1) {
+            //     if (rates === '') {
+            //         Toast.show({ type: 'error', text1: t('Pleaseselectrates'), position: 'bottom' });
+            //     }
+            //     else if (description === '') {
+            //         Toast.show({ type: 'error', text1: t('Pleasetypedescription'), position: 'bottom' });
+            //     }
+            //     else if (productImages[0].imagURL === '') {
+            //         Toast.show({ type: 'error', text1: t('Pleaseselectimage'), position: 'bottom' });
+            //     }
+            //     else {
+            //         setstep(step + 1)
+            //     }
+            // }
+            // if (step === 2) {
+            //     if (rates === '') {
+            //         Toast.show({ type: 'error', text1: t('Pleaseselectrates'), position: 'bottom' });
+            //     }
+            //     else {
+
+            //         setstep(0)
+            //     }
+            // }
+
+
+            dispatch(showError())
         }
     }
 
@@ -451,9 +498,49 @@ const CreateService = ({ navigation }) => {
             instructions: instructions,
             addStatus: 'pending',
             addType: 'job',
+            postedBy: user.userId,
         }
         dispatch(createJob(data, navigation))
     }
+
+    const createServiceHandler = () => {
+        const geoPoint = new firestore.GeoPoint(savedCords[0], savedCords[1]);
+        let data = {
+            category: selectedCategories,
+            subCategory: selectedsubcategories,
+            totalPriceWithTax: totalPriceWithTax,
+            fixedRates: totalPrice,
+            description: description,
+            images: productImages,
+            createdAt: new Date(date).getTime(),
+            geoPoint: geoPoint,
+            addStatus: 'pending',
+            addType: 'service',
+            postedBy: user.userId,
+        }
+
+
+        // dispatch(createJob(data, navigation))
+
+
+
+        // const data = ([
+        //     {
+        //         title: 'Cleaning at Company',
+        //         description: 'We specialize in delivering top-quality house cleaning services, ensuring every corner is spotless. Our team is committed to using 100% effort and care in every task, from dusting and vacuuming to deep cleaning kitchens and bathrooms.',
+        //         price: 25,
+        //         discount: 30,
+        //         images: [Images.cleaning, Images.cleaning, Images.cleaning, Images.cleaning, Images.cleaning],
+        //         openTime: '10:00 AM to 12:00 PM',
+        //         let: 0,
+        //         lng: 0,
+        //         reviews: [{ img: Images.profilePic, name: 'Charollette Hanlin', date: '23 May, 2023 | 02:00 PM', star: '5', review: 'Lorem ipsum dolor sit amet consectetur. Purus massa tristique arcu tempus ut ac porttitor. Lorem ipsum dolor sit amet consectetur. ' },]
+        //     },
+        // ])
+        // navigation.navigate('AdFullView', { item: data[0], isBooking: false, isReviewBooking: true, isJobCreate: isJobCreate, })
+
+    }
+
 
     return (
         <View style={styles.container}>
@@ -704,12 +791,15 @@ const CreateService = ({ navigation }) => {
                         <View style={{ width: '90%' }}>
                             <View style={styles.heading}>
                                 <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('adfixedrate')}</Text>
+                                {
+                                    isError && totalPrice == '0' && <Text style={{ top: 3, color: colors.Error_Red }}>*</Text>
+                                }
                             </View>
                             <View style={styles.listDropDown}>
                                 <Select
                                     bg={colors.white}
                                     borderWidth={0}
-                                    selectedValue={rates}
+                                    selectedValue={totalPrice}
                                     minWidth="100%"
                                     accessibilityLabel="User"
                                     placeholder={t('adfixedrate')}
@@ -718,18 +808,17 @@ const CreateService = ({ navigation }) => {
                                         background: colors.Primary_01,
                                     }}
                                     color={colors.Neutral_01}
-                                    mt={1} onValueChange={itemValue => setrates(itemValue)}
+                                    mt={1} onValueChange={itemValue => settotalPrice(itemValue)}
                                 >
-                                    <Select.Item label="5 Euro" value="5" />
-                                    <Select.Item label="7 Euro" value="7" />
-                                    <Select.Item label="8 Euro" value="8" />
-                                    <Select.Item label="9 Euro" value="9" />
-                                    <Select.Item label="10 Euro" value="10" />
-                                    <Select.Item label="11 Euro" value="11" />
-                                    <Select.Item label="12 Euro" value="12" />
-                                    <Select.Item label="13 Euro" value="13" />
-                                    <Select.Item label="14 Euro" value="14" />
-                                    <Select.Item label="15 Euro" value="15" />
+                                    {
+                                        fixRates.length && fixRates.map((key, index) => (
+                                            <Select.Item
+                                                key={index}
+                                                label={key.rate + ' Euro'}
+                                                value={key.rate}
+                                            />
+                                        ))
+                                    }
                                 </Select>
                             </View>
                         </View>
@@ -826,7 +915,11 @@ const CreateService = ({ navigation }) => {
                     {
                         !isJobCreate &&
                         <View style={{ width: '90%' }}>
-                            <WeekTimeSelector theme={theme} colors={colors} />
+                            <WeekTimeSelector
+                                theme={theme}
+                                colors={colors}
+                                onSelectedDaysChange={handleSelectedDaysChange}
+                            />
                         </View>
                     }
 
