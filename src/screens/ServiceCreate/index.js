@@ -30,7 +30,7 @@ import InformationPopup from '../../components/Information_Popup';
 import BookingStatusTab from '../../components/BookingStatusTab';
 import HorizontalList from '../../components/horizontalList';
 import AdditionalServices from '../../components/AdditionalServices';
-import { createJob, showError, } from '../../store/actions/action';
+import { createJob, createService, showError, } from '../../store/actions/action';
 import SmallMap from '../../components/smallMap';
 import Toast from 'react-native-toast-message';
 
@@ -329,7 +329,6 @@ const CreateService = ({ navigation }) => {
     };
 
     const handleSelectedDaysChange = (data) => {
-        console.log('Selected Days:', data);
         setSelectedDays(data);
     };
 
@@ -342,6 +341,14 @@ const CreateService = ({ navigation }) => {
             tax += taxAmount;
         }
         settotalPriceWithTax(Number(total + tax));
+    };
+
+    const formatTime = (milliseconds) => {
+        if (milliseconds === null) return 'Select Time';
+        const date = new Date();
+        date.setHours(Math.floor(milliseconds / 3600000));
+        date.setMinutes((milliseconds % 3600000) / 60000);
+        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
     };
 
     const stepsHandler = () => {
@@ -406,63 +413,42 @@ const CreateService = ({ navigation }) => {
             }
             dispatch(showError())
         } else {
+            if (step === 0) {
+                if (selectedCategories === '') {
+                    Toast.show({ type: 'error', text1: t('Pleaseselectcategory'), position: 'bottom' });
+                }
+                else if (selectedsubcategories === '') {
+                    Toast.show({ type: 'error', text1: t('Pleaseselectsubcategory'), position: 'bottom' });
+                }
+                else {
+                    setstep(step + 1)
+                }
+            }
+            if (step === 1) {
+                if (totalPrice === '') {
+                    Toast.show({ type: 'error', text1: t('Pleaseselectrates'), position: 'bottom' });
+                }
+                else if (description === '') {
+                    Toast.show({ type: 'error', text1: t('Pleasetypedescription'), position: 'bottom' });
+                }
+                else if (productImages[0].imagURL === '') {
+                    Toast.show({ type: 'error', text1: t('Pleaseselectimage'), position: 'bottom' });
+                }
+                else {
+                    setstep(step + 1)
+                }
+            }
             if (step === 2) {
-                const data = ([
-                    {
-                        title: 'Cleaning at Company',
-                        description: 'We specialize in delivering top-quality house cleaning services, ensuring every corner is spotless. Our team is committed to using 100% effort and care in every task, from dusting and vacuuming to deep cleaning kitchens and bathrooms.',
-                        price: 25,
-                        discount: 30,
-                        images: [Images.cleaning, Images.cleaning, Images.cleaning, Images.cleaning, Images.cleaning],
-                        openTime: '10:00 AM to 12:00 PM',
-                        let: 0,
-                        lng: 0,
-                        reviews: [{ img: Images.profilePic, name: 'Charollette Hanlin', date: '23 May, 2023 | 02:00 PM', star: '5', review: 'Lorem ipsum dolor sit amet consectetur. Purus massa tristique arcu tempus ut ac porttitor. Lorem ipsum dolor sit amet consectetur. ' },]
-                    },
-                ])
-                setstep(0)
-                navigation.navigate('AdFullView', { item: data[0], isBooking: false, isReviewBooking: true, isJobCreate: isJobCreate, })
+                if (selectedDays.length == 0 || selectedDays[0]?.openingTime == null || selectedDays[0]?.closingTime == null) {
+                    Toast.show({ type: 'error', text1: t('Pleaseselectrates'), position: 'bottom' });
+                }
+                else {
+                    setstep(step + 1)
+                }
             }
-            else {
-                setstep(step + 1)
+            if (step === 3) {
+                createServiceHandler()
             }
-
-            // if (step === 0) {
-            //     if (selectedCategories === '') {
-            //         Toast.show({ type: 'error', text1: t('Pleaseselectcategory'), position: 'bottom' });
-            //     }
-            //     else if (selectedsubcategories === '') {
-            //         Toast.show({ type: 'error', text1: t('Pleaseselectsubcategory'), position: 'bottom' });
-            //     }
-            //     else {
-            //         setstep(step + 1)
-            //     }
-            // }
-            // if (step === 1) {
-            //     if (rates === '') {
-            //         Toast.show({ type: 'error', text1: t('Pleaseselectrates'), position: 'bottom' });
-            //     }
-            //     else if (description === '') {
-            //         Toast.show({ type: 'error', text1: t('Pleasetypedescription'), position: 'bottom' });
-            //     }
-            //     else if (productImages[0].imagURL === '') {
-            //         Toast.show({ type: 'error', text1: t('Pleaseselectimage'), position: 'bottom' });
-            //     }
-            //     else {
-            //         setstep(step + 1)
-            //     }
-            // }
-            // if (step === 2) {
-            //     if (rates === '') {
-            //         Toast.show({ type: 'error', text1: t('Pleaseselectrates'), position: 'bottom' });
-            //     }
-            //     else {
-
-            //         setstep(0)
-            //     }
-            // }
-
-
             dispatch(showError())
         }
     }
@@ -502,7 +488,6 @@ const CreateService = ({ navigation }) => {
         }
         dispatch(createJob(data, navigation))
     }
-
     const createServiceHandler = () => {
         const geoPoint = new firestore.GeoPoint(savedCords[0], savedCords[1]);
         let data = {
@@ -519,7 +504,7 @@ const CreateService = ({ navigation }) => {
             addType: 'service',
             postedBy: user.userId,
         }
-        // dispatch(createJob(data, navigation))
+        dispatch(createService(data, navigation))
     }
 
 
@@ -1036,146 +1021,208 @@ const CreateService = ({ navigation }) => {
             {
                 step === 3 &&
                 <View style={styles.body}>
-                    <View style={{ width: '90%', }}>
-                        <View style={styles.heading}>
-                            <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('location')}</Text>
-                            {
-                                isError && location == '' && <Text style={{ top: 3, color: colors.Error_Red }}>*</Text>
-                            }
+                    {
+                        isJobCreate &&
+                        <View style={{ width: '90%', }}>
+                            <View style={styles.heading}>
+                                <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('location')}</Text>
+                                {
+                                    isError && location == '' && <Text style={{ top: 3, color: colors.Error_Red }}>*</Text>
+                                }
+                            </View>
+                            <View style={styles.inputContiner}>
+                                <TextInput
+                                    keyboardType='number-pad'
+                                    style={{ color: colors.black }}
+                                    value={location}
+                                    onChangeText={(e) => { setlocation(e) }}
+                                    placeholder={t('location')}
+                                    placeholderTextColor={colors.Neutral_01}
+                                />
+                                <Feather name="map-pin" style={styles.listIcon} />
+                            </View>
+                            <View style={styles.heading}>
+                                <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('anyspecificinstruction')}</Text>
+                                {
+                                    isError && instructions == '' && <Text style={{ top: 3, color: colors.Error_Red }}>*</Text>
+                                }
+                            </View>
+                            <View style={styles.textAreaContainer}>
+                                <TextInput
+                                    keyboardType="default"
+                                    style={{ height: '100%', width: '100%', textAlignVertical: 'top', color: colors.black }}
+                                    value={instructions}
+                                    onChangeText={(e) => { setinstructions(e) }}
+                                    placeholder={t('yourtext')}
+                                    placeholderTextColor={colors.Neutral_01}
+                                    multiline={true}
+                                />
+                            </View>
                         </View>
-                        <View style={styles.inputContiner}>
-                            <TextInput
-                                keyboardType='number-pad'
-                                style={{ color: colors.black }}
-                                value={location}
-                                onChangeText={(e) => { setlocation(e) }}
-                                placeholder={t('location')}
-                                placeholderTextColor={colors.Neutral_01}
-                            />
-                            <Feather name="map-pin" style={styles.listIcon} />
-                        </View>
-                        <View style={styles.heading}>
-                            <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('anyspecificinstruction')}</Text>
-                            {
-                                isError && instructions == '' && <Text style={{ top: 3, color: colors.Error_Red }}>*</Text>
-                            }
-                        </View>
-                        <View style={styles.textAreaContainer}>
-                            <TextInput
-                                keyboardType="default"
-                                style={{ height: '100%', width: '100%', textAlignVertical: 'top', color: colors.black }}
-                                value={instructions}
-                                onChangeText={(e) => { setinstructions(e) }}
-                                placeholder={t('yourtext')}
-                                placeholderTextColor={colors.Neutral_01}
-                                multiline={true}
-                            />
-                        </View>
-                    </View>
+                    }
+
+                    {
+                        !isJobCreate &&
+                        <ScrollView contentContainerStyle={{ justifyContent: 'center', alignItems: 'center', paddingBottom: 50 }} style={{ width: '100%', }}>
+                            <View style={{ width: '90%', }}>
+
+                                <View style={[styles.heading, { marginTop: 20 }]}>
+                                    <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('service') + ' '}</Text>
+                                    <Text style={[Typography.text_paragraph_1, styles.editText]}>{selectedCategories + ' / ' + selectedsubcategories}</Text>
+                                </View>
+
+                                <View style={[styles.heading, { marginTop: 20 }]}>
+                                    <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('description') + ' '}</Text>
+                                    <Text style={[Typography.text_paragraph_1, styles.editText]}>{description}</Text>
+                                </View>
+
+                                <View style={[styles.heading, { marginTop: 20 }]}>
+                                    <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('price') + ' '}</Text>
+                                    <Text style={[Typography.text_paragraph_1, styles.editText]}>{'€' + totalPrice}</Text>
+                                </View>
+
+                                <View style={[styles.list2, { flexDirection: 'column' }]}>
+                                    <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{t('availability')}</Text>
+                                    {
+                                        selectedDays.length > 0 && selectedDays.map((key, index) => {
+                                            return (
+                                                <View key={index} style={{ alignItems: 'flex-start' }}>
+                                                    <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, marginTop: 5 }]}>{key.day}</Text>
+                                                    <Text style={[Typography.text_paragraph_1, { color: colors.White_Primary_01, }]}>{formatTime(key.openingTime) + ' to ' + formatTime(key.closingTime)}</Text>
+                                                </View>
+                                            )
+                                        })
+                                    }
+                                </View>
+
+                                <View style={styles.taxContainer}>
+                                    <Text style={[Typography.text_CTA1, { color: colors.black, }]}>{t('pay') + ':'}</Text>
+
+                                    <View style={styles.taxContainer_C1}>
+                                        <Text style={[Typography.text_CTA1, { color: colors.Neutral_01, }]}>{t('amount')}</Text>
+                                        <Text style={[Typography.text_CTA1, { color: colors.black, }]}>{'€' + totalPrice}</Text>
+                                    </View>
+                                    {
+                                        taxes.map((key, index) => {
+                                            return (
+                                                <View key={index} style={styles.taxContainer_C1}>
+                                                    <Text style={[Typography.text_CTA1, { color: colors.Neutral_01, }]}>{key.name + ' ' + key.percentage + '%'}</Text>
+                                                    <Text style={[Typography.text_CTA1, { color: colors.black, }]}>{'€' + Number(totalPrice / 100 * key.percentage).toFixed(1)}</Text>
+                                                </View>
+                                            )
+                                        })
+                                    }
+                                    <View style={styles.taxContainer_C1}>
+                                        <Text style={[Typography.text_CTA1, { color: colors.Neutral_01, }]}>{t('total')}</Text>
+                                        <Text style={[Typography.text_CTA1, { color: colors.black, }]}>{'€' + totalPriceWithTax.toFixed(1)}</Text>
+                                    </View>
+                                </View>
+                            </View>
+                        </ScrollView>
+                    }
                 </View>
             }
 
             {
                 step === 4 &&
                 <ScrollView contentContainerStyle={{ justifyContent: 'center', alignItems: 'center', paddingBottom: 50 }} style={{ width: '100%', }}>
-                    <View style={{ width: '90%', }}>
+                    {
+                        isJobCreate &&
+                        <View style={{ width: '90%', }}>
 
-                        <View style={[styles.heading, { marginTop: 20 }]}>
-                            <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('service') + ' '}</Text>
-                            <Text style={[Typography.text_paragraph_1, styles.editText]}>{selectedCategories}</Text>
-                        </View>
+                            <View style={[styles.heading, { marginTop: 20 }]}>
+                                <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('service') + ' '}</Text>
+                                <Text style={[Typography.text_paragraph_1, styles.editText]}>{selectedCategories + ' / ' + selectedsubcategories}</Text>
+                            </View>
 
-                        <View style={[styles.heading, { marginTop: 20 }]}>
-                            <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('description') + ' '}</Text>
-                            <Text style={[Typography.text_paragraph_1, styles.editText]}>{instructions}</Text>
-                        </View>
+                            <View style={[styles.heading, { marginTop: 20 }]}>
+                                <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('description') + ' '}</Text>
+                                <Text style={[Typography.text_paragraph_1, styles.editText]}>{instructions}</Text>
+                            </View>
 
-                        <View style={[styles.heading, { marginTop: 20 }]}>
-                            <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('cleaners') + ' '}</Text>
-                            <Text style={[Typography.text_paragraph_1, styles.editText]}>{selectedProfessional}</Text>
-                        </View>
+                            <View style={[styles.heading, { marginTop: 20 }]}>
+                                <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('cleaners') + ' '}</Text>
+                                <Text style={[Typography.text_paragraph_1, styles.editText]}>{selectedProfessional}</Text>
+                            </View>
 
-                        <View style={[styles.heading, { marginTop: 20 }]}>
-                            <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('workFrequency') + ' '}</Text>
-                            <Text style={[Typography.text_paragraph_1, styles.editText]}>{repeateService}</Text>
-                        </View>
-
-                        {
-                            selectedCategories === CleaningAndHygineService &&
-                            <>
-                                <View style={[styles.heading, { marginTop: 20 }]}>
-                                    <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('areaSize') + ' '}</Text>
-                                    <Text style={[Typography.text_paragraph_1, styles.editText]}>{roomsize}</Text>
-                                </View>
-
-                                <View style={[styles.heading, { marginTop: 20 }]}>
-                                    <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('roomsNumber') + ' '}</Text>
-                                    <Text style={[Typography.text_paragraph_1, styles.editText]}>{roomsQty}</Text>
-                                </View>
-
-                                <View style={[styles.heading, { marginTop: 20 }]}>
-                                    <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('needCleaningMaterials') + ' '}</Text>
-                                    <Text style={[Typography.text_paragraph_1, styles.editText]}>{needCleaningMaterials}</Text>
-                                </View>
-                                <View style={[styles.heading, { marginTop: 20 }]}>
-                                    <View style={{ flexDirection: 'column', flexWrap: 'wrap', }}>
-                                        <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('additionalService') + ' '}</Text>
-                                        {
-                                            aditionalSelectedServices.map((service, index) => (
-                                                <Text key={index} style={[Typography.text_paragraph_1, styles.editText]}>{service.title}</Text>
-                                            ))
-                                        }
-                                    </View>
-                                </View>
-                            </>
-                        }
-
-                        <View style={[styles.heading, { marginTop: 20 }]}>
-                            <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('price') + ' '}</Text>
-                            <Text style={[Typography.text_paragraph_1, styles.editText]}>{'€' + totalPrice}</Text>
-                        </View>
-
-                        <View style={[styles.heading, { marginTop: 20 }]}>
-                            <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('selectDate') + ' '}</Text>
-                            <Text style={[Typography.text_paragraph_1, styles.editText,]}>{moment(date).format('DD MM YYYY')}</Text>
-                        </View>
-
-                        <View style={[styles.heading, { marginTop: 20 }]}>
-                            <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('selectTime') + ' '}</Text>
-                            <Text style={[Typography.text_paragraph_1, styles.editText]}>{moment(timeStart).format('LT') + ' - ' + moment(timeEnd).format('LT')}</Text>
-                        </View>
-
-                        <View style={[styles.heading, { marginTop: 20 }]}>
-                            <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('location') + ' '}</Text>
-                            <Text style={[Typography.text_paragraph_1, styles.editText]}>{location}</Text>
-                        </View>
-
-                        <View style={styles.taxContainer}>
-                            <Text style={[Typography.text_CTA1, { color: colors.black, }]}>{t('pay') + ':'}</Text>
-
-                            <View style={styles.taxContainer_C1}>
-                                <Text style={[Typography.text_CTA1, { color: colors.Neutral_01, }]}>{t('amount')}</Text>
-                                <Text style={[Typography.text_CTA1, { color: colors.black, }]}>{'€' + totalPrice}</Text>
+                            <View style={[styles.heading, { marginTop: 20 }]}>
+                                <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('workFrequency') + ' '}</Text>
+                                <Text style={[Typography.text_paragraph_1, styles.editText]}>{repeateService}</Text>
                             </View>
 
                             {
-                                taxes.map((key, index) => {
-                                    return (
-                                        <View key={index} style={styles.taxContainer_C1}>
-                                            <Text style={[Typography.text_CTA1, { color: colors.Neutral_01, }]}>{key.name + ' ' + key.percentage + '%'}</Text>
-                                            <Text style={[Typography.text_CTA1, { color: colors.black, }]}>{'€' + Number(totalPrice / 100 * key.percentage).toFixed(1)}</Text>
+                                selectedCategories === CleaningAndHygineService &&
+                                <>
+                                    <View style={[styles.heading, { marginTop: 20 }]}>
+                                        <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('areaSize') + ' '}</Text>
+                                        <Text style={[Typography.text_paragraph_1, styles.editText]}>{roomsize}</Text>
+                                    </View>
+
+                                    <View style={[styles.heading, { marginTop: 20 }]}>
+                                        <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('roomsNumber') + ' '}</Text>
+                                        <Text style={[Typography.text_paragraph_1, styles.editText]}>{roomsQty}</Text>
+                                    </View>
+
+                                    <View style={[styles.heading, { marginTop: 20 }]}>
+                                        <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('needCleaningMaterials') + ' '}</Text>
+                                        <Text style={[Typography.text_paragraph_1, styles.editText]}>{needCleaningMaterials}</Text>
+                                    </View>
+                                    <View style={[styles.heading, { marginTop: 20 }]}>
+                                        <View style={{ flexDirection: 'column', flexWrap: 'wrap', }}>
+                                            <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('additionalService') + ' '}</Text>
+                                            {
+                                                aditionalSelectedServices.map((service, index) => (
+                                                    <Text key={index} style={[Typography.text_paragraph_1, styles.editText]}>{service.title}</Text>
+                                                ))
+                                            }
                                         </View>
-                                    )
-                                })
+                                    </View>
+                                </>
                             }
 
-                            <View style={styles.taxContainer_C1}>
-                                <Text style={[Typography.text_CTA1, { color: colors.Neutral_01, }]}>{t('total')}</Text>
-                                <Text style={[Typography.text_CTA1, { color: colors.black, }]}>{'€' + totalPriceWithTax.toFixed(1)}</Text>
+                            <View style={[styles.heading, { marginTop: 20 }]}>
+                                <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('price') + ' '}</Text>
+                                <Text style={[Typography.text_paragraph_1, styles.editText]}>{'€' + totalPrice}</Text>
                             </View>
 
+                            <View style={[styles.heading, { marginTop: 20 }]}>
+                                <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('selectDate') + ' '}</Text>
+                                <Text style={[Typography.text_paragraph_1, styles.editText,]}>{moment(date).format('DD MM YYYY')}</Text>
+                            </View>
+
+                            <View style={[styles.heading, { marginTop: 20 }]}>
+                                <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('selectTime') + ' '}</Text>
+                                <Text style={[Typography.text_paragraph_1, styles.editText]}>{moment(timeStart).format('LT') + ' - ' + moment(timeEnd).format('LT')}</Text>
+                            </View>
+
+                            <View style={[styles.heading, { marginTop: 20 }]}>
+                                <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('location') + ' '}</Text>
+                                <Text style={[Typography.text_paragraph_1, styles.editText]}>{location}</Text>
+                            </View>
+                            <View style={styles.taxContainer}>
+                                <Text style={[Typography.text_CTA1, { color: colors.black, }]}>{t('pay') + ':'}</Text>
+
+                                <View style={styles.taxContainer_C1}>
+                                    <Text style={[Typography.text_CTA1, { color: colors.Neutral_01, }]}>{t('amount')}</Text>
+                                    <Text style={[Typography.text_CTA1, { color: colors.black, }]}>{'€' + totalPrice}</Text>
+                                </View>
+                                {
+                                    taxes.map((key, index) => {
+                                        return (
+                                            <View key={index} style={styles.taxContainer_C1}>
+                                                <Text style={[Typography.text_CTA1, { color: colors.Neutral_01, }]}>{key.name + ' ' + key.percentage + '%'}</Text>
+                                                <Text style={[Typography.text_CTA1, { color: colors.black, }]}>{'€' + Number(totalPrice / 100 * key.percentage).toFixed(1)}</Text>
+                                            </View>
+                                        )
+                                    })
+                                }
+                                <View style={styles.taxContainer_C1}>
+                                    <Text style={[Typography.text_CTA1, { color: colors.Neutral_01, }]}>{t('total')}</Text>
+                                    <Text style={[Typography.text_CTA1, { color: colors.black, }]}>{'€' + totalPriceWithTax.toFixed(1)}</Text>
+                                </View>
+                            </View>
                         </View>
-                    </View>
+                    }
                 </ScrollView>
             }
 
@@ -1192,10 +1239,21 @@ const CreateService = ({ navigation }) => {
                                     </View>
                                 </View>
                                 <View style={{ width: '45%', }}>
-                                    <CTAButton1 title={step < 4 ? t('next') : isJobCreate ? t('createJob') : t('createService')} submitHandler={() => { stepsHandler() }} />
+                                    {
+                                        isJobCreate &&
+                                        <CTAButton1 title={step < 4 ? t('next') : t('createJob')} submitHandler={() => { stepsHandler() }} />
+                                    }
+                                    {
+                                        !isJobCreate &&
+                                        <CTAButton1 title={step < 3 ? t('next') : t('createService')} submitHandler={() => { stepsHandler() }} />
+                                    }
                                 </View>
                             </>
-                        ) : (<CTAButton1 title={step < 4 ? t('next') : isJobCreate ? t('createJob') : t('createService')} submitHandler={() => { stepsHandler() }} />)
+                        ) : (
+                            (isJobCreate) ? (
+                                <CTAButton1 title={step < 4 ? t('next') : t('createJob')} submitHandler={() => { stepsHandler() }} />
+                            ) : (<CTAButton1 title={step < 3 ? t('next') : t('createService')} submitHandler={() => { stepsHandler() }} />)
+                        )
                     }
                 </View>
             </View>
@@ -1238,6 +1296,13 @@ const createStyles = (colors, theme, deviceWidth) => {
             fontWeight: 'bold',
             color: colors.black,
             textAlign: 'left'
+        },
+        list2: {
+            flexDirection: 'row',
+            marginTop: 10,
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            width: '100%'
         },
         editText: {
             fontSize: RFValue(14, screenResolution.screenHeight),

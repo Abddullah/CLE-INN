@@ -313,4 +313,25 @@ export const createJob = (data, navigation) => async (dispatch) => {
   }
 };
 
+export const createService = (data, navigation) => async (dispatch) => {
+  try {
+    dispatch({ type: 'IS_LOADER', payload: true });
+    const docRef = firestore().collection('service').doc();
+    const serviceId = docRef.id;
+    const updatedData = { ...data, serviceId: serviceId };
+    // Save the data with the serviceId in Firestore
+    await docRef.set(updatedData);
+    dispatch({ type: 'IS_LOADER', payload: false });
+    const customMessage = await getFirebaseErrorMessage('serviceCreatedSuccess');
+    Toast.show({ type: 'success', text1: customMessage, position: 'bottom' });
+    navigation.navigate('Home');
+  } catch (error) {
+    console.log(error, 'createJob_error');
+    dispatch({ type: 'IS_LOADER', payload: false });
+    const errorMessage = await getFirebaseErrorMessage(error.code);
+    Toast.show({ type: 'error', text1: errorMessage, position: 'bottom' });
+  }
+};
+
+
 

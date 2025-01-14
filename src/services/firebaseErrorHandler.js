@@ -32,6 +32,7 @@ const translations = {
         "Password reset email sent successfully.": "Password reset email sent successfully.",
         "User update successfully!": "User update successfully!",
         "jobCreatedSuccess": 'Job created successfully!',
+        "serviceCreatedSuccess": 'Service created successfully!',
         "": "",
     },
     it: {
@@ -65,6 +66,7 @@ const translations = {
         "Password reset email sent successfully.": "Email di reimpostazione della password inviata con successo.",
         "User update successfully!": "Utente aggiornato con successo!",
         "jobCreatedSuccess": "Lavoro creato con successo!",
+        "serviceCreatedSuccess": 'Servizio creato con successo!',
         "": "",
     }
 };
