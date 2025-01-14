@@ -20,7 +20,7 @@ const WeekdayTimeSelector = ({ theme, colors, onSelectedDaysChange }) => {
 
     const [isPickerVisible, setPickerVisible] = useState(false);
     const [selectedDay, setSelectedDay] = useState(null);
-    const [selectedType, setSelectedType] = useState(null); // 'openingTime' or 'closingTime'
+    const [selectedType, setSelectedType] = useState(null);
 
     const handleDayToggle = (day) => {
         setDays((prevDays) => ({
@@ -30,23 +30,22 @@ const WeekdayTimeSelector = ({ theme, colors, onSelectedDaysChange }) => {
     };
 
     const handleTimeChange = (day, type, time) => {
-        const milliseconds = time.getHours() * 3600000 + time.getMinutes() * 60000; // Convert time to milliseconds since midnight
+        const milliseconds = time.getHours() * 3600000 + time.getMinutes() * 60000;
         const updatedDays = {
             ...days,
             [day]: { ...days[day], [type]: milliseconds },
         };
 
         if (type === 'closingTime' && updatedDays[day].openingTime !== null) {
-            // Check if closing time is earlier than opening time
             if (milliseconds <= updatedDays[day].openingTime) {
                 Toast.show({ type: 'error', text1: t('closingTimeMustBeLater'), position: 'bottom' });
                 setPickerVisible(false);
-                return; // Prevent closing time update if it's earlier than opening time
+                return;
             }
         }
 
         setDays(updatedDays);
-        sendDataToParent(updatedDays); // Pass raw milliseconds to parent
+        sendDataToParent(updatedDays);
         setPickerVisible(false);
     };
 
@@ -61,8 +60,8 @@ const WeekdayTimeSelector = ({ theme, colors, onSelectedDaysChange }) => {
             .filter((day) => updatedDays[day].enabled)
             .map((day) => ({
                 day,
-                openingTime: updatedDays[day].openingTime, // Raw milliseconds
-                closingTime: updatedDays[day].closingTime, // Raw milliseconds
+                openingTime: updatedDays[day].openingTime,
+                closingTime: updatedDays[day].closingTime,
             }));
         onSelectedDaysChange(selectedDays);
     };
