@@ -514,31 +514,12 @@ const CreateService = ({ navigation }) => {
             images: productImages,
             createdAt: new Date(date).getTime(),
             geoPoint: geoPoint,
+            timeSlots: selectedDays,
             addStatus: 'pending',
             addType: 'service',
             postedBy: user.userId,
         }
-
-
         // dispatch(createJob(data, navigation))
-
-
-
-        // const data = ([
-        //     {
-        //         title: 'Cleaning at Company',
-        //         description: 'We specialize in delivering top-quality house cleaning services, ensuring every corner is spotless. Our team is committed to using 100% effort and care in every task, from dusting and vacuuming to deep cleaning kitchens and bathrooms.',
-        //         price: 25,
-        //         discount: 30,
-        //         images: [Images.cleaning, Images.cleaning, Images.cleaning, Images.cleaning, Images.cleaning],
-        //         openTime: '10:00 AM to 12:00 PM',
-        //         let: 0,
-        //         lng: 0,
-        //         reviews: [{ img: Images.profilePic, name: 'Charollette Hanlin', date: '23 May, 2023 | 02:00 PM', star: '5', review: 'Lorem ipsum dolor sit amet consectetur. Purus massa tristique arcu tempus ut ac porttitor. Lorem ipsum dolor sit amet consectetur. ' },]
-        //     },
-        // ])
-        // navigation.navigate('AdFullView', { item: data[0], isBooking: false, isReviewBooking: true, isJobCreate: isJobCreate, })
-
     }
 
 

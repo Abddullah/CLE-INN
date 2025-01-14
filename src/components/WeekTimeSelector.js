@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import CheckBox from '@react-native-community/checkbox';
 import DatePicker from 'react-native-date-picker';
 import { t } from 'i18next';
 import screenResolution from '../utilities/constants/screenResolution';
 import { RFValue } from "react-native-responsive-fontsize";
+import Toast from 'react-native-toast-message';
 
 const WeekdayTimeSelector = ({ theme, colors, onSelectedDaysChange }) => {
     const [days, setDays] = useState({
@@ -34,6 +35,16 @@ const WeekdayTimeSelector = ({ theme, colors, onSelectedDaysChange }) => {
             ...days,
             [day]: { ...days[day], [type]: milliseconds },
         };
+
+        if (type === 'closingTime' && updatedDays[day].openingTime !== null) {
+            // Check if closing time is earlier than opening time
+            if (milliseconds <= updatedDays[day].openingTime) {
+                Toast.show({ type: 'error', text1: t('closingTimeMustBeLater'), position: 'bottom' });
+                setPickerVisible(false);
+                return; // Prevent closing time update if it's earlier than opening time
+            }
+        }
+
         setDays(updatedDays);
         sendDataToParent(updatedDays); // Pass raw milliseconds to parent
         setPickerVisible(false);
