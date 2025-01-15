@@ -884,6 +884,7 @@ const CreateService = ({ navigation }) => {
                             <WeekTimeSelector
                                 theme={theme}
                                 colors={colors}
+                                selectedDays={selectedDays}
                                 onSelectedDaysChange={handleSelectedDaysChange}
                             />
                         </View>
