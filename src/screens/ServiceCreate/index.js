@@ -50,7 +50,7 @@ const CreateService = ({ navigation }) => {
     let isError = useSelector((state) => state.reducer.isError);
     let savedCords = useSelector((state) => state.reducer.savedCords);
     let allcategories = useSelector((state) => state.reducer.categories);
-    let hourlyRates = useSelector((state) => state.reducer.hourlyRates);
+    // let hourlyRates = useSelector((state) => state.reducer.hourlyRates);
     let roomSizes = useSelector((state) => state.reducer.roomSize);
     let noOfRooms = useSelector((state) => state.reducer.noOfRooms);
     let taxes = useSelector((state) => state.reducer.taxes);
@@ -58,6 +58,7 @@ const CreateService = ({ navigation }) => {
 
     const [step, setstep] = useState(0);
     // repeate service modal state
+    const [hourlyRates, sethourlyRates] = useState('0');
     const [modalVisible, setModalVisible] = useState(true);
     const [repeateService, setrepeateService] = useState('One Time');
     // informationPopups state 
@@ -128,6 +129,10 @@ const CreateService = ({ navigation }) => {
         setPreviousSelectedProfessional(selectedProfessional);
         taxHandler();
     }, [hourlyRates, selectedHour, selectedProfessional, aditionalSelectedServices]);
+
+    useEffect(() => {
+        sethourlyRates(user.hourlyRate);
+    }, [user]);
 
     useEffect(() => {
         taxHandler();
@@ -488,7 +493,7 @@ const CreateService = ({ navigation }) => {
         }
         dispatch(createJob(data, navigation))
     }
-    
+
     const createServiceHandler = () => {
         const geoPoint = new firestore.GeoPoint(savedCords[0], savedCords[1]);
         let data = {
@@ -508,564 +513,639 @@ const CreateService = ({ navigation }) => {
         dispatch(createService(data, navigation))
     }
 
-
     return (
-        <View style={styles.container}>
-            <CustomHeader
-                title={isJobCreate ? t('createJob') : t('createService')}
-                isLeft={true}
-                leftPress={() => { backHandler() }}
-            />
+        (hourlyRates === 0 || hourlyRates === '' || hourlyRates === '0') ? (
+            <View style={styles.container} >
+                <CustomHeader
+                    title={isJobCreate ? t('createJob') : t('createService')}
+                    isLeft={true}
+                    leftPress={() => { backHandler() }}
+                />
+                <View style={[styles.body, { justifyContent: 'center', width: "70%" }]}>
+                    <Text style={[Typography.text_paragraph_1, styles.headingText, { textAlign: 'center' }]}>{t('pleaseSetYourHourlyRate')}</Text>
+                </View>
+            </View>
+        ) : (
+            <View style={styles.container} >
+                <CustomHeader
+                    title={isJobCreate ? t('createJob') : t('createService')}
+                    isLeft={true}
+                    leftPress={() => { backHandler() }}
+                />
 
-            {
-                user.role !== 'provider' && <RepeatService modalVisible={modalVisible} setModalVisible={(selected) => { setModalVisible(false); setrepeateService(selected) }} />
-            }
+                {
+                    user.role !== 'provider' && <RepeatService modalVisible={modalVisible} setModalVisible={(selected) => { setModalVisible(false); setrepeateService(selected) }} />
+                }
 
-            <InformationPopup modalVisible={informationPopup} setModalVisible={() => setinformationPopup(false)} info={1} />
-            <InformationPopup modalVisible={informationPopup1} setModalVisible={() => setinformationPopup1(false)} info={2} />
+                <InformationPopup modalVisible={informationPopup} setModalVisible={() => setinformationPopup(false)} info={1} />
+                <InformationPopup modalVisible={informationPopup1} setModalVisible={() => setinformationPopup1(false)} info={2} />
 
-            {
-                step === 0 &&
-                <ScrollView contentContainerStyle={{ justifyContent: 'center', alignItems: 'center', paddingBottom: 50 }} style={{ width: '100%', }}>
-                    <View style={{ width: '90%' }}>
-                        {
-                            isJobCreate &&
-                            <>
-                                <View style={styles.heading}>
-                                    <TouchableOpacity
-                                        onPress={() => { setinformationPopup(!informationPopup) }}
-                                        activeOpacity={.8}
-                                        style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: 10, }}
-                                    >
-                                        <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('howmanyhoursdoyou')}</Text>
-                                        <FontAwesome5 name="info-circle" style={{ fontSize: RFValue(18, screenResolution.screenHeight), color: colors.White_Primary_01, marginLeft: 5 }} />
-                                    </TouchableOpacity>
-                                </View>
-
-                                <ScrollView
-                                    horizontal={true}
-                                    showsHorizontalScrollIndicator={false}
-                                    style={styles.horizontalScroll}
-                                >
-                                    <HorizontalList selectedState={selectedHour} setselectedState={setselectedHour} title={'1'} />
-                                    <HorizontalList selectedState={selectedHour} setselectedState={setselectedHour} title={'2'} />
-                                    <HorizontalList selectedState={selectedHour} setselectedState={setselectedHour} title={'3'} />
-                                    <HorizontalList selectedState={selectedHour} setselectedState={setselectedHour} title={'4'} />
-                                    <HorizontalList selectedState={selectedHour} setselectedState={setselectedHour} title={'5'} />
-                                    <HorizontalList selectedState={selectedHour} setselectedState={setselectedHour} title={'6'} />
-                                    <HorizontalList selectedState={selectedHour} setselectedState={setselectedHour} title={'7'} />
-                                    <HorizontalList selectedState={selectedHour} setselectedState={setselectedHour} title={'8'} />
-                                </ScrollView>
-                                <View style={[styles.heading, { marginTop: 30 }]}>
-                                    <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('howmanyprofessional')}</Text>
-                                </View>
-                                <ScrollView
-                                    horizontal={true}
-                                    showsHorizontalScrollIndicator={false}
-                                    style={styles.horizontalScroll}
-                                >
-                                    <HorizontalList selectedState={selectedProfessional} setselectedState={setselectedProfessional} title={'1'} />
-                                    <HorizontalList selectedState={selectedProfessional} setselectedState={setselectedProfessional} title={'2'} />
-                                    <HorizontalList selectedState={selectedProfessional} setselectedState={setselectedProfessional} title={'3'} />
-                                    <HorizontalList selectedState={selectedProfessional} setselectedState={setselectedProfessional} title={'4'} />
-                                </ScrollView>
-                            </>
-                        }
-
-                        <View style={[styles.heading, { marginTop: 30, }]}>
-                            <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('selectCategory')}</Text>
-                            {
-                                isError && selectedCategories == '' && <Text style={{ top: 3, color: colors.Error_Red }}>*</Text>
-                            }
-                        </View>
-
-                        <View style={styles.listDropDown}>
-                            <Select
-                                bg={colors.white}
-                                borderWidth={0}
-                                selectedValue={selectedCategories}
-                                minWidth="100%"
-                                accessibilityLabel={t('selectCategory')}
-                                placeholder={t('selectCategory')}
-                                placeholderTextColor={colors.Neutral_01}
-                                _selectedItem={{
-                                    background: colors.Primary_01,
-                                }}
-                                color={colors.Neutral_01}
-                                mt={1}
-                                onValueChange={itemValue => categoryHandler(itemValue)}
-                            >
-                                {
-                                    allcategories.length && allcategories.map((category, index) => (
-                                        <Select.Item
-                                            key={index}
-                                            label={category.categoryName}
-                                            value={category.categoryName}
-                                        />
-                                    ))
-                                }
-                            </Select>
-                        </View>
-
-                        {
-                            selectedCategories != '' &&
-                            <>
-                                <View style={styles.heading}>
-                                    <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('subCategories')}</Text>
-                                    {
-                                        isError && selectedsubcategories == '' && <Text style={{ top: 3, color: colors.Error_Red }}>*</Text>
-                                    }
-                                </View>
-                                <View style={styles.listDropDown}>
-                                    <Select
-                                        bg={colors.white}
-                                        borderWidth={0}
-                                        selectedValue={selectedsubcategories}
-                                        minWidth="100%"
-                                        accessibilityLabel={t('subCategories')}
-                                        placeholder={t('subCategories')}
-                                        placeholderTextColor={colors.Neutral_01}
-                                        _selectedItem={{
-                                            background: colors.Primary_01,
-                                        }}
-                                        color={colors.Neutral_01}
-                                        mt={1}
-                                        onValueChange={itemValue => setselectedsubcategories(itemValue)}
-                                    >
-                                        {
-                                            subcategories.length && subcategories.map((category, index) => (
-                                                <Select.Item
-                                                    key={index}
-                                                    label={category}
-                                                    value={category}
-                                                />
-                                            ))
-                                        }
-                                    </Select>
-                                </View>
-                            </>
-                        }
-
-                        {
-                            isJobCreate && selectedCategories === CleaningAndHygineService &&
-                            <>
-                                <View style={styles.heading}>
-                                    <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('areaSize')}</Text>
-                                    {
-                                        isError && roomsize == '' && <Text style={{ top: 3, color: colors.Error_Red }}>*</Text>
-                                    }
-                                </View>
-                                <View style={styles.listDropDown}>
-                                    <Select
-                                        bg={colors.white}
-                                        borderWidth={0}
-                                        selectedValue={roomsize}
-                                        minWidth="100%"
-                                        accessibilityLabel="User"
-                                        placeholder={t('areaSize')}
-                                        placeholderTextColor={colors.Neutral_01}
-                                        _selectedItem={{
-                                            background: colors.Primary_01,
-                                        }}
-                                        color={colors.Neutral_01}
-                                        mt={1} onValueChange={itemValue => roomSizeHandler(itemValue)}
-                                    >
-                                        {
-                                            roomSizes.length && roomSizes.map((key, index) => (
-                                                <Select.Item
-                                                    key={index}
-                                                    label={key.title}
-                                                    value={key.title}
-                                                />
-                                            ))
-                                        }
-                                    </Select>
-                                </View>
-                            </>
-                        }
-
-                        {
-                            isJobCreate && selectedCategories === CleaningAndHygineService &&
-                            <>
-                                <View style={styles.heading}>
-                                    <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('roomsNumber')}</Text>
-                                    {
-                                        isError && roomsQty == '' && <Text style={{ top: 3, color: colors.Error_Red }}>*</Text>
-                                    }
-                                </View>
-                                <View style={styles.listDropDown}>
-                                    <Select
-                                        bg={colors.white}
-                                        borderWidth={0}
-                                        selectedValue={roomsQty}
-                                        minWidth="100%"
-                                        accessibilityLabel="User"
-                                        placeholder={t('roomsNumber')}
-                                        placeholderTextColor={colors.Neutral_01}
-                                        _selectedItem={{
-                                            background: colors.Primary_01,
-                                        }}
-                                        color={colors.Neutral_01}
-                                        mt={1} onValueChange={itemValue => roomQtyHandler(itemValue)}
-                                    >
-                                        {
-                                            noOfRooms.length && noOfRooms.map((key, index) => (
-                                                <Select.Item
-                                                    key={index}
-                                                    label={key.title}
-                                                    value={key.title}
-                                                />
-                                            ))
-                                        }
-                                    </Select>
-                                </View>
-                            </>
-                        }
-
-                        {
-                            isJobCreate && selectedCategories === CleaningAndHygineService &&
-                            <>
-                                <TouchableOpacity
-                                    onPress={() => { setinformationPopup1(!informationPopup1) }}
-                                    activeOpacity={.8}
-                                    style={{ flexDirection: 'row', marginTop: 30, }}
-                                >
-                                    <Text style={[Typography.text_paragraph_1, styles.headingText, {}]}>{t('needCleaningMaterials')}</Text>
-                                    <FontAwesome5 name="info-circle" style={{ fontSize: RFValue(18, screenResolution.screenHeight), color: colors.White_Primary_01, marginLeft: 5 }} />
-                                </TouchableOpacity>
-
-                                <View style={{ width: '100%', flexDirection: 'row', marginTop: 20 }}>
-                                    <BookingStatusTab selectedState={needCleaningMaterials} setselectedState={(e) => cleaningMaterialHandler(e)} title={t('noIhavethem')} />
-                                    <BookingStatusTab selectedState={needCleaningMaterials} setselectedState={(e) => cleaningMaterialHandler(e)} title={t('yesPlease')} />
-                                </View>
-                            </>
-                        }
-
-                        {
-                            isJobCreate && selectedCategories === CleaningAndHygineService &&
-                            <AdditionalServices onSelectedServicesChange={(e) => { additionalServicesHandler(e) }} selectedService={aditionalSelectedServices} />
-                        }
-
-                    </View>
-                </ScrollView>
-            }
-
-            {
-                step === 1 &&
-                <ScrollView contentContainerStyle={{ justifyContent: 'center', alignItems: 'center', paddingBottom: 50 }} style={{ width: '100%', }}>
-                    {
-                        !isJobCreate &&
+                {
+                    step === 0 &&
+                    <ScrollView contentContainerStyle={{ justifyContent: 'center', alignItems: 'center', paddingBottom: 50 }} style={{ width: '100%', }}>
                         <View style={{ width: '90%' }}>
-                            <View style={styles.heading}>
-                                <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('adfixedrate')}</Text>
+                            {
+                                isJobCreate &&
+                                <>
+                                    <View style={styles.heading}>
+                                        <TouchableOpacity
+                                            onPress={() => { setinformationPopup(!informationPopup) }}
+                                            activeOpacity={.8}
+                                            style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: 10, }}
+                                        >
+                                            <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('howmanyhoursdoyou')}</Text>
+                                            <FontAwesome5 name="info-circle" style={{ fontSize: RFValue(18, screenResolution.screenHeight), color: colors.White_Primary_01, marginLeft: 5 }} />
+                                        </TouchableOpacity>
+                                    </View>
+
+                                    <ScrollView
+                                        horizontal={true}
+                                        showsHorizontalScrollIndicator={false}
+                                        style={styles.horizontalScroll}
+                                    >
+                                        <HorizontalList selectedState={selectedHour} setselectedState={setselectedHour} title={'1'} />
+                                        <HorizontalList selectedState={selectedHour} setselectedState={setselectedHour} title={'2'} />
+                                        <HorizontalList selectedState={selectedHour} setselectedState={setselectedHour} title={'3'} />
+                                        <HorizontalList selectedState={selectedHour} setselectedState={setselectedHour} title={'4'} />
+                                        <HorizontalList selectedState={selectedHour} setselectedState={setselectedHour} title={'5'} />
+                                        <HorizontalList selectedState={selectedHour} setselectedState={setselectedHour} title={'6'} />
+                                        <HorizontalList selectedState={selectedHour} setselectedState={setselectedHour} title={'7'} />
+                                        <HorizontalList selectedState={selectedHour} setselectedState={setselectedHour} title={'8'} />
+                                    </ScrollView>
+                                    <View style={[styles.heading, { marginTop: 30 }]}>
+                                        <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('howmanyprofessional')}</Text>
+                                    </View>
+                                    <ScrollView
+                                        horizontal={true}
+                                        showsHorizontalScrollIndicator={false}
+                                        style={styles.horizontalScroll}
+                                    >
+                                        <HorizontalList selectedState={selectedProfessional} setselectedState={setselectedProfessional} title={'1'} />
+                                        <HorizontalList selectedState={selectedProfessional} setselectedState={setselectedProfessional} title={'2'} />
+                                        <HorizontalList selectedState={selectedProfessional} setselectedState={setselectedProfessional} title={'3'} />
+                                        <HorizontalList selectedState={selectedProfessional} setselectedState={setselectedProfessional} title={'4'} />
+                                    </ScrollView>
+                                </>
+                            }
+
+                            <View style={[styles.heading, { marginTop: 30, }]}>
+                                <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('selectCategory')}</Text>
                                 {
-                                    isError && totalPrice == '0' && <Text style={{ top: 3, color: colors.Error_Red }}>*</Text>
+                                    isError && selectedCategories == '' && <Text style={{ top: 3, color: colors.Error_Red }}>*</Text>
                                 }
                             </View>
+
                             <View style={styles.listDropDown}>
                                 <Select
                                     bg={colors.white}
                                     borderWidth={0}
-                                    selectedValue={totalPrice}
+                                    selectedValue={selectedCategories}
                                     minWidth="100%"
-                                    accessibilityLabel="User"
-                                    placeholder={t('adfixedrate')}
+                                    accessibilityLabel={t('selectCategory')}
+                                    placeholder={t('selectCategory')}
                                     placeholderTextColor={colors.Neutral_01}
                                     _selectedItem={{
                                         background: colors.Primary_01,
                                     }}
                                     color={colors.Neutral_01}
-                                    mt={1} onValueChange={itemValue => settotalPrice(itemValue)}
+                                    mt={1}
+                                    onValueChange={itemValue => categoryHandler(itemValue)}
                                 >
                                     {
-                                        fixRates.length && fixRates.map((key, index) => (
+                                        allcategories.length && allcategories.map((category, index) => (
                                             <Select.Item
                                                 key={index}
-                                                label={key.rate + ' Euro'}
-                                                value={key.rate}
+                                                label={category.categoryName}
+                                                value={category.categoryName}
                                             />
                                         ))
                                     }
                                 </Select>
                             </View>
-                        </View>
-                    }
 
-                    {
-                        !isJobCreate &&
-                        <View style={{ width: '90%' }}>
-                            <View style={styles.heading}>
-                                <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('description')}</Text>
-                            </View>
-                            <View style={styles.textAreaContainer}>
-                                <TextInput
-                                    keyboardType="default"
-                                    style={{ height: '100%', width: '100%', textAlignVertical: 'top', color: colors.black }}
-                                    value={description}
-                                    onChangeText={(e) => { setdescription(e) }}
-                                    placeholder={t('description')}
-                                    placeholderTextColor={colors.Neutral_01}
-                                    multiline={true}
-                                />
-                            </View>
-                        </View>
-                    }
-
-                    <View style={{ width: '90%', marginTop: 20, flexDirection: 'row', justifyContent: 'space-between' }}>
-                        <TouchableOpacity
-                            activeOpacity={.8}
-                            style={{ flexDirection: 'row', }}
-                        >
-                            <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('photos')}</Text>
                             {
-                                isError && productImages[0].imagURL === '' && <Text style={{ top: 3, color: colors.Error_Red }}>*</Text>
+                                selectedCategories != '' &&
+                                <>
+                                    <View style={styles.heading}>
+                                        <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('subCategories')}</Text>
+                                        {
+                                            isError && selectedsubcategories == '' && <Text style={{ top: 3, color: colors.Error_Red }}>*</Text>
+                                        }
+                                    </View>
+                                    <View style={styles.listDropDown}>
+                                        <Select
+                                            bg={colors.white}
+                                            borderWidth={0}
+                                            selectedValue={selectedsubcategories}
+                                            minWidth="100%"
+                                            accessibilityLabel={t('subCategories')}
+                                            placeholder={t('subCategories')}
+                                            placeholderTextColor={colors.Neutral_01}
+                                            _selectedItem={{
+                                                background: colors.Primary_01,
+                                            }}
+                                            color={colors.Neutral_01}
+                                            mt={1}
+                                            onValueChange={itemValue => setselectedsubcategories(itemValue)}
+                                        >
+                                            {
+                                                subcategories.length && subcategories.map((category, index) => (
+                                                    <Select.Item
+                                                        key={index}
+                                                        label={category}
+                                                        value={category}
+                                                    />
+                                                ))
+                                            }
+                                        </Select>
+                                    </View>
+                                </>
                             }
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            // onPress={pickImages}
-                            style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}
-                            activeOpacity={.8}
-                        >
-                            <Ionicons color={colors.White_Primary_01} name={'add-circle-outline'} size={22} style={{ top: 2, marginRight: 5 }} />
 
-                            <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('photos')}</Text>
-                        </TouchableOpacity>
+                            {
+                                isJobCreate && selectedCategories === CleaningAndHygineService &&
+                                <>
+                                    <View style={styles.heading}>
+                                        <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('areaSize')}</Text>
+                                        {
+                                            isError && roomsize == '' && <Text style={{ top: 3, color: colors.Error_Red }}>*</Text>
+                                        }
+                                    </View>
+                                    <View style={styles.listDropDown}>
+                                        <Select
+                                            bg={colors.white}
+                                            borderWidth={0}
+                                            selectedValue={roomsize}
+                                            minWidth="100%"
+                                            accessibilityLabel="User"
+                                            placeholder={t('areaSize')}
+                                            placeholderTextColor={colors.Neutral_01}
+                                            _selectedItem={{
+                                                background: colors.Primary_01,
+                                            }}
+                                            color={colors.Neutral_01}
+                                            mt={1} onValueChange={itemValue => roomSizeHandler(itemValue)}
+                                        >
+                                            {
+                                                roomSizes.length && roomSizes.map((key, index) => (
+                                                    <Select.Item
+                                                        key={index}
+                                                        label={key.title}
+                                                        value={key.title}
+                                                    />
+                                                ))
+                                            }
+                                        </Select>
+                                    </View>
+                                </>
+                            }
 
-                    </View>
+                            {
+                                isJobCreate && selectedCategories === CleaningAndHygineService &&
+                                <>
+                                    <View style={styles.heading}>
+                                        <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('roomsNumber')}</Text>
+                                        {
+                                            isError && roomsQty == '' && <Text style={{ top: 3, color: colors.Error_Red }}>*</Text>
+                                        }
+                                    </View>
+                                    <View style={styles.listDropDown}>
+                                        <Select
+                                            bg={colors.white}
+                                            borderWidth={0}
+                                            selectedValue={roomsQty}
+                                            minWidth="100%"
+                                            accessibilityLabel="User"
+                                            placeholder={t('roomsNumber')}
+                                            placeholderTextColor={colors.Neutral_01}
+                                            _selectedItem={{
+                                                background: colors.Primary_01,
+                                            }}
+                                            color={colors.Neutral_01}
+                                            mt={1} onValueChange={itemValue => roomQtyHandler(itemValue)}
+                                        >
+                                            {
+                                                noOfRooms.length && noOfRooms.map((key, index) => (
+                                                    <Select.Item
+                                                        key={index}
+                                                        label={key.title}
+                                                        value={key.title}
+                                                    />
+                                                ))
+                                            }
+                                        </Select>
+                                    </View>
+                                </>
+                            }
 
-                    <View style={{ width: '90%' }}>
-                        <FlatList
-                            data={productImages}
-                            numColumns={3}
-                            contentContainerStyle={{}}
-                            columnWrapperStyle={styles.columnWrapperStyle}
-                            renderItem={({ item, index }) => (
-                                <View style={styles.imageContainer}>
+                            {
+                                isJobCreate && selectedCategories === CleaningAndHygineService &&
+                                <>
+                                    <TouchableOpacity
+                                        onPress={() => { setinformationPopup1(!informationPopup1) }}
+                                        activeOpacity={.8}
+                                        style={{ flexDirection: 'row', marginTop: 30, }}
+                                    >
+                                        <Text style={[Typography.text_paragraph_1, styles.headingText, {}]}>{t('needCleaningMaterials')}</Text>
+                                        <FontAwesome5 name="info-circle" style={{ fontSize: RFValue(18, screenResolution.screenHeight), color: colors.White_Primary_01, marginLeft: 5 }} />
+                                    </TouchableOpacity>
+
+                                    <View style={{ width: '100%', flexDirection: 'row', marginTop: 20 }}>
+                                        <BookingStatusTab selectedState={needCleaningMaterials} setselectedState={(e) => cleaningMaterialHandler(e)} title={t('noIhavethem')} />
+                                        <BookingStatusTab selectedState={needCleaningMaterials} setselectedState={(e) => cleaningMaterialHandler(e)} title={t('yesPlease')} />
+                                    </View>
+                                </>
+                            }
+
+                            {
+                                isJobCreate && selectedCategories === CleaningAndHygineService &&
+                                <AdditionalServices onSelectedServicesChange={(e) => { additionalServicesHandler(e) }} selectedService={aditionalSelectedServices} />
+                            }
+
+                        </View>
+                    </ScrollView>
+                }
+
+                {
+                    step === 1 &&
+                    <ScrollView contentContainerStyle={{ justifyContent: 'center', alignItems: 'center', paddingBottom: 50 }} style={{ width: '100%', }}>
+                        {
+                            !isJobCreate &&
+                            <View style={{ width: '90%' }}>
+                                <View style={styles.heading}>
+                                    <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('adfixedrate')}</Text>
                                     {
-                                        item?.imagURL ? (
-                                            <>
-                                                <Image source={{ uri: item?.imagURL }} style={{ height: '100%', width: '100%' }} />
-                                                <TouchableOpacity onPress={async () => { crossImage(index) }}
-                                                    style={{ width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center', position: 'absolute', }}>
-                                                    <Entypo color={colors.White_Primary_01} name={'cross'} size={30} />
-                                                </TouchableOpacity>
-                                            </>
-                                        ) : (
-                                            (isLoader === true) ? (
-                                                <ActivityIndicator color={'#000000'} />
-                                            ) : (
-                                                <TouchableOpacity
-                                                    onPress={async () => { await pickImage(index) }}
-                                                >
-                                                    <AntDesign color={colors.White_Primary_01} name={'plus'} size={30} />
-                                                </TouchableOpacity>
-                                            )
-                                        )
+                                        isError && totalPrice == '0' && <Text style={{ top: 3, color: colors.Error_Red }}>*</Text>
                                     }
                                 </View>
-                            )}
-                            keyExtractor={(item, index) => index.toString()}
-                        />
-                        <View style={styles.list}>
-                            <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{t('location')}</Text>
-                            <View style={{ height: 250, width: '100%', marginTop: 10, overflow: 'hidden' }}>
-                                <SmallMap savedCords={savedCords} />
+                                <View style={styles.listDropDown}>
+                                    <Select
+                                        bg={colors.white}
+                                        borderWidth={0}
+                                        selectedValue={totalPrice}
+                                        minWidth="100%"
+                                        accessibilityLabel="User"
+                                        placeholder={t('adfixedrate')}
+                                        placeholderTextColor={colors.Neutral_01}
+                                        _selectedItem={{
+                                            background: colors.Primary_01,
+                                        }}
+                                        color={colors.Neutral_01}
+                                        mt={1} onValueChange={itemValue => settotalPrice(itemValue)}
+                                    >
+                                        {
+                                            fixRates.length && fixRates.map((key, index) => (
+                                                <Select.Item
+                                                    key={index}
+                                                    label={key.rate + ' Euro'}
+                                                    value={key.rate}
+                                                />
+                                            ))
+                                        }
+                                    </Select>
+                                </View>
                             </View>
-                        </View>
-                    </View>
-                </ScrollView>
-            }
+                        }
 
-            {
-                step === 2 &&
-                <View style={styles.body}>
-                    {
-                        !isJobCreate &&
+                        {
+                            !isJobCreate &&
+                            <View style={{ width: '90%' }}>
+                                <View style={styles.heading}>
+                                    <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('description')}</Text>
+                                </View>
+                                <View style={styles.textAreaContainer}>
+                                    <TextInput
+                                        keyboardType="default"
+                                        style={{ height: '100%', width: '100%', textAlignVertical: 'top', color: colors.black }}
+                                        value={description}
+                                        onChangeText={(e) => { setdescription(e) }}
+                                        placeholder={t('description')}
+                                        placeholderTextColor={colors.Neutral_01}
+                                        multiline={true}
+                                    />
+                                </View>
+                            </View>
+                        }
+
+                        <View style={{ width: '90%', marginTop: 20, flexDirection: 'row', justifyContent: 'space-between' }}>
+                            <TouchableOpacity
+                                activeOpacity={.8}
+                                style={{ flexDirection: 'row', }}
+                            >
+                                <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('photos')}</Text>
+                                {
+                                    isError && productImages[0].imagURL === '' && <Text style={{ top: 3, color: colors.Error_Red }}>*</Text>
+                                }
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                // onPress={pickImages}
+                                style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}
+                                activeOpacity={.8}
+                            >
+                                <Ionicons color={colors.White_Primary_01} name={'add-circle-outline'} size={22} style={{ top: 2, marginRight: 5 }} />
+
+                                <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('photos')}</Text>
+                            </TouchableOpacity>
+
+                        </View>
+
                         <View style={{ width: '90%' }}>
-                            <WeekTimeSelector
-                                theme={theme}
-                                colors={colors}
-                                selectedDays={selectedDays}
-                                onSelectedDaysChange={handleSelectedDaysChange}
+                            <FlatList
+                                data={productImages}
+                                numColumns={3}
+                                contentContainerStyle={{}}
+                                columnWrapperStyle={styles.columnWrapperStyle}
+                                renderItem={({ item, index }) => (
+                                    <View style={styles.imageContainer}>
+                                        {
+                                            item?.imagURL ? (
+                                                <>
+                                                    <Image source={{ uri: item?.imagURL }} style={{ height: '100%', width: '100%' }} />
+                                                    <TouchableOpacity onPress={async () => { crossImage(index) }}
+                                                        style={{ width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center', position: 'absolute', }}>
+                                                        <Entypo color={colors.White_Primary_01} name={'cross'} size={30} />
+                                                    </TouchableOpacity>
+                                                </>
+                                            ) : (
+                                                (isLoader === true) ? (
+                                                    <ActivityIndicator color={'#000000'} />
+                                                ) : (
+                                                    <TouchableOpacity
+                                                        onPress={async () => { await pickImage(index) }}
+                                                    >
+                                                        <AntDesign color={colors.White_Primary_01} name={'plus'} size={30} />
+                                                    </TouchableOpacity>
+                                                )
+                                            )
+                                        }
+                                    </View>
+                                )}
+                                keyExtractor={(item, index) => index.toString()}
                             />
-                        </View>
-                    }
-
-                    {
-                        isJobCreate &&
-                        <View style={{ width: '90%', }}>
-                            {/* Heading */}
-                            <View style={styles.heading}>
-                                <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('whenwouldyoulike')}</Text>
-                            </View>
-
-                            {/* Date Section */}
-                            <View style={{ width: '100%', marginTop: 10 }}>
-                                <View style={{ flexDirection: 'row' }}>
-                                    <Text style={[styles.fieldHeading, { color: colors.Neutral_01 }]}>{t('selectDate')}</Text>
-                                    {isError && !dateSelected && <Text style={{ top: 3, color: "red", top: -1 }}>*</Text>}
-                                </View>
-
-                                <View style={styles.list1}>
-                                    <View style={styles.dob}>
-                                        {/* Date Picker */}
-                                        <TouchableOpacity onPress={() => { setopenBs(true) }}  >
-                                            {!showBs && <Text style={[styles.listText, { marginLeft: 10, color: colors.Neutral_01 }]}>{t('selectDate')}</Text>}
-                                            {showBs && <Text style={[styles.listText, { marginLeft: 10, color: colors.black }]}>{moment(date).format('DD MM YYYY')}</Text>}
-                                        </TouchableOpacity>
-
-                                        <DatePicker
-                                            minimumDate={new Date()}
-                                            mode='date'
-                                            modal
-                                            open={openBs}
-                                            date={date}
-                                            onConfirm={(date) => {
-                                                setopenBs(false);
-                                                setDate(date);
-                                                setshowBs(true);
-                                                setDateSelected(true);
-                                            }}
-                                            onCancel={() => {
-                                                setopenBs(false);
-                                                setshowBs(false);
-                                            }}
-                                        />
-
-                                        {/* Date Icon */}
-                                        <TouchableOpacity onPress={() => { setopenBs(true) }}>
-                                            <Fontisto name="date" style={styles.listIcon} />
-                                        </TouchableOpacity>
-                                    </View>
-                                </View>
-                            </View>
-
-                            {/* Time Section start*/}
-                            <View style={{ width: '100%', marginTop: 10 }}>
-                                <View style={{ flexDirection: 'row' }}>
-                                    <Text style={[styles.fieldHeading, { color: colors.Neutral_01 }]}>{t('selectTimeStart')}</Text>
-                                    {isError && !timeStartSelected && <Text style={{ top: 3, color: "red", top: -1 }}>*</Text>}
-                                </View>
-                                <View style={styles.list1}>
-                                    <View style={styles.dob}>
-                                        {/* Date Picker */}
-                                        <TouchableOpacity onPress={() => { settimeStartOpen(true) }}  >
-                                            {!timeStartShow && <Text style={[styles.listText, { marginLeft: 10, color: colors.Neutral_01 }]}>{t('selectTime')}</Text>}
-                                            {timeStartShow && <Text style={[styles.listText, { marginLeft: 10, color: colors.black }]}>{moment(timeStart).format('LT')}</Text>}
-                                        </TouchableOpacity>
-                                        <DatePicker
-                                            // minimumDate={new Date()}
-                                            mode='time'
-                                            modal
-                                            open={timeStartOpen}
-                                            date={timeStart}
-                                            onConfirm={(date) => {
-                                                settimeStart(date);
-                                                settimeStartOpen(false);
-                                                settimeStartShow(true);
-                                                settimeStartSelected(true);
-                                            }}
-                                            onCancel={() => {
-                                                settimeStartOpen(false);
-                                                settimeStartShow(false);
-                                            }}
-                                        />
-                                        {/* Date Icon */}
-                                        <TouchableOpacity onPress={() => { settimeStartOpen(true) }}>
-                                            <Fontisto name="date" style={styles.listIcon} />
-                                        </TouchableOpacity>
-                                    </View>
-                                </View>
-                            </View>
-
-                            {/* Time Section end */}
-                            <View style={{ width: '100%', marginTop: 10 }}>
-                                <View style={{ flexDirection: 'row' }}>
-                                    <Text style={[styles.fieldHeading, { color: colors.Neutral_01 }]}>{t('selectTimeEnd')}</Text>
-                                    {isError && !timeEndSelected && <Text style={{ top: 3, color: "red", top: -1 }}>*</Text>}
-                                </View>
-                                <View style={styles.list1}>
-                                    <View style={styles.dob}>
-                                        {/* Date Picker */}
-                                        <TouchableOpacity onPress={() => { settimeEndOpen(true) }}  >
-                                            {!timeEndShow && <Text style={[styles.listText, { marginLeft: 10, color: colors.Neutral_01 }]}>{t('selectTime')}</Text>}
-                                            {timeEndShow && <Text style={[styles.listText, { marginLeft: 10, color: colors.black }]}>{moment(timeEnd).format('LT')}</Text>}
-                                        </TouchableOpacity>
-                                        <DatePicker
-                                            // minimumDate={new Date()}
-                                            mode='time'
-                                            modal
-                                            open={timeEndOpen}
-                                            date={timeEnd}
-                                            onConfirm={(date) => {
-                                                settimeEnd(date);
-                                                settimeEndOpen(false);
-                                                settimeEndShow(true);
-                                                settimeEndSelected(true);
-                                            }}
-                                            onCancel={() => {
-                                                settimeEndOpen(false);
-                                                settimeEndShow(false);
-                                            }}
-                                        />
-                                        {/* Date Icon */}
-                                        <TouchableOpacity onPress={() => { settimeEndOpen(true) }}>
-                                            <Fontisto name="date" style={styles.listIcon} />
-                                        </TouchableOpacity>
-                                    </View>
+                            <View style={styles.list}>
+                                <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{t('location')}</Text>
+                                <View style={{ height: 250, width: '100%', marginTop: 10, overflow: 'hidden' }}>
+                                    <SmallMap savedCords={savedCords} />
                                 </View>
                             </View>
                         </View>
-                    }
-                </View>
-            }
+                    </ScrollView>
+                }
 
-            {
-                step === 3 &&
-                <View style={styles.body}>
-                    {
-                        isJobCreate &&
-                        <View style={{ width: '90%', }}>
-                            <View style={styles.heading}>
-                                <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('location')}</Text>
-                                {
-                                    isError && location == '' && <Text style={{ top: 3, color: colors.Error_Red }}>*</Text>
-                                }
-                            </View>
-                            <View style={styles.inputContiner}>
-                                <TextInput
-                                    keyboardType='number-pad'
-                                    style={{ color: colors.black }}
-                                    value={location}
-                                    onChangeText={(e) => { setlocation(e) }}
-                                    placeholder={t('location')}
-                                    placeholderTextColor={colors.Neutral_01}
-                                />
-                                <Feather name="map-pin" style={styles.listIcon} />
-                            </View>
-                            <View style={styles.heading}>
-                                <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('anyspecificinstruction')}</Text>
-                                {
-                                    isError && instructions == '' && <Text style={{ top: 3, color: colors.Error_Red }}>*</Text>
-                                }
-                            </View>
-                            <View style={styles.textAreaContainer}>
-                                <TextInput
-                                    keyboardType="default"
-                                    style={{ height: '100%', width: '100%', textAlignVertical: 'top', color: colors.black }}
-                                    value={instructions}
-                                    onChangeText={(e) => { setinstructions(e) }}
-                                    placeholder={t('yourtext')}
-                                    placeholderTextColor={colors.Neutral_01}
-                                    multiline={true}
+                {
+                    step === 2 &&
+                    <View style={styles.body}>
+                        {
+                            !isJobCreate &&
+                            <View style={{ width: '90%' }}>
+                                <WeekTimeSelector
+                                    theme={theme}
+                                    colors={colors}
+                                    selectedDays={selectedDays}
+                                    onSelectedDaysChange={handleSelectedDaysChange}
                                 />
                             </View>
-                        </View>
-                    }
+                        }
 
-                    {
-                        !isJobCreate &&
-                        <ScrollView contentContainerStyle={{ justifyContent: 'center', alignItems: 'center', paddingBottom: 50 }} style={{ width: '100%', }}>
+                        {
+                            isJobCreate &&
+                            <View style={{ width: '90%', }}>
+                                {/* Heading */}
+                                <View style={styles.heading}>
+                                    <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('whenwouldyoulike')}</Text>
+                                </View>
+
+                                {/* Date Section */}
+                                <View style={{ width: '100%', marginTop: 10 }}>
+                                    <View style={{ flexDirection: 'row' }}>
+                                        <Text style={[styles.fieldHeading, { color: colors.Neutral_01 }]}>{t('selectDate')}</Text>
+                                        {isError && !dateSelected && <Text style={{ top: 3, color: "red", top: -1 }}>*</Text>}
+                                    </View>
+
+                                    <View style={styles.list1}>
+                                        <View style={styles.dob}>
+                                            {/* Date Picker */}
+                                            <TouchableOpacity onPress={() => { setopenBs(true) }}  >
+                                                {!showBs && <Text style={[styles.listText, { marginLeft: 10, color: colors.Neutral_01 }]}>{t('selectDate')}</Text>}
+                                                {showBs && <Text style={[styles.listText, { marginLeft: 10, color: colors.black }]}>{moment(date).format('DD MM YYYY')}</Text>}
+                                            </TouchableOpacity>
+
+                                            <DatePicker
+                                                minimumDate={new Date()}
+                                                mode='date'
+                                                modal
+                                                open={openBs}
+                                                date={date}
+                                                onConfirm={(date) => {
+                                                    setopenBs(false);
+                                                    setDate(date);
+                                                    setshowBs(true);
+                                                    setDateSelected(true);
+                                                }}
+                                                onCancel={() => {
+                                                    setopenBs(false);
+                                                    setshowBs(false);
+                                                }}
+                                            />
+
+                                            {/* Date Icon */}
+                                            <TouchableOpacity onPress={() => { setopenBs(true) }}>
+                                                <Fontisto name="date" style={styles.listIcon} />
+                                            </TouchableOpacity>
+                                        </View>
+                                    </View>
+                                </View>
+
+                                {/* Time Section start*/}
+                                <View style={{ width: '100%', marginTop: 10 }}>
+                                    <View style={{ flexDirection: 'row' }}>
+                                        <Text style={[styles.fieldHeading, { color: colors.Neutral_01 }]}>{t('selectTimeStart')}</Text>
+                                        {isError && !timeStartSelected && <Text style={{ top: 3, color: "red", top: -1 }}>*</Text>}
+                                    </View>
+                                    <View style={styles.list1}>
+                                        <View style={styles.dob}>
+                                            {/* Date Picker */}
+                                            <TouchableOpacity onPress={() => { settimeStartOpen(true) }}  >
+                                                {!timeStartShow && <Text style={[styles.listText, { marginLeft: 10, color: colors.Neutral_01 }]}>{t('selectTime')}</Text>}
+                                                {timeStartShow && <Text style={[styles.listText, { marginLeft: 10, color: colors.black }]}>{moment(timeStart).format('LT')}</Text>}
+                                            </TouchableOpacity>
+                                            <DatePicker
+                                                // minimumDate={new Date()}
+                                                mode='time'
+                                                modal
+                                                open={timeStartOpen}
+                                                date={timeStart}
+                                                onConfirm={(date) => {
+                                                    settimeStart(date);
+                                                    settimeStartOpen(false);
+                                                    settimeStartShow(true);
+                                                    settimeStartSelected(true);
+                                                }}
+                                                onCancel={() => {
+                                                    settimeStartOpen(false);
+                                                    settimeStartShow(false);
+                                                }}
+                                            />
+                                            {/* Date Icon */}
+                                            <TouchableOpacity onPress={() => { settimeStartOpen(true) }}>
+                                                <Fontisto name="date" style={styles.listIcon} />
+                                            </TouchableOpacity>
+                                        </View>
+                                    </View>
+                                </View>
+
+                                {/* Time Section end */}
+                                <View style={{ width: '100%', marginTop: 10 }}>
+                                    <View style={{ flexDirection: 'row' }}>
+                                        <Text style={[styles.fieldHeading, { color: colors.Neutral_01 }]}>{t('selectTimeEnd')}</Text>
+                                        {isError && !timeEndSelected && <Text style={{ top: 3, color: "red", top: -1 }}>*</Text>}
+                                    </View>
+                                    <View style={styles.list1}>
+                                        <View style={styles.dob}>
+                                            {/* Date Picker */}
+                                            <TouchableOpacity onPress={() => { settimeEndOpen(true) }}  >
+                                                {!timeEndShow && <Text style={[styles.listText, { marginLeft: 10, color: colors.Neutral_01 }]}>{t('selectTime')}</Text>}
+                                                {timeEndShow && <Text style={[styles.listText, { marginLeft: 10, color: colors.black }]}>{moment(timeEnd).format('LT')}</Text>}
+                                            </TouchableOpacity>
+                                            <DatePicker
+                                                // minimumDate={new Date()}
+                                                mode='time'
+                                                modal
+                                                open={timeEndOpen}
+                                                date={timeEnd}
+                                                onConfirm={(date) => {
+                                                    settimeEnd(date);
+                                                    settimeEndOpen(false);
+                                                    settimeEndShow(true);
+                                                    settimeEndSelected(true);
+                                                }}
+                                                onCancel={() => {
+                                                    settimeEndOpen(false);
+                                                    settimeEndShow(false);
+                                                }}
+                                            />
+                                            {/* Date Icon */}
+                                            <TouchableOpacity onPress={() => { settimeEndOpen(true) }}>
+                                                <Fontisto name="date" style={styles.listIcon} />
+                                            </TouchableOpacity>
+                                        </View>
+                                    </View>
+                                </View>
+                            </View>
+                        }
+                    </View>
+                }
+
+                {
+                    step === 3 &&
+                    <View style={styles.body}>
+                        {
+                            isJobCreate &&
+                            <View style={{ width: '90%', }}>
+                                <View style={styles.heading}>
+                                    <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('location')}</Text>
+                                    {
+                                        isError && location == '' && <Text style={{ top: 3, color: colors.Error_Red }}>*</Text>
+                                    }
+                                </View>
+                                <View style={styles.inputContiner}>
+                                    <TextInput
+                                        keyboardType='number-pad'
+                                        style={{ color: colors.black }}
+                                        value={location}
+                                        onChangeText={(e) => { setlocation(e) }}
+                                        placeholder={t('location')}
+                                        placeholderTextColor={colors.Neutral_01}
+                                    />
+                                    <Feather name="map-pin" style={styles.listIcon} />
+                                </View>
+                                <View style={styles.heading}>
+                                    <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('anyspecificinstruction')}</Text>
+                                    {
+                                        isError && instructions == '' && <Text style={{ top: 3, color: colors.Error_Red }}>*</Text>
+                                    }
+                                </View>
+                                <View style={styles.textAreaContainer}>
+                                    <TextInput
+                                        keyboardType="default"
+                                        style={{ height: '100%', width: '100%', textAlignVertical: 'top', color: colors.black }}
+                                        value={instructions}
+                                        onChangeText={(e) => { setinstructions(e) }}
+                                        placeholder={t('yourtext')}
+                                        placeholderTextColor={colors.Neutral_01}
+                                        multiline={true}
+                                    />
+                                </View>
+                            </View>
+                        }
+
+                        {
+                            !isJobCreate &&
+                            <ScrollView contentContainerStyle={{ justifyContent: 'center', alignItems: 'center', paddingBottom: 50 }} style={{ width: '100%', }}>
+                                <View style={{ width: '90%', }}>
+
+                                    <View style={[styles.heading, { marginTop: 20 }]}>
+                                        <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('service') + ' '}</Text>
+                                        <Text style={[Typography.text_paragraph_1, styles.editText]}>{selectedCategories + ' / ' + selectedsubcategories}</Text>
+                                    </View>
+
+                                    <View style={[styles.heading, { marginTop: 20 }]}>
+                                        <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('description') + ' '}</Text>
+                                        <Text style={[Typography.text_paragraph_1, styles.editText]}>{description}</Text>
+                                    </View>
+
+                                    <View style={[styles.heading, { marginTop: 20 }]}>
+                                        <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('price') + ' '}</Text>
+                                        <Text style={[Typography.text_paragraph_1, styles.editText]}>{'€' + totalPrice}</Text>
+                                    </View>
+
+                                    <View style={[styles.list2, { flexDirection: 'column' }]}>
+                                        <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{t('availability')}</Text>
+                                        {
+                                            selectedDays.length > 0 && selectedDays.map((key, index) => {
+                                                return (
+                                                    <View key={index} style={{ alignItems: 'flex-start' }}>
+                                                        <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, marginTop: 5 }]}>{key.day}</Text>
+                                                        <Text style={[Typography.text_paragraph_1, { color: colors.White_Primary_01, }]}>{formatTime(key.openingTime) + ' to ' + formatTime(key.closingTime)}</Text>
+                                                    </View>
+                                                )
+                                            })
+                                        }
+                                    </View>
+
+                                    <View style={styles.taxContainer}>
+                                        <Text style={[Typography.text_CTA1, { color: colors.black, }]}>{t('pay') + ':'}</Text>
+
+                                        <View style={styles.taxContainer_C1}>
+                                            <Text style={[Typography.text_CTA1, { color: colors.Neutral_01, }]}>{t('amount')}</Text>
+                                            <Text style={[Typography.text_CTA1, { color: colors.black, }]}>{'€' + totalPrice}</Text>
+                                        </View>
+                                        {
+                                            taxes.map((key, index) => {
+                                                return (
+                                                    <View key={index} style={styles.taxContainer_C1}>
+                                                        <Text style={[Typography.text_CTA1, { color: colors.Neutral_01, }]}>{key.name + ' ' + key.percentage + '%'}</Text>
+                                                        <Text style={[Typography.text_CTA1, { color: colors.black, }]}>{'€' + Number(totalPrice / 100 * key.percentage).toFixed(1)}</Text>
+                                                    </View>
+                                                )
+                                            })
+                                        }
+                                        <View style={styles.taxContainer_C1}>
+                                            <Text style={[Typography.text_CTA1, { color: colors.Neutral_01, }]}>{t('total')}</Text>
+                                            <Text style={[Typography.text_CTA1, { color: colors.black, }]}>{'€' + totalPriceWithTax.toFixed(1)}</Text>
+                                        </View>
+                                    </View>
+                                </View>
+                            </ScrollView>
+                        }
+                    </View>
+                }
+
+                {
+                    step === 4 &&
+                    <ScrollView contentContainerStyle={{ justifyContent: 'center', alignItems: 'center', paddingBottom: 50 }} style={{ width: '100%', }}>
+                        {
+                            isJobCreate &&
                             <View style={{ width: '90%', }}>
 
                                 <View style={[styles.heading, { marginTop: 20 }]}>
@@ -1075,28 +1155,68 @@ const CreateService = ({ navigation }) => {
 
                                 <View style={[styles.heading, { marginTop: 20 }]}>
                                     <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('description') + ' '}</Text>
-                                    <Text style={[Typography.text_paragraph_1, styles.editText]}>{description}</Text>
+                                    <Text style={[Typography.text_paragraph_1, styles.editText]}>{instructions}</Text>
                                 </View>
+
+                                <View style={[styles.heading, { marginTop: 20 }]}>
+                                    <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('cleaners') + ' '}</Text>
+                                    <Text style={[Typography.text_paragraph_1, styles.editText]}>{selectedProfessional}</Text>
+                                </View>
+
+                                <View style={[styles.heading, { marginTop: 20 }]}>
+                                    <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('workFrequency') + ' '}</Text>
+                                    <Text style={[Typography.text_paragraph_1, styles.editText]}>{repeateService}</Text>
+                                </View>
+
+                                {
+                                    selectedCategories === CleaningAndHygineService &&
+                                    <>
+                                        <View style={[styles.heading, { marginTop: 20 }]}>
+                                            <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('areaSize') + ' '}</Text>
+                                            <Text style={[Typography.text_paragraph_1, styles.editText]}>{roomsize}</Text>
+                                        </View>
+
+                                        <View style={[styles.heading, { marginTop: 20 }]}>
+                                            <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('roomsNumber') + ' '}</Text>
+                                            <Text style={[Typography.text_paragraph_1, styles.editText]}>{roomsQty}</Text>
+                                        </View>
+
+                                        <View style={[styles.heading, { marginTop: 20 }]}>
+                                            <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('needCleaningMaterials') + ' '}</Text>
+                                            <Text style={[Typography.text_paragraph_1, styles.editText]}>{needCleaningMaterials}</Text>
+                                        </View>
+                                        <View style={[styles.heading, { marginTop: 20 }]}>
+                                            <View style={{ flexDirection: 'column', flexWrap: 'wrap', }}>
+                                                <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('additionalService') + ' '}</Text>
+                                                {
+                                                    aditionalSelectedServices.map((service, index) => (
+                                                        <Text key={index} style={[Typography.text_paragraph_1, styles.editText]}>{service.title}</Text>
+                                                    ))
+                                                }
+                                            </View>
+                                        </View>
+                                    </>
+                                }
 
                                 <View style={[styles.heading, { marginTop: 20 }]}>
                                     <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('price') + ' '}</Text>
                                     <Text style={[Typography.text_paragraph_1, styles.editText]}>{'€' + totalPrice}</Text>
                                 </View>
 
-                                <View style={[styles.list2, { flexDirection: 'column' }]}>
-                                    <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{t('availability')}</Text>
-                                    {
-                                        selectedDays.length > 0 && selectedDays.map((key, index) => {
-                                            return (
-                                                <View key={index} style={{ alignItems: 'flex-start' }}>
-                                                    <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, marginTop: 5 }]}>{key.day}</Text>
-                                                    <Text style={[Typography.text_paragraph_1, { color: colors.White_Primary_01, }]}>{formatTime(key.openingTime) + ' to ' + formatTime(key.closingTime)}</Text>
-                                                </View>
-                                            )
-                                        })
-                                    }
+                                <View style={[styles.heading, { marginTop: 20 }]}>
+                                    <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('selectDate') + ' '}</Text>
+                                    <Text style={[Typography.text_paragraph_1, styles.editText,]}>{moment(date).format('DD MM YYYY')}</Text>
                                 </View>
 
+                                <View style={[styles.heading, { marginTop: 20 }]}>
+                                    <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('selectTime') + ' '}</Text>
+                                    <Text style={[Typography.text_paragraph_1, styles.editText]}>{moment(timeStart).format('LT') + ' - ' + moment(timeEnd).format('LT')}</Text>
+                                </View>
+
+                                <View style={[styles.heading, { marginTop: 20 }]}>
+                                    <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('location') + ' '}</Text>
+                                    <Text style={[Typography.text_paragraph_1, styles.editText]}>{location}</Text>
+                                </View>
                                 <View style={styles.taxContainer}>
                                     <Text style={[Typography.text_CTA1, { color: colors.black, }]}>{t('pay') + ':'}</Text>
 
@@ -1120,146 +1240,43 @@ const CreateService = ({ navigation }) => {
                                     </View>
                                 </View>
                             </View>
-                        </ScrollView>
-                    }
-                </View>
-            }
+                        }
+                    </ScrollView>
+                }
 
-            {
-                step === 4 &&
-                <ScrollView contentContainerStyle={{ justifyContent: 'center', alignItems: 'center', paddingBottom: 50 }} style={{ width: '100%', }}>
-                    {
-                        isJobCreate &&
-                        <View style={{ width: '90%', }}>
-
-                            <View style={[styles.heading, { marginTop: 20 }]}>
-                                <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('service') + ' '}</Text>
-                                <Text style={[Typography.text_paragraph_1, styles.editText]}>{selectedCategories + ' / ' + selectedsubcategories}</Text>
-                            </View>
-
-                            <View style={[styles.heading, { marginTop: 20 }]}>
-                                <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('description') + ' '}</Text>
-                                <Text style={[Typography.text_paragraph_1, styles.editText]}>{instructions}</Text>
-                            </View>
-
-                            <View style={[styles.heading, { marginTop: 20 }]}>
-                                <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('cleaners') + ' '}</Text>
-                                <Text style={[Typography.text_paragraph_1, styles.editText]}>{selectedProfessional}</Text>
-                            </View>
-
-                            <View style={[styles.heading, { marginTop: 20 }]}>
-                                <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('workFrequency') + ' '}</Text>
-                                <Text style={[Typography.text_paragraph_1, styles.editText]}>{repeateService}</Text>
-                            </View>
-
-                            {
-                                selectedCategories === CleaningAndHygineService &&
+                <View style={styles.footer}>
+                    <View style={{ width: '90%', flexDirection: 'row', justifyContent: 'space-between', }}>
+                        {
+                            (totalPrice != '0' || totalPrice != 0) ? (
                                 <>
-                                    <View style={[styles.heading, { marginTop: 20 }]}>
-                                        <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('areaSize') + ' '}</Text>
-                                        <Text style={[Typography.text_paragraph_1, styles.editText]}>{roomsize}</Text>
-                                    </View>
-
-                                    <View style={[styles.heading, { marginTop: 20 }]}>
-                                        <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('roomsNumber') + ' '}</Text>
-                                        <Text style={[Typography.text_paragraph_1, styles.editText]}>{roomsQty}</Text>
-                                    </View>
-
-                                    <View style={[styles.heading, { marginTop: 20 }]}>
-                                        <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('needCleaningMaterials') + ' '}</Text>
-                                        <Text style={[Typography.text_paragraph_1, styles.editText]}>{needCleaningMaterials}</Text>
-                                    </View>
-                                    <View style={[styles.heading, { marginTop: 20 }]}>
-                                        <View style={{ flexDirection: 'column', flexWrap: 'wrap', }}>
-                                            <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('additionalService') + ' '}</Text>
-                                            {
-                                                aditionalSelectedServices.map((service, index) => (
-                                                    <Text key={index} style={[Typography.text_paragraph_1, styles.editText]}>{service.title}</Text>
-                                                ))
-                                            }
+                                    <View style={{ width: '45%', justifyContent: 'center', }}>
+                                        <View style={{ flexDirection: 'row' }}>
+                                            <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('total') + ': '}</Text>
+                                            <Text style={[Typography.text_paragraph_1, styles.headingText]}>{'€' + ' '}</Text>
+                                            <Text style={[Typography.text_paragraph_1, styles.headingText]}>{totalPrice}</Text>
                                         </View>
                                     </View>
-                                </>
-                            }
-
-                            <View style={[styles.heading, { marginTop: 20 }]}>
-                                <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('price') + ' '}</Text>
-                                <Text style={[Typography.text_paragraph_1, styles.editText]}>{'€' + totalPrice}</Text>
-                            </View>
-
-                            <View style={[styles.heading, { marginTop: 20 }]}>
-                                <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('selectDate') + ' '}</Text>
-                                <Text style={[Typography.text_paragraph_1, styles.editText,]}>{moment(date).format('DD MM YYYY')}</Text>
-                            </View>
-
-                            <View style={[styles.heading, { marginTop: 20 }]}>
-                                <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('selectTime') + ' '}</Text>
-                                <Text style={[Typography.text_paragraph_1, styles.editText]}>{moment(timeStart).format('LT') + ' - ' + moment(timeEnd).format('LT')}</Text>
-                            </View>
-
-                            <View style={[styles.heading, { marginTop: 20 }]}>
-                                <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('location') + ' '}</Text>
-                                <Text style={[Typography.text_paragraph_1, styles.editText]}>{location}</Text>
-                            </View>
-                            <View style={styles.taxContainer}>
-                                <Text style={[Typography.text_CTA1, { color: colors.black, }]}>{t('pay') + ':'}</Text>
-
-                                <View style={styles.taxContainer_C1}>
-                                    <Text style={[Typography.text_CTA1, { color: colors.Neutral_01, }]}>{t('amount')}</Text>
-                                    <Text style={[Typography.text_CTA1, { color: colors.black, }]}>{'€' + totalPrice}</Text>
-                                </View>
-                                {
-                                    taxes.map((key, index) => {
-                                        return (
-                                            <View key={index} style={styles.taxContainer_C1}>
-                                                <Text style={[Typography.text_CTA1, { color: colors.Neutral_01, }]}>{key.name + ' ' + key.percentage + '%'}</Text>
-                                                <Text style={[Typography.text_CTA1, { color: colors.black, }]}>{'€' + Number(totalPrice / 100 * key.percentage).toFixed(1)}</Text>
-                                            </View>
-                                        )
-                                    })
-                                }
-                                <View style={styles.taxContainer_C1}>
-                                    <Text style={[Typography.text_CTA1, { color: colors.Neutral_01, }]}>{t('total')}</Text>
-                                    <Text style={[Typography.text_CTA1, { color: colors.black, }]}>{'€' + totalPriceWithTax.toFixed(1)}</Text>
-                                </View>
-                            </View>
-                        </View>
-                    }
-                </ScrollView>
-            }
-
-            <View style={styles.footer}>
-                <View style={{ width: '90%', flexDirection: 'row', justifyContent: 'space-between', }}>
-                    {
-                        (totalPrice != '0' || totalPrice != 0) ? (
-                            <>
-                                <View style={{ width: '45%', justifyContent: 'center', }}>
-                                    <View style={{ flexDirection: 'row' }}>
-                                        <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('total') + ': '}</Text>
-                                        <Text style={[Typography.text_paragraph_1, styles.headingText]}>{'€' + ' '}</Text>
-                                        <Text style={[Typography.text_paragraph_1, styles.headingText]}>{totalPrice}</Text>
+                                    <View style={{ width: '45%', }}>
+                                        {
+                                            isJobCreate &&
+                                            <CTAButton1 title={step < 4 ? t('next') : t('createJob')} submitHandler={() => { stepsHandler() }} />
+                                        }
+                                        {
+                                            !isJobCreate &&
+                                            <CTAButton1 title={step < 3 ? t('next') : t('createService')} submitHandler={() => { stepsHandler() }} />
+                                        }
                                     </View>
-                                </View>
-                                <View style={{ width: '45%', }}>
-                                    {
-                                        isJobCreate &&
-                                        <CTAButton1 title={step < 4 ? t('next') : t('createJob')} submitHandler={() => { stepsHandler() }} />
-                                    }
-                                    {
-                                        !isJobCreate &&
-                                        <CTAButton1 title={step < 3 ? t('next') : t('createService')} submitHandler={() => { stepsHandler() }} />
-                                    }
-                                </View>
-                            </>
-                        ) : (
-                            (isJobCreate) ? (
-                                <CTAButton1 title={step < 4 ? t('next') : t('createJob')} submitHandler={() => { stepsHandler() }} />
-                            ) : (<CTAButton1 title={step < 3 ? t('next') : t('createService')} submitHandler={() => { stepsHandler() }} />)
-                        )
-                    }
+                                </>
+                            ) : (
+                                (isJobCreate) ? (
+                                    <CTAButton1 title={step < 4 ? t('next') : t('createJob')} submitHandler={() => { stepsHandler() }} />
+                                ) : (<CTAButton1 title={step < 3 ? t('next') : t('createService')} submitHandler={() => { stepsHandler() }} />)
+                            )
+                        }
+                    </View>
                 </View>
-            </View>
-        </View>
+            </View >
+        )
     );
 };
 

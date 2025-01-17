@@ -81,6 +81,7 @@ export const registerUser = (credentials, navigation) => async (dispatch) => {
       gender: credentials.gender,
       address: credentials.address,
       profilePhoto: credentials.profilePhoto,
+      hourlyRate: credentials.hourlyRate,
       userId: userId,
       createdAt: firestore.FieldValue.serverTimestamp(),
     });
@@ -334,4 +335,22 @@ export const createService = (data, navigation) => async (dispatch) => {
 };
 
 
+// export const fetchJobs = (selectedCategory) => async (dispatch) => {
+//   console.log(selectedCategory, 'fetchJobs');
+// };
 
+export const fetchJobs = (selectedCategory) => async (dispatch) => {
+  try {
+    dispatch({ type: 'IS_LOADER', payload: true });
+    const snapshot = await firestore().collection('jobs').where('category', '==', selectedCategory).get();
+    const jobs = snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
+    console.log(jobs, 'fetchJobs');
+    // dispatch({ type: 'SET_JOBS', payload: jobs });
+    dispatch({ type: 'IS_LOADER', payload: false });
+  } catch (error) {
+    console.log(error, 'fetchJobs_error');
+    dispatch({ type: 'IS_LOADER', payload: false });
+    const errorMessage = await getFirebaseErrorMessage(error.code);
+    Toast.show({ type: 'error', text1: errorMessage, position: 'bottom' });
+  }
+};

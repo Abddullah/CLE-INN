@@ -18,8 +18,10 @@ import screenResolution from '../../utilities/constants/screenResolution';
 import CustomTabs from '../../components/CustomTabs';
 import ServiceCard from '../../components/ServiceCard';
 import { RFValue } from 'react-native-responsive-fontsize';
+import { fetchJobs, showError, } from '../../store/actions/action'
 
 const Home = ({ navigation }) => {
+    const dispatch = useDispatch()
     const { theme } = useTheme();
     const colors = theme === 'dark' ? DarkThemeColors : LightThemeColors;
     const styles = createStyles(colors, theme);
@@ -91,10 +93,12 @@ const Home = ({ navigation }) => {
     ]);
 
     useEffect(() => {
-        allcategories.length > 0 && setselectedCat(allcategories[0]?.categoryName)
-        allcategories.length > 0 && setsubCat(allcategories[0]?.subCategories)
+        if (allcategories.length != 0) {
+            setselectedCat(allcategories[0]?.categoryName)
+            setsubCat(allcategories[0]?.subCategories)
+            dispatch(fetchJobs(allcategories[0]?.categoryName))
+        }
     }, [allcategories])
-
 
     useEffect(() => {
         user.role === 'user' && setselectedTab(t('services'))
@@ -104,6 +108,8 @@ const Home = ({ navigation }) => {
     const selectedCatHandler = (title, subCategories) => {
         setselectedCat(title)
         setsubCat(subCategories)
+        dispatch(fetchJobs(title))
+        console.log('selectedCat', title, subCategories);
     }
 
     return (
