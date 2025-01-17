@@ -43,6 +43,7 @@ export default function Signup({ navigation }) {
             gender: '',
             address: '',
             profilePhoto: '',
+            hourlyRate: '',
         }
         // navigation.navigate('OtpVerify')
         // dispatch(registerUser(credentials, navigation))

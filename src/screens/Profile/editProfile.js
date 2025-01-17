@@ -35,6 +35,7 @@ const EditProfile = ({ navigation }) => {
     const [showBs, setshowBs] = useState(false)
     const [gender, setgender] = useState('');
     const [address, setaddress] = useState('');
+    const [hourlyRate, sethourlyRate] = useState('');
     const [profileImage, setProfileImage] = useState(Images.profilePic);
 
     useEffect(() => {
@@ -45,6 +46,7 @@ const EditProfile = ({ navigation }) => {
         user.dob != '' && setshowBs(true)
         setgender(user.gender)
         setaddress(user.address)
+        sethourlyRate(user.hourlyRate)
     }, [user]);
 
 
@@ -67,6 +69,7 @@ const EditProfile = ({ navigation }) => {
             gender,
             address,
             profilePhoto: '',
+            hourlyRate,
         }
 
         console.log(credentials, "credentials");
@@ -230,7 +233,7 @@ const EditProfile = ({ navigation }) => {
                         </Select>
                     </View>
                 </View> */}
-                
+
                 <View style={{ marginTop: 10 }}>
                     <View style={{ flexDirection: 'row' }}>
                         <Text style={[{ top: 3, color: colors.Neutral_01 }, Typography.text_paragraph_1]}>
@@ -276,6 +279,25 @@ const EditProfile = ({ navigation }) => {
                             value={address}
                             onChangeText={(e) => { setaddress(e) }}
                             placeholder={t('address')}
+                            placeholderTextColor={colors.Neutral_01}
+                        />
+                    </View>
+                </View>
+
+                <View style={{ width: '100%' }}>
+                    <View style={{ flexDirection: 'row' }}>
+                        <Text style={[{ top: 3, color: colors.Neutral_01 }, Typography.text_paragraph_1,]}>{t('hourlyRate')}</Text>
+                        {
+                            isError && phone == '' && <Text style={{ top: 3, color: colors.Error_Red }}>*</Text>
+                        }
+                    </View>
+                    <View style={styles.inputContiner}>
+                        <TextInput
+                            keyboardType='number-pad'
+                            style={styles.input}
+                            value={hourlyRate}
+                            onChangeText={(e) => { sethourlyRate(e) }}
+                            placeholder={t('hourlyRate')}
                             placeholderTextColor={colors.Neutral_01}
                         />
                     </View>

@@ -488,6 +488,7 @@ const CreateService = ({ navigation }) => {
         }
         dispatch(createJob(data, navigation))
     }
+    
     const createServiceHandler = () => {
         const geoPoint = new firestore.GeoPoint(savedCords[0], savedCords[1]);
         let data = {

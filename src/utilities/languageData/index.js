@@ -317,6 +317,7 @@ export const languageData = [
             Pleaseselectrates: 'Please select rates',
             Pleasetypedescription: 'Please type decription',
             closingTimeMustBeLater: 'Closing time must be Later',
+            hourlyRate: 'Hourly Rate',
 
         }
     },
@@ -642,6 +643,8 @@ export const languageData = [
             Pleaseselectrates: 'Seleziona le tariffe',
             Pleasetypedescription: 'Scrivi la descrizione',
             closingTimeMustBeLater: "L'orario di chiusura deve essere successivo",
+            hourlyRate: 'Tariffa oraria',
+
         }
     },
 ];
