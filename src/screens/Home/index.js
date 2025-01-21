@@ -18,7 +18,7 @@ import screenResolution from '../../utilities/constants/screenResolution';
 import CustomTabs from '../../components/CustomTabs';
 import ServiceCard from '../../components/ServiceCard';
 import { RFValue } from 'react-native-responsive-fontsize';
-import { fetchJobs, showError, } from '../../store/actions/action'
+import { fetchAds, showError, } from '../../store/actions/action'
 
 const Home = ({ navigation }) => {
     const dispatch = useDispatch()
@@ -27,6 +27,7 @@ const Home = ({ navigation }) => {
     const styles = createStyles(colors, theme);
     let user = useSelector((state) => state.reducer.user);
     let allcategories = useSelector((state) => state.reducer.categories);
+    let ads = useSelector((state) => state.reducer.allAds);
 
     const [search, setsearch] = useState('');
     const [selectedTab, setselectedTab] = useState();
@@ -44,59 +45,14 @@ const Home = ({ navigation }) => {
             let: 0,
             lng: 0,
             reviews: [{ img: Images.profilePic, name: 'Charollette Hanlin', date: '23 May, 2023 | 02:00 PM', star: '5', review: 'Lorem ipsum dolor sit amet consectetur. Purus massa tristique arcu tempus ut ac porttitor. Lorem ipsum dolor sit amet consectetur. ' },]
-        }, {
-            title: 'Cleaning at Company',
-            description: 'We specialize in delivering top-quality house cleaning services, ensuring every corner is spotless. Our team is committed to using 100% effort and care in every task, from dusting and vacuuming to deep cleaning kitchens and bathrooms.',
-            price: 25,
-            discount: 30,
-            images: [Images.cleaning],
-            openTime: '10:00 AM to 12:00 PM',
-            let: 0,
-            lng: 0,
-            reviews: [{ img: Images.profilePic, name: 'Charollette Hanlin', date: '23 May, 2023 | 02:00 PM', star: '5', review: 'Lorem ipsum dolor sit amet consectetur. Purus massa tristique arcu tempus ut ac porttitor. Lorem ipsum dolor sit amet consectetur. ' },]
         },
-        {
-            title: 'Cleaning at Company',
-            description: 'We specialize in delivering top-quality house cleaning services, ensuring every corner is spotless. Our team is committed to using 100% effort and care in every task, from dusting and vacuuming to deep cleaning kitchens and bathrooms.',
-            price: 25,
-            discount: 30,
-            images: [Images.cleaning],
-            openTime: '10:00 AM to 12:00 PM',
-            let: 0,
-            lng: 0,
-            reviews: [{ img: Images.profilePic, name: 'Charollette Hanlin', date: '23 May, 2023 | 02:00 PM', star: '5', review: 'Lorem ipsum dolor sit amet consectetur. Purus massa tristique arcu tempus ut ac porttitor. Lorem ipsum dolor sit amet consectetur. ' },]
-        },
-        {
-            title: 'Cleaning at Company',
-            description: 'We specialize in delivering top-quality house cleaning services, ensuring every corner is spotless. Our team is committed to using 100% effort and care in every task, from dusting and vacuuming to deep cleaning kitchens and bathrooms.',
-            price: 25,
-            discount: 30,
-            images: [Images.cleaning],
-            openTime: '10:00 AM to 12:00 PM',
-            let: 0,
-            lng: 0,
-            reviews: [{ img: Images.profilePic, name: 'Charollette Hanlin', date: '23 May, 2023 | 02:00 PM', star: '5', review: 'Lorem ipsum dolor sit amet consectetur. Purus massa tristique arcu tempus ut ac porttitor. Lorem ipsum dolor sit amet consectetur. ' },]
-        },
-        {
-            title: 'Cleaning at Company',
-            description: 'We specialize in delivering top-quality house cleaning services, ensuring every corner is spotless. Our team is committed to using 100% effort and care in every task, from dusting and vacuuming to deep cleaning kitchens and bathrooms.',
-            price: 25,
-            discount: 30,
-            images: [Images.cleaning],
-            openTime: '10:00 AM to 12:00 PM',
-            let: 0,
-            lng: 0,
-            reviews: [{ img: Images.profilePic, name: 'Charollette Hanlin', date: '23 May, 2023 | 02:00 PM', star: '5', review: 'Lorem ipsum dolor sit amet consectetur. Purus massa tristique arcu tempus ut ac porttitor. Lorem ipsum dolor sit amet consectetur. ' },]
-        },
-
-
     ]);
 
     useEffect(() => {
         if (allcategories.length != 0) {
             setselectedCat(allcategories[0]?.categoryName)
             setsubCat(allcategories[0]?.subCategories)
-            dispatch(fetchJobs(allcategories[0]?.categoryName))
+            dispatch(fetchAds(allcategories[0]?.categoryName, user.role === 'user' ? 'jobs' : 'service'))
         }
     }, [allcategories])
 
@@ -108,7 +64,7 @@ const Home = ({ navigation }) => {
     const selectedCatHandler = (title, subCategories) => {
         setselectedCat(title)
         setsubCat(subCategories)
-        dispatch(fetchJobs(title))
+        dispatch(fetchAds(title, user.role === 'user' ? 'jobs' : 'service'))
         console.log('selectedCat', title, subCategories);
     }
 
@@ -198,7 +154,7 @@ const Home = ({ navigation }) => {
                             <FlatList
                                 data={data}
                                 style={{ marginTop: 10, }}
-                                contentContainerStyle={{ justifyContent: 'center', }} // Add padding for even spacing on the sides
+                                contentContainerStyle={{ justifyContent: 'center', }}
                                 numColumns={2}
                                 showsVerticalScrollIndicator={false}
                                 renderItem={({ item }) => (
@@ -208,7 +164,7 @@ const Home = ({ navigation }) => {
                                         submitHandler={() => { navigation.navigate('AdFullView', { item: item, isMyAd: true, isJobCreate: true }) }}
                                     />
                                 )}
-                                ItemSeparatorComponent={() => <View style={{ height: 10 }} />} // Add vertical space between rows
+                                ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
                             />
                         </View>
                     </>
@@ -235,7 +191,6 @@ const Home = ({ navigation }) => {
                                     dotStyle={{ width: 8, height: 8, borderRadius: 4, }}
                                 />
                             </View>
-
                             <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{t('specialservices')}</Text>
                             <ScrollView
                                 horizontal={true}
@@ -244,161 +199,67 @@ const Home = ({ navigation }) => {
                             >
                                 <FlatList
                                     data={allcategories}
-                                    contentContainerStyle={{}}
                                     horizontal={true}
                                     showsHorizontalScrollIndicator={false}
                                     showsVerticalScrollIndicator={false}
-                                    renderItem={({ item }) => <Categories icon={item.image} title={item.categoryName} subCategories={item.subCategories} submitHandler={(title, subCategories) => { selectedCatHandler(title, subCategories) }} selectedCat={selectedCat} />}
+                                    renderItem={({ item }) =>
+                                        <Categories
+                                            selectedCat={selectedCat}
+                                            subCategories={item.subCategories}
+                                            icon={item.image}
+                                            title={item.categoryName}
+                                            submitHandler={(title, subCategories) => {
+                                                selectedCatHandler(title, subCategories)
+                                            }}
+                                        />
+                                    }
                                 />
                             </ScrollView>
                         </View>
-                        <View style={{ width: '95%', alignItems: 'flex-start', }}>
-                            <View style={styles.subCatTextContainer}>
-                                <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, marginTop: 20 }]}>
-                                    {subCat[0]}
-                                </Text>
-                                <TouchableOpacity activeOpacity={.8} onPress={() => { navigation.navigate('CategoriesList', { subCatTitle: subCat[0] }) }}>
-                                    <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, marginTop: 20 }]}>
-                                        {t('viewAll')}
-                                    </Text>
-                                </TouchableOpacity>
-                            </View>
-                            <FlatList
-                                data={data}
-                                contentContainerStyle={{ marginTop: 10, padding: 5, }}
-                                horizontal={true}
-                                showsHorizontalScrollIndicator={false}
-                                showsVerticalScrollIndicator={false}
-                                renderItem={({ item, index }) =>
-                                    <ServiceCard
-                                        index={index}
-                                        data={item}
-                                        isFav={true}
-                                        submitHandler={() => {
-                                            navigation.navigate('AdFullView', { item: item, isService: selectedTab === t('services') ? true : false, isJobCreate: selectedTab === t('myjobs') ? true : false });
-                                        }}
-                                    />
-                                }
-                            />
-                        </View>
-                        <View style={{ width: '95%', alignItems: 'flex-start' }}>
-                            <View style={styles.subCatTextContainer}>
-                                <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, marginTop: 20 }]}>
-                                    {subCat[1]}
-                                </Text>
-                                <TouchableOpacity activeOpacity={.8} onPress={() => { navigation.navigate('CategoriesList', { subCatTitle: subCat[1] }) }}>
-                                    <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, marginTop: 20 }]}>
-                                        {t('viewAll')}
-                                    </Text>
-                                </TouchableOpacity>
-                            </View>
-                            <FlatList
-                                data={data}
-                                contentContainerStyle={{ marginTop: 10, padding: 5, }}
-                                horizontal={true}
-                                showsHorizontalScrollIndicator={false}
-                                showsVerticalScrollIndicator={false}
-                                renderItem={({ item, index }) =>
-                                    <ServiceCard
-                                        index={index}
-                                        data={item}
-                                        isFav={true}
-                                        submitHandler={() => {
-                                            navigation.navigate('AdFullView', { item: item, isService: selectedTab === t('services') ? true : false, isJobCreate: selectedTab === t('myjobs') ? true : false });
-                                        }}
-                                    />
-                                }
-                            />
-                        </View>
-                        <View style={{ width: '95%', alignItems: 'flex-start' }}>
-                            <View style={styles.subCatTextContainer}>
-                                <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, marginTop: 20 }]}>
-                                    {subCat[2]}
-                                </Text>
-                                <TouchableOpacity activeOpacity={.8} onPress={() => { navigation.navigate('CategoriesList', { subCatTitle: subCat[2] }) }}>
-                                    <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, marginTop: 20 }]}>
-                                        {t('viewAll')}
-                                    </Text>
-                                </TouchableOpacity>
-                            </View>
-                            <FlatList
-                                data={data}
-                                contentContainerStyle={{ marginTop: 10, padding: 5, }}
-                                horizontal={true}
-                                showsHorizontalScrollIndicator={false}
-                                showsVerticalScrollIndicator={false}
-                                renderItem={({ item, index }) =>
-                                    <ServiceCard
-                                        index={index}
-                                        data={item}
-                                        isFav={true}
-                                        submitHandler={() => {
-                                            navigation.navigate('AdFullView', { item: item, isService: selectedTab === t('services') ? true : false, isJobCreate: selectedTab === t('myjobs') ? true : false });
-                                        }}
-                                    />
-                                }
-                            />
-                        </View>
-                        <View style={{ width: '95%', alignItems: 'flex-start' }}>
-                            <View style={styles.subCatTextContainer}>
-                                <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, marginTop: 20 }]}>
-                                    {subCat[3]}
-                                </Text>
-                                <TouchableOpacity activeOpacity={.8} onPress={() => { navigation.navigate('CategoriesList', { subCatTitle: subCat[3] }) }}>
-                                    <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, marginTop: 20 }]}>
-                                        {t('viewAll')}
-                                    </Text>
-                                </TouchableOpacity>
-                            </View>
-                            <FlatList
-                                data={data}
-                                contentContainerStyle={{ marginTop: 10, padding: 5, }}
-                                horizontal={true}
-                                showsHorizontalScrollIndicator={false}
-                                showsVerticalScrollIndicator={false}
-                                renderItem={({ item, index }) =>
-                                    <ServiceCard
-                                        index={index}
-                                        data={item}
-                                        isFav={true}
-                                        submitHandler={() => {
-                                            navigation.navigate('AdFullView', { item: item, isService: selectedTab === t('services') ? true : false, isJobCreate: selectedTab === t('myjobs') ? true : false });
-                                        }}
-                                    />
-                                }
-                            />
-                        </View>
-                        <View style={{ width: '95%', alignItems: 'flex-start' }}>
-                            <View style={styles.subCatTextContainer}>
-                                <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, marginTop: 20 }]}>
-                                    {subCat[4]}
-                                </Text>
-                                <TouchableOpacity activeOpacity={.8} onPress={() => { navigation.navigate('CategoriesList', { subCatTitle: subCat[4] }) }}>
-                                    <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, marginTop: 20 }]}>
-                                        {t('viewAll')}
-                                    </Text>
-                                </TouchableOpacity>
-                            </View>
-                            <FlatList
-                                data={data}
-                                contentContainerStyle={{ marginTop: 10, padding: 5, }}
-                                horizontal={true}
-                                showsHorizontalScrollIndicator={false}
-                                showsVerticalScrollIndicator={false}
-                                renderItem={({ item, index }) =>
-                                    <ServiceCard
-                                        index={index}
-                                        data={item}
-                                        isFav={true}
-                                        submitHandler={() => {
-                                            navigation.navigate('AdFullView', { item: item, isService: selectedTab === t('services') ? true : false, isJobCreate: selectedTab === t('myjobs') ? true : false });
-                                        }}
-                                    />
-                                }
-                            />
-                        </View>
+
+                        {
+                            subCat.length != 0 && subCat.map((key, index) => {
+                                return (
+                                    ads.length != 0 && ads.map((item, index) => {
+                                        return (
+                                            item.subCategory === key &&
+                                            <View key={index} style={{ width: '95%', alignItems: 'flex-start', }}>
+                                                <View style={styles.subCatTextContainer}>
+                                                    <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, marginTop: 20 }]}>
+                                                        {key}
+                                                    </Text>
+                                                    <TouchableOpacity activeOpacity={.8} onPress={() => { navigation.navigate('CategoriesList', { subCatTitle: key }) }}>
+                                                        <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, marginTop: 20 }]}>
+                                                            {t('viewAll')}
+                                                        </Text>
+                                                    </TouchableOpacity>
+                                                </View>
+                                                <FlatList
+                                                    data={data}
+                                                    contentContainerStyle={{ marginTop: 10, padding: 5, }}
+                                                    horizontal={true}
+                                                    showsHorizontalScrollIndicator={false}
+                                                    showsVerticalScrollIndicator={false}
+                                                    renderItem={({ item, index }) =>
+                                                        <ServiceCard
+                                                            index={index}
+                                                            data={item}
+                                                            isFav={true}
+                                                            submitHandler={() => {
+                                                                navigation.navigate('AdFullView', { item: item, isService: selectedTab === t('services') ? true : false, isJobCreate: selectedTab === t('myjobs') ? true : false });
+                                                            }}
+                                                        />
+                                                    }
+                                                />
+                                            </View>
+                                        )
+                                    })
+                                )
+                            })
+                        }
                     </>
                 }
+
             </ScrollView>
 
             <TouchableOpacity
@@ -409,7 +270,7 @@ const Home = ({ navigation }) => {
                 <Ionicons name="add-outline" style={{ fontSize: RFValue(12, screenResolution.screenWidth), color: colors.white, }} />
             </TouchableOpacity>
 
-        </View >
+        </View>
     );
 };
 
