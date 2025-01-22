@@ -17,6 +17,7 @@ const initState = {
   taxes: [],
   fixRates: [],
   allAds: [],
+  myAds: [],
 };
 
 const reducer = (state = initState, action) => {
@@ -90,6 +91,11 @@ const reducer = (state = initState, action) => {
       return {
         ...state,
         allAds: action.payload,
+      }
+    case 'SET_My_ADS':
+      return {
+        ...state,
+        myAds: action.payload,
       }
 
     default:

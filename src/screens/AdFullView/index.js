@@ -29,15 +29,10 @@ const AdFullView = ({ navigation }) => {
     const colors = theme === 'dark' ? DarkThemeColors : LightThemeColors;
     const styles = createStyles(colors, theme);
     let user = useSelector((state) => state.reducer.user);
-    let isError = useSelector((state) => state.reducer.isError);
 
     let data = route.params?.item;
     let isBooking = route.params?.isBooking;
     let isReviewBooking = route.params?.isReviewBooking;
-    let isMyAd = route.params?.isMyAd;
-
-    let isService = route.params?.isService;
-    let isJobCreate = route.params?.isJobCreate;
 
     console.log(data, "data");
 
@@ -301,12 +296,12 @@ const AdFullView = ({ navigation }) => {
                 }
 
                 {
-                    (data.addType === 'service') &&
+                    (data.postedBy !== user.userId && data.addType === 'service') &&
                     <CTAButton1 title={t('book')} submitHandler={() => { navigation.navigate('CreateBooking') }} />
                 }
 
                 {
-                    (data.addType === 'job') &&
+                    (data.postedBy !== user.userId && data.addType === 'job') &&
                     <CTAButton1 title={t('apply')} submitHandler={() => { navigation.navigate('SignatureScreen') }} />
                 }
 

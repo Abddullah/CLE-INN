@@ -325,11 +325,28 @@ export const fetchAds = (selectedCategory, collection) => async (dispatch) => {
     dispatch({ type: 'IS_LOADER', payload: true });
     const snapshot = await firestore().collection(collection).where('category', '==', selectedCategory).get();
     const allAds = snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
-    console.log(allAds, 'FetchAds');
     dispatch({ type: 'SET_ADS', payload: allAds });
     dispatch({ type: 'IS_LOADER', payload: false });
   } catch (error) {
     console.log(error, 'fetch_ads_error');
+    dispatch({ type: 'IS_LOADER', payload: false });
+    const errorMessage = await getFirebaseErrorMessage(error.code);
+    Toast.show({ type: 'error', text1: errorMessage, position: 'bottom' });
+  }
+};
+
+export const fetchAdsByUser = (userId, collection) => async (dispatch) => {
+  try {
+    dispatch({ type: 'IS_LOADER', payload: true });
+    const snapshot = await firestore()
+      .collection(collection)
+      .where('postedBy', '==', userId)
+      .get();
+    const myAds = snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
+    dispatch({ type: 'SET_My_ADS', payload: myAds });
+    dispatch({ type: 'IS_LOADER', payload: false });
+  } catch (error) {
+    console.log(error, 'fetch_jobs_error');
     dispatch({ type: 'IS_LOADER', payload: false });
     const errorMessage = await getFirebaseErrorMessage(error.code);
     Toast.show({ type: 'error', text1: errorMessage, position: 'bottom' });

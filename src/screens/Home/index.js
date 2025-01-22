@@ -18,7 +18,7 @@ import screenResolution from '../../utilities/constants/screenResolution';
 import CustomTabs from '../../components/CustomTabs';
 import ServiceCard from '../../components/ServiceCard';
 import { RFValue } from 'react-native-responsive-fontsize';
-import { fetchAds, showError, } from '../../store/actions/action'
+import { fetchAds, fetchAdsByUser, } from '../../store/actions/action'
 
 const Home = ({ navigation }) => {
     const dispatch = useDispatch()
@@ -28,7 +28,7 @@ const Home = ({ navigation }) => {
     let user = useSelector((state) => state.reducer.user);
     let allcategories = useSelector((state) => state.reducer.categories);
     let ads = useSelector((state) => state.reducer.allAds);
-    let isLoader = useSelector((state) => state.reducer.isLoader);
+    let myAds = useSelector((state) => state.reducer.myAds);
 
     const [search, setsearch] = useState('');
     const [selectedTab, setselectedTab] = useState();
@@ -44,6 +44,7 @@ const Home = ({ navigation }) => {
     }, [allcategories])
 
     useEffect(() => {
+        dispatch(fetchAdsByUser(user.userId, user.role === 'user' ? 'jobs' : 'service'))
         user.role === 'user' && setselectedTab(t('services'))
         user.role !== 'user' && setselectedTab(t('myjobs'))
     }, [user])
@@ -116,55 +117,31 @@ const Home = ({ navigation }) => {
                     </View>
                 }
 
-                {/* My Ads Servives for provider*/}
+                {/* My Ads Tab */}
                 {
-                    (user.role !== 'user' && selectedTab === t('myads')) &&
-                    <>
-                        <View style={{ width: '100%', alignItems: 'center', marginTop: 10 }}>
-                            <FlatList
-                                data={ads}
-                                style={{ marginTop: 10, }}
-                                contentContainerStyle={{ justifyContent: 'center', }} // Add padding for even spacing on the sides
-                                numColumns={2}
-                                showsVerticalScrollIndicator={false}
-                                renderItem={({ item }) => (
-                                    <ServiceCard
-                                        data={item}
-                                        isFav={true}
-                                        submitHandler={() => { navigation.navigate('AdFullView', { item: item }) }}
-                                    />
-                                )}
-                                ItemSeparatorComponent={() => <View style={{ height: 10 }} />} // Add vertical space between rows
-                            />
-                        </View>
-                    </>
+                    ((user.role !== 'user' && selectedTab === t('myads')) || (user.role === 'user' && selectedTab === t('myjobs'))) &&
+
+                    <View style={{ width: '100%', alignItems: 'center', marginTop: 10 }}>
+                        <FlatList
+                            data={myAds}
+                            style={{ marginTop: 10, }}
+                            contentContainerStyle={{ justifyContent: 'center', }}
+                            numColumns={2}
+                            showsVerticalScrollIndicator={false}
+                            renderItem={({ item }) => (
+                                <ServiceCard
+                                    data={item}
+                                    isFav={true}
+                                    submitHandler={() => { navigation.navigate('AdFullView', { item: item }) }}
+                                />
+                            )}
+                            ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
+                        />
+                    </View>
+
                 }
 
-                {/* My Jobs for User */}
-                {
-                    (user.role === 'user' && selectedTab === t('myjobs')) &&
-                    <>
-                        <View style={{ width: '100%', alignItems: 'center', marginTop: 10 }}>
-                            <FlatList
-                                data={ads}
-                                style={{ marginTop: 10, }}
-                                contentContainerStyle={{ justifyContent: 'center', }}
-                                numColumns={2}
-                                showsVerticalScrollIndicator={false}
-                                renderItem={({ item }) => (
-                                    <ServiceCard
-                                        data={item}
-                                        isFav={true}
-                                        submitHandler={() => { navigation.navigate('AdFullView', { item: item }) }}
-                                    />
-                                )}
-                                ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
-                            />
-                        </View>
-                    </>
-                }
-
-                {/* Jobs and services Tab */}
+                {/* all ads Tab */}
                 {
                     (selectedTab === t('services') || (user.role === 'provider' ? selectedTab === t('myjobs') : selectedTab !== t('myjobs'))) &&
                     <>
@@ -261,7 +238,7 @@ const Home = ({ navigation }) => {
                 <Ionicons name="add-outline" style={{ fontSize: RFValue(12, screenResolution.screenWidth), color: colors.white, }} />
             </TouchableOpacity>
 
-        </View>
+        </View >
     );
 };
 
