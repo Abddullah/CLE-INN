@@ -43,6 +43,13 @@ const AdFullView = ({ navigation }) => {
 
     let images = [Images.cleaning, Images.cleaning, Images.cleaning, Images.cleaning, Images.cleaning];
 
+    const formatTime = (milliseconds) => {
+        if (milliseconds === null) return 'Select Time';
+        const date = new Date();
+        date.setHours(Math.floor(milliseconds / 3600000));
+        date.setMinutes((milliseconds % 3600000) / 60000);
+        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+    };
 
     return (
         <View style={styles.container}>
@@ -97,7 +104,7 @@ const AdFullView = ({ navigation }) => {
                     }
                     {
                         data.addType === 'service' &&
-                        <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{'€' + data.fixedRates}</Text>
+                        <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{'€' + (data.fixedRates || data.fixRates)}</Text>
                     }
                 </View>
 
@@ -186,19 +193,26 @@ const AdFullView = ({ navigation }) => {
                     data.addType === 'service' &&
                     <View style={[styles.list2, { flexDirection: 'column' }]}>
                         <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{t('availability')}</Text>
-                        <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, marginTop: 5 }]}>{'Monday'}</Text>
-                        <Text style={[Typography.text_paragraph_1, { color: colors.White_Primary_01, }]}>{'08:00 AM to 22:00 PM'}</Text>
-                        <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{'Tuesday'}</Text>
-                        <Text style={[Typography.text_paragraph_1, { color: colors.White_Primary_01, }]}>{'08:00 AM to 22:00 PM'}</Text>
-                        <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{'Wednesday'}</Text>
-                        <Text style={[Typography.text_paragraph_1, { color: colors.White_Primary_01, }]}>{'08:00 AM to 22:00 PM'}</Text>
+                        {
+                            data.timeSlots.length > 0 && data.timeSlots.map((key, index) => {
+                                return (
+                                    <View key={index} style={{ alignItems: 'flex-start' }}>
+                                        <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, marginTop: 5 }]}>{key.day}</Text>
+                                        <Text style={[Typography.text_paragraph_1, { color: colors.White_Primary_01, }]}>{formatTime(key.openingTime) + ' to ' + formatTime(key.closingTime)}</Text>
+                                    </View>
+                                )
+                            })
+                        }
                     </View>
                 }
 
-                <View style={styles.list2}>
-                    <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{t('address')}</Text>
-                    <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{data.address}</Text>
-                </View>
+                {
+                    data.addType === 'job' &&
+                    <View style={styles.list2}>
+                        <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{t('address')}</Text>
+                        <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{data.address}</Text>
+                    </View>
+                }
 
                 <View style={styles.list}>
                     <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{t('location')}</Text>
