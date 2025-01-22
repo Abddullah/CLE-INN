@@ -29,26 +29,11 @@ const Home = ({ navigation }) => {
     let allcategories = useSelector((state) => state.reducer.categories);
     let ads = useSelector((state) => state.reducer.allAds);
     let isLoader = useSelector((state) => state.reducer.isLoader);
-    console.log('isLoader', isLoader);
 
     const [search, setsearch] = useState('');
     const [selectedTab, setselectedTab] = useState();
     const [selectedCat, setselectedCat] = useState('');
     const [subCat, setsubCat] = useState([]);
-
-    const [data, setdata] = useState([
-        {
-            title: 'Cleaning at Company',
-            description: 'We specialize in delivering top-quality house cleaning services, ensuring every corner is spotless. Our team is committed to using 100% effort and care in every task, from dusting and vacuuming to deep cleaning kitchens and bathrooms.',
-            price: 25,
-            discount: 30,
-            images: [Images.cleaning, Images.cleaning, Images.cleaning, Images.cleaning, Images.cleaning],
-            openTime: '10:00 AM to 12:00 PM',
-            let: 0,
-            lng: 0,
-            reviews: [{ img: Images.profilePic, name: 'Charollette Hanlin', date: '23 May, 2023 | 02:00 PM', star: '5', review: 'Lorem ipsum dolor sit amet consectetur. Purus massa tristique arcu tempus ut ac porttitor. Lorem ipsum dolor sit amet consectetur. ' },]
-        },
-    ]);
 
     useEffect(() => {
         if (allcategories.length != 0) {
@@ -92,7 +77,6 @@ const Home = ({ navigation }) => {
                     <FontAwesome5 name="map-marker-alt" style={{ fontSize: RFValue(18, screenResolution.screenHeight), color: colors.BothPrimary_01, left: 3 }} />
                     <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, marginLeft: 13 }]}>{'Italy, Teramo city'}</Text>
                 </View>
-
 
                 <View style={{ width: '100%', }}>
                     <View style={styles.inputContiner}>
@@ -138,7 +122,7 @@ const Home = ({ navigation }) => {
                     <>
                         <View style={{ width: '100%', alignItems: 'center', marginTop: 10 }}>
                             <FlatList
-                                data={data}
+                                data={ads}
                                 style={{ marginTop: 10, }}
                                 contentContainerStyle={{ justifyContent: 'center', }} // Add padding for even spacing on the sides
                                 numColumns={2}
@@ -147,7 +131,7 @@ const Home = ({ navigation }) => {
                                     <ServiceCard
                                         data={item}
                                         isFav={true}
-                                        submitHandler={() => { navigation.navigate('AdFullView', { item: item, isMyAd: true }) }}
+                                        submitHandler={() => { navigation.navigate('AdFullView', { item: item }) }}
                                     />
                                 )}
                                 ItemSeparatorComponent={() => <View style={{ height: 10 }} />} // Add vertical space between rows
@@ -162,7 +146,7 @@ const Home = ({ navigation }) => {
                     <>
                         <View style={{ width: '100%', alignItems: 'center', marginTop: 10 }}>
                             <FlatList
-                                data={data}
+                                data={ads}
                                 style={{ marginTop: 10, }}
                                 contentContainerStyle={{ justifyContent: 'center', }}
                                 numColumns={2}
@@ -171,7 +155,7 @@ const Home = ({ navigation }) => {
                                     <ServiceCard
                                         data={item}
                                         isFav={true}
-                                        submitHandler={() => { navigation.navigate('AdFullView', { item: item, isMyAd: true, isJobCreate: true }) }}
+                                        submitHandler={() => { navigation.navigate('AdFullView', { item: item }) }}
                                     />
                                 )}
                                 ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
