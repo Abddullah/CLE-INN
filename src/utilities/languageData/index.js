@@ -319,6 +319,10 @@ export const languageData = [
             closingTimeMustBeLater: 'Closing time must be Later',
             hourlyRate: 'Hourly Rate',
             pleaseSetYourHourlyRate: 'Please set your hourly rate in your profile before proceeding.',
+            RequiredHours: 'Required Hours',
+            bookingDate: 'Booking Date',
+            bookingTime: 'Booking Time',
+
 
 
         }
@@ -647,6 +651,12 @@ export const languageData = [
             closingTimeMustBeLater: "L'orario di chiusura deve essere successivo",
             hourlyRate: 'Tariffa oraria',
             pleaseSetYourHourlyRate: 'Imposta la tua tariffa oraria nel tuo profilo prima di procedere.',
+            RequiredHours: 'Ore richieste',
+            bookingDate: 'Data di prenotazione',
+            bookingTime: 'Orario di prenotazione',
+
+
+
 
         }
     },

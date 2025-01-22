@@ -34,7 +34,7 @@ const reducer = (state = initState, action) => {
     case 'IS_LOADER':
       return {
         ...state,
-        isLoader: !state.isLoader,
+        isLoader: state.isLoader,
       };
     case 'SET_USER':
       return {

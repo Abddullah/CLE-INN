@@ -28,6 +28,8 @@ const Home = ({ navigation }) => {
     let user = useSelector((state) => state.reducer.user);
     let allcategories = useSelector((state) => state.reducer.categories);
     let ads = useSelector((state) => state.reducer.allAds);
+    let isLoader = useSelector((state) => state.reducer.isLoader);
+    console.log('isLoader', isLoader);
 
     const [search, setsearch] = useState('');
     const [selectedTab, setselectedTab] = useState();
@@ -52,7 +54,7 @@ const Home = ({ navigation }) => {
         if (allcategories.length != 0) {
             setselectedCat(allcategories[0]?.categoryName)
             setsubCat(allcategories[0]?.subCategories)
-            dispatch(fetchAds(allcategories[0]?.categoryName, user.role === 'user' ? 'jobs' : 'service'))
+            dispatch(fetchAds(allcategories[0]?.categoryName, user.role === 'user' ? 'service' : 'jobs'))
         }
     }, [allcategories])
 
@@ -64,9 +66,16 @@ const Home = ({ navigation }) => {
     const selectedCatHandler = (title, subCategories) => {
         setselectedCat(title)
         setsubCat(subCategories)
-        dispatch(fetchAds(title, user.role === 'user' ? 'jobs' : 'service'))
-        console.log('selectedCat', title, subCategories);
+        dispatch(fetchAds(title, user.role === 'user' ? 'service' : 'jobs'))
     }
+
+    const groupedAds = subCat.reduce((acc, key) => {
+        const adsForSubCat = ads.filter((item) => item.subCategory === key);
+        if (adsForSubCat.length > 0) {
+            acc[key] = adsForSubCat;
+        }
+        return acc;
+    }, {});
 
     return (
         <View style={styles.container}>
@@ -76,6 +85,7 @@ const Home = ({ navigation }) => {
                     <Feather name="sun" style={{ fontSize: RFValue(20, screenResolution.screenHeight), color: colors.yellow, }} />
                     <Text style={[Typography.text_paragraph_1, { color: colors.black, marginLeft: 10 }]}>{'Good Morning,'}</Text>
                     <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{' Mark Wisdom'}</Text>
+                    <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{'  ' + user.role}</Text>
                 </View>
 
                 <View style={{ flexDirection: 'row', width: '100%', }}>
@@ -170,7 +180,6 @@ const Home = ({ navigation }) => {
                     </>
                 }
 
-
                 {/* Jobs and services Tab */}
                 {
                     (selectedTab === t('services') || (user.role === 'provider' ? selectedTab === t('myjobs') : selectedTab !== t('myjobs'))) &&
@@ -218,44 +227,42 @@ const Home = ({ navigation }) => {
                         </View>
 
                         {
-                            subCat.length != 0 && subCat.map((key, index) => {
-                                return (
-                                    ads.length != 0 && ads.map((item, index) => {
-                                        return (
-                                            item.subCategory === key &&
-                                            <View key={index} style={{ width: '95%', alignItems: 'flex-start', }}>
-                                                <View style={styles.subCatTextContainer}>
-                                                    <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, marginTop: 20 }]}>
-                                                        {key}
-                                                    </Text>
-                                                    <TouchableOpacity activeOpacity={.8} onPress={() => { navigation.navigate('CategoriesList', { subCatTitle: key }) }}>
-                                                        <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, marginTop: 20 }]}>
-                                                            {t('viewAll')}
-                                                        </Text>
-                                                    </TouchableOpacity>
-                                                </View>
-                                                <FlatList
-                                                    data={data}
-                                                    contentContainerStyle={{ marginTop: 10, padding: 5, }}
-                                                    horizontal={true}
-                                                    showsHorizontalScrollIndicator={false}
-                                                    showsVerticalScrollIndicator={false}
-                                                    renderItem={({ item, index }) =>
-                                                        <ServiceCard
-                                                            index={index}
-                                                            data={item}
-                                                            isFav={true}
-                                                            submitHandler={() => {
-                                                                navigation.navigate('AdFullView', { item: item, isService: selectedTab === t('services') ? true : false, isJobCreate: selectedTab === t('myjobs') ? true : false });
-                                                            }}
-                                                        />
-                                                    }
-                                                />
-                                            </View>
-                                        )
-                                    })
-                                )
-                            })
+                            Object.keys(groupedAds).map((key) => (
+                                <View key={key} style={{ width: '95%', alignItems: 'flex-start' }}>
+                                    <View style={styles.subCatTextContainer}>
+                                        <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, marginTop: 20 }]}>
+                                            {key}
+                                        </Text>
+                                        <TouchableOpacity
+                                            activeOpacity={0.8}
+                                            onPress={() => {
+                                                navigation.navigate('CategoriesList', { subCatTitle: key });
+                                            }}
+                                        >
+                                            <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, marginTop: 20 }]}>
+                                                {t('viewAll')}
+                                            </Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                    <FlatList
+                                        data={groupedAds[key]}
+                                        contentContainerStyle={{ marginTop: 10, padding: 5, }}
+                                        horizontal={true}
+                                        showsHorizontalScrollIndicator={false}
+                                        showsVerticalScrollIndicator={false}
+                                        renderItem={({ item, index }) =>
+                                            <ServiceCard
+                                                index={index}
+                                                data={item}
+                                                isFav={true}
+                                                submitHandler={() => {
+                                                    navigation.navigate('AdFullView', { item: item });
+                                                }}
+                                            />
+                                        }
+                                    />
+                                </View>
+                            ))
                         }
                     </>
                 }

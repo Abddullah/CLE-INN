@@ -18,6 +18,10 @@ import screenResolution from '../../utilities/constants/screenResolution';
 import CustomHeader from '../../components/Header';
 import CTAButton1 from '../../components/CTA_BUTTON1';
 import CTAButton2 from '../../components/CTA_BUTTON2';
+import moment from 'moment';
+import SmallMap from '../../components/smallMap';
+
+const CleaningAndHygineService = "Cleaning and Hygiene Services";
 
 const AdFullView = ({ navigation }) => {
     const route = useRoute();
@@ -29,16 +33,23 @@ const AdFullView = ({ navigation }) => {
 
     let data = route.params?.item;
     let isBooking = route.params?.isBooking;
-    let isMyAd = route.params?.isMyAd;
-    let isService = route.params?.isService;
     let isReviewBooking = route.params?.isReviewBooking;
+    let isMyAd = route.params?.isMyAd;
+
+    let isService = route.params?.isService;
     let isJobCreate = route.params?.isJobCreate;
-    // console.log(data, "data");
+
+    console.log(data, "data");
+
+    let images = [Images.cleaning, Images.cleaning, Images.cleaning, Images.cleaning, Images.cleaning];
+
 
     return (
         <View style={styles.container}>
             <CustomHeader
-                title={isJobCreate ? t('myads') : t('serviceprovider')}
+                title={
+                    (data.postedBy === user.userId) ? (t('myads')) : (data.addType === 'job' ? t('myjobs') : t('serviceprovider'))
+                }
                 isLeft={true}
                 leftPress={() => { navigation.goBack() }}
             />
@@ -51,7 +62,7 @@ const AdFullView = ({ navigation }) => {
                     <SliderBox
                         autoplay={true}
                         ImageComponent={FastImage}
-                        images={data.images}
+                        images={images}
                         sliderBoxHeight={230}
                         onCurrentImagePressed={index => console.warn(`image ${index} pressed`)}
                         dotColor={colors.Primary_01}
@@ -63,79 +74,143 @@ const AdFullView = ({ navigation }) => {
 
                 <View style={styles.list}>
                     <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{t('title')}</Text>
-                    <Text style={[Typography.text_paragraph, { color: colors.Neutral_01 }]}>{data.title}</Text>
+                    <Text style={[Typography.text_paragraph, { color: colors.Neutral_01 }]}>{data.category + ' / ' + data.subCategory}</Text>
                 </View>
 
                 <View style={styles.list}>
                     <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{t('description')}</Text>
-                    <Text style={[Typography.text_paragraph, { textAlign: 'left', color: colors.Neutral_01 }]}>{data.description}</Text>
+                    {
+                        data.addType === 'job' &&
+                        <Text style={[Typography.text_paragraph, { textAlign: 'left', color: colors.Neutral_01 }]}>{data.instructions}</Text>
+                    }
+                    {
+                        data.addType === 'service' &&
+                        <Text style={[Typography.text_paragraph, { textAlign: 'left', color: colors.Neutral_01 }]}>{data.description}</Text>
+                    }
                 </View>
 
                 <View style={styles.list2}>
                     <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{t('price')}</Text>
-                    <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{'€' + data.price + '/hr'}</Text>
+                    {
+                        data.addType === 'job' &&
+                        <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{'€' + data.totalPrice}</Text>
+                    }
+                    {
+                        data.addType === 'service' &&
+                        <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{'€' + data.fixedRates}</Text>
+                    }
                 </View>
 
                 {
-                    isJobCreate &&
+                    data.addType === 'job' &&
+                    <View style={styles.list2}>
+                        <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{t('RequiredHours')}</Text>
+                        <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{data.howManyHourDoYouNeed}</Text>
+                    </View>
+                }
+
+                {
+                    data.addType === 'job' &&
                     <View style={styles.list2}>
                         <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{t('cleaners')}</Text>
-                        <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{'3'}</Text>
+                        <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{data.howManyProfessionalDoYouNeed}</Text>
                     </View>
                 }
 
                 {
-                    isJobCreate &&
+                    data.addType === 'job' &&
                     <View style={styles.list2}>
                         <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{t('workFrequency')}</Text>
-                        <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{'Weekly'}</Text>
+                        <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{data.repeateService}</Text>
                     </View>
                 }
 
 
                 {
-                    isJobCreate &&
+                    data.addType === 'job' && data.category === CleaningAndHygineService &&
                     <View style={styles.list2}>
                         <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{t('areaSize')}</Text>
-                        <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{'51 - 100 m2'}</Text>
+                        <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{data.roomSize}</Text>
                     </View>
                 }
 
                 {
-                    isJobCreate &&
+                    data.addType === 'job' && data.category === CleaningAndHygineService &&
                     <View style={styles.list2}>
                         <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{t('roomsNumber')}</Text>
-                        <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{'1 Room'}</Text>
+                        <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{data.roomsQty}</Text>
                     </View>
                 }
 
                 {
-                    isJobCreate &&
+                    data.addType === 'job' && data.category === CleaningAndHygineService &&
                     <View style={styles.list2}>
                         <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{t('needCleaningMaterials')}</Text>
-                        <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{'Yes Please'}</Text>
+                        <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{data.needCleaningMaterials}</Text>
                     </View>
                 }
 
-                <View style={[styles.list2, { flexDirection: 'column' }]}>
-                    <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{t('availability')}</Text>
-                    <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, marginTop: 5 }]}>{'Monday'}</Text>
-                    <Text style={[Typography.text_paragraph_1, { color: colors.White_Primary_01, }]}>{'08:00 AM to 22:00 PM'}</Text>
-                    <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{'Tuesday'}</Text>
-                    <Text style={[Typography.text_paragraph_1, { color: colors.White_Primary_01, }]}>{'08:00 AM to 22:00 PM'}</Text>
-                    <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{'Wednesday'}</Text>
-                    <Text style={[Typography.text_paragraph_1, { color: colors.White_Primary_01, }]}>{'08:00 AM to 22:00 PM'}</Text>
+                {
+                    data.addType === 'job' && data.category === CleaningAndHygineService &&
+                    <View style={styles.list2}>
+                        <View style={{ flexDirection: 'column', flexWrap: 'wrap', }}>
+                            <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{t('additionalService')}</Text>
+                            {
+                                data?.aditionalServices.map((service, index) => (
+                                    <Text style={[Typography.text_paragraph_1, { textAlign: 'left', color: colors.White_Primary_01, }]}>{service.title}</Text>
+                                ))
+                            }
+                        </View>
+                    </View>
+                }
+
+                {
+                    data.addType === 'job' &&
+                    <View style={styles.list2}>
+                        <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{t('bookingDate') + ' '}</Text>
+                        <Text style={[Typography.text_paragraph_1, styles.editText, { color: colors.White_Primary_01, }]}>{moment(data.bookingDate).format('DD MM YYYY')}</Text>
+
+                    </View>
+                }
+
+                {
+                    data.addType === 'job' &&
+                    <View style={styles.list2}>
+                        <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{t('bookingTime') + ' '}</Text>
+                        <Text style={[Typography.text_paragraph_1, styles.editText, { color: colors.White_Primary_01, }]}>{moment(data.bookingStart).format('LT') + ' - ' + moment(data.bookingEnd).format('LT')}</Text>
+                    </View>
+                }
+
+
+                {
+                    data.addType === 'service' &&
+                    <View style={[styles.list2, { flexDirection: 'column' }]}>
+                        <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{t('availability')}</Text>
+                        <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, marginTop: 5 }]}>{'Monday'}</Text>
+                        <Text style={[Typography.text_paragraph_1, { color: colors.White_Primary_01, }]}>{'08:00 AM to 22:00 PM'}</Text>
+                        <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{'Tuesday'}</Text>
+                        <Text style={[Typography.text_paragraph_1, { color: colors.White_Primary_01, }]}>{'08:00 AM to 22:00 PM'}</Text>
+                        <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{'Wednesday'}</Text>
+                        <Text style={[Typography.text_paragraph_1, { color: colors.White_Primary_01, }]}>{'08:00 AM to 22:00 PM'}</Text>
+                    </View>
+                }
+
+                <View style={styles.list2}>
+                    <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{t('address')}</Text>
+                    <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{data.address}</Text>
                 </View>
 
                 <View style={styles.list}>
                     <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{t('location')}</Text>
-                    <MapSmall width={'100%'} marginTop={10} />
+                    <View style={{ height: 250, width: '100%', marginTop: 10, overflow: 'hidden' }}>
+                        <SmallMap savedCords={[data.geoPoint._latitude, data.geoPoint._longitude]} />
+                    </View>
                 </View>
 
                 <TouchableOpacity
                     activeOpacity={.8}
                     style={styles.centerStyle}
-                    onPress={() => { navigation.navigate('CustomerInfo', { isJobCreate: isJobCreate }) }}
+                    onPress={() => { navigation.navigate('CustomerInfo', { isJobCreate: data.addType === 'job' ? true : false }) }}
                 >
                     <FontAwesome5 name="info-circle" style={{ fontSize: RFValue(18, screenResolution.screenHeight), color: colors.White_Primary_01, marginLeft: 10 }} />
                     {
@@ -149,7 +224,6 @@ const AdFullView = ({ navigation }) => {
                 </TouchableOpacity>
 
                 {
-                    !isReviewBooking &&
                     <>
                         <View style={[styles.list2, { marginTop: 20 }]}>
                             <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{t('reviews')}</Text>
@@ -188,6 +262,7 @@ const AdFullView = ({ navigation }) => {
                         </View>
                     </>
                 }
+
             </ScrollView>
 
             <View style={{ width: '90%', marginBottom: 20 }}>
@@ -212,17 +287,17 @@ const AdFullView = ({ navigation }) => {
                 }
 
                 {
-                    (isService === true) &&
+                    (data.addType === 'service') &&
                     <CTAButton1 title={t('book')} submitHandler={() => { navigation.navigate('CreateBooking') }} />
                 }
 
                 {
-                    (isService === false) &&
+                    (data.addType === 'job') &&
                     <CTAButton1 title={t('apply')} submitHandler={() => { navigation.navigate('SignatureScreen') }} />
                 }
 
                 {
-                    (isMyAd === true) &&
+                    (data.postedBy === user.userId) &&
                     <>
                         <View>
                             <CTAButton1 title={t('edit')} submitHandler={() => { }} />

@@ -15,7 +15,6 @@ const CTAButton1 = ({
     const colors = theme === 'dark' ? DarkThemeColors : LightThemeColors;
     const styles = createStyles(colors, theme);
     let isLoader = useSelector((state) => state.reducer.isLoader);
-
     return (
         <TouchableOpacity
             onPress={submitHandler}

@@ -23,8 +23,8 @@ export default function SignIn({ navigation }) {
 
     let isError = useSelector((state) => state.reducer.isError);
     let isLoader = useSelector((state) => state.reducer.isLoader);
-    // const [email, setemail] = useState('provider@gmail.com');
-    const [email, setemail] = useState('user@gmail.com');
+    const [email, setemail] = useState('provider@gmail.com');
+    // const [email, setemail] = useState('user@gmail.com');
     const [password, setpassword] = useState('12345678');
     const [isSelectedRemember, setisSelectedRemember] = useState(false);
     const [secureEntryState, setsecureEntryState] = useState(true);
