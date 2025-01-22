@@ -197,7 +197,7 @@ const Home = ({ navigation }) => {
                                         <TouchableOpacity
                                             activeOpacity={0.8}
                                             onPress={() => {
-                                                navigation.navigate('CategoriesList', { subCatTitle: key });
+                                                navigation.navigate('CategoriesList', { subCatTitle: key, ads: groupedAds[key] });
                                             }}
                                         >
                                             <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, marginTop: 20 }]}>

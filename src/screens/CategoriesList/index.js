@@ -16,6 +16,7 @@ const CategoriesList = ({ navigation }) => {
     const styles = createStyles(colors, theme, user,);
     const route = useRoute();
     let subCatTitle = route.params?.subCatTitle;
+    let ads = route.params?.ads;
 
     const [data, setdata] = useState([
         {
@@ -89,22 +90,24 @@ const CategoriesList = ({ navigation }) => {
                         {subCatTitle}
                     </Text>
                 </View>
-                <FlatList
-                    data={data}
-                    style={{ marginTop: 10, }}
-                    contentContainerStyle={{ justifyContent: 'center', }}
-                    numColumns={2}
-                    showsVerticalScrollIndicator={false}
-                    renderItem={({ item }) => (
-                        <ServiceCard
-                            data={item}
-                            isFav={true}
-                            submitHandler={() => { navigation.navigate('AdFullView', { item: item, isBooking: false }) }}
-                        />
-                    )}
-                    ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
-                />
-            </View>
+                <View style={{ width: '95%', alignItems: ads.length > 1 ? 'center' : 'flex-start', }}>
+                    <FlatList
+                        data={ads}
+                        style={{ marginTop: 10 }}
+                        contentContainerStyle={{ justifyContent: 'center' }}
+                        numColumns={2}
+                        showsVerticalScrollIndicator={false}
+                        renderItem={({ item }) => (
+                            <ServiceCard
+                                data={item}
+                                isFav={true}
+                                submitHandler={() => { navigation.navigate('AdFullView', { item: item }) }}
+                            />
+                        )}
+                        ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
+                    />
+                </View>
+            </View >
         </>
     );
 };
