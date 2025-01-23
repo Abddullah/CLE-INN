@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react'
 import {
   StyleSheet,
   View,
@@ -7,149 +7,96 @@ import {
   TextInput,
   FlatList,
   TouchableOpacity,
-} from 'react-native';
-import {useDispatch, useSelector} from 'react-redux';
-import {t} from 'i18next';
-import {Typography} from '../../utilities/constants/constant.style';
-import FastImage from 'react-native-fast-image';
-import {SliderBox} from 'react-native-image-slider-box';
-import AntDesign from 'react-native-vector-icons/AntDesign';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import Feather from 'react-native-vector-icons/Feather';
-import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+} from 'react-native'
+import {useDispatch, useSelector} from 'react-redux'
+import {t} from 'i18next'
+import {Typography} from '../../utilities/constants/constant.style'
+import FastImage from 'react-native-fast-image'
+import {SliderBox} from 'react-native-image-slider-box'
+import AntDesign from 'react-native-vector-icons/AntDesign'
+import Ionicons from 'react-native-vector-icons/Ionicons'
+import Feather from 'react-native-vector-icons/Feather'
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5'
 // local imports
-import Images from '../../assets/images/index';
-import {LightThemeColors, DarkThemeColors} from '../../utilities/constants';
-import {useTheme} from '../../../ThemeContext';
-import Categories from '../../components/Categories';
-import screenResolution from '../../utilities/constants/screenResolution';
-import CustomTabs from '../../components/CustomTabs';
-import ServiceCard from '../../components/ServiceCard';
-import {RFValue} from 'react-native-responsive-fontsize';
-import {fetchAds, fetchAdsByUser} from '../../store/actions/action';
+import Images from '../../assets/images/index'
+import {LightThemeColors, DarkThemeColors} from '../../utilities/constants'
+import {useTheme} from '../../../ThemeContext'
+import Categories from '../../components/Categories'
+import screenResolution from '../../utilities/constants/screenResolution'
+import CustomTabs from '../../components/CustomTabs'
+import ServiceCard from '../../components/ServiceCard'
+import {RFValue} from 'react-native-responsive-fontsize'
+import {fetchAds, fetchAdsByUser} from '../../store/actions/action'
+import getGreetingMessage from '../../services/greetUserByCurrentTime'
+import CityAndCountry from '../../services/getCityAndCountry'
 
-const Home = ({navigation, iconColor }) => {
-  const dispatch = useDispatch();
-  const {theme} = useTheme();
-  const colors = theme === 'dark' ? DarkThemeColors : LightThemeColors;
-  const styles = createStyles(colors, theme);
-  let savedCords = useSelector(state => state.reducer.savedCords);
-  let user = useSelector(state => state.reducer.user);
-  let allcategories = useSelector(state => state.reducer.categories);
-  let ads = useSelector(state => state.reducer.allAds);
-  let myAds = useSelector(state => state.reducer.myAds);
+const Home = ({navigation, iconColor}) => {
+  const dispatch = useDispatch()
+  const {theme} = useTheme()
+  const colors = theme === 'dark' ? DarkThemeColors : LightThemeColors
+  const styles = createStyles(colors, theme)
+  let savedCords = useSelector(state => state.reducer.savedCords)
+  let user = useSelector(state => state.reducer.user)
+  let allcategories = useSelector(state => state.reducer.categories)
+  let ads = useSelector(state => state.reducer.allAds)
+  let myAds = useSelector(state => state.reducer.myAds)
 
-  console.log('My Ads', myAds);
+  console.log('My Ads', myAds)
 
-  const [search, setsearch] = useState('');
-  const [selectedTab, setselectedTab] = useState();
-  const [selectedCat, setselectedCat] = useState('');
-  const [subCat, setsubCat] = useState([]);
-  const [cityAndCountryName , setCityAndCountryName]= useState("loading...")
+  const [search, setsearch] = useState('')
+  const [selectedTab, setselectedTab] = useState()
+  const [selectedCat, setselectedCat] = useState('')
+  const [subCat, setsubCat] = useState([])
+  const [cityAndCountryName, setCityAndCountryName] = useState('loading...')
 
   useEffect(() => {
     if (allcategories.length != 0) {
-      setselectedCat(allcategories[0]?.categoryName);
-      setsubCat(allcategories[0]?.subCategories);
+      setselectedCat(allcategories[0]?.categoryName)
+      setsubCat(allcategories[0]?.subCategories)
       dispatch(
         fetchAds(
           allcategories[0]?.categoryName,
           user.role === 'user' ? 'service' : 'jobs',
         ),
-      );
+      )
     }
-  }, [allcategories]);
+  }, [allcategories])
 
   useEffect(() => {
     dispatch(
       fetchAdsByUser(user.userId, user.role === 'user' ? 'jobs' : 'service'),
-    );
-    user.role === 'user' && setselectedTab(t('services'));
-    user.role !== 'user' && setselectedTab(t('myjobs'));
-  }, [user]);
+    )
+    user.role === 'user' && setselectedTab(t('services'))
+    user.role !== 'user' && setselectedTab(t('myjobs'))
+  }, [user])
 
   const selectedCatHandler = (title, subCategories) => {
-    setselectedCat(title);
-    setsubCat(subCategories);
-    dispatch(fetchAds(title, user.role === 'user' ? 'service' : 'jobs'));
-  };
+    setselectedCat(title)
+    setsubCat(subCategories)
+    dispatch(fetchAds(title, user.role === 'user' ? 'service' : 'jobs'))
+  }
 
   const groupedAds = subCat.reduce((acc, key) => {
-    const adsForSubCat = ads.filter(item => item.subCategory === key);
+    const adsForSubCat = ads.filter(item => item.subCategory === key)
     if (adsForSubCat.length > 0) {
-      acc[key] = adsForSubCat;
+      acc[key] = adsForSubCat
     }
-    return acc;
-  }, {});
+    return acc
+  }, {})
 
-  //greet message according to the current time
-
-  const getGreetingMessage = () => {
-    const now = new Date();
-    const hours = now.getHours();
-
-    if (hours >= 5 && hours < 12) {
-      return { message: "Good Morning", icon: "sun", color: colors.yellow };
-    } else if (hours >= 12 && hours < 17) {
-      return { message: "Good Afternoon", icon: "cloud", color: colors.blue };
-    } else if (hours >= 17 && hours < 21) {
-      return { message: "Good Evening", icon: "sunset", color: colors.orange };
-    } else {
-      return { message: "Good Night", icon: "moon", color: colors.orange };
-    }
-  };
-
-  const { message, icon, color } = getGreetingMessage();
-
-
-  //get name of location by using the savecord state
-
-  
-  
-  const getCityAndCountry = async (lng, lat) => {
-    const accessToken = 'pk.eyJ1Ijoicm9sbiIsImEiOiJjbHUydnB1Y3EwYnFzMmlxZWc2NWFscDJvIn0.9TwHwnZcT6qB2OO6Q4OnFQ';
-    const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${accessToken}`;
-
-    try {
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error('Failed to fetch location data');
-      }
-
-      const data = await response.json();
-      const place = data.features.find((feature) =>
-        feature.place_type.includes('place')
-      );
-      const country = data.features.find((feature) =>
-        feature.place_type.includes('country')
-      );
-
-      const city = place ? place.text : 'Unknown city';
-      const countryName = country ? country.text : 'Unknown country';
-
-      // Update state with city and country
-      setCityAndCountryName(`${city}, ${countryName}`);
-    } catch (error) {
-      console.error('Error fetching location:', error.message);
-      setCityAndCountryName('Error fetching location');
-    }
-  };
-
-  useEffect(() => {
-    getCityAndCountry(savedCords[1], savedCords[0]);
-  }, []);
+  const {message, icon, color} = getGreetingMessage()
 
   return (
     <View style={styles.container}>
       <View style={styles.boxContainer}>
         <View style={{flexDirection: 'row', width: '100%'}}>
-        <Feather
-        name={icon}
-        style={{
-          fontSize: 20,
-          iconColor: color,
-        }}
-      />
+          <Feather
+            name={icon}
+            style={{
+              fontSize: 20,
+              iconColor: color,
+            }}
+          />
           <Text
             style={[
               Typography.text_paragraph_1,
@@ -180,7 +127,7 @@ const Home = ({navigation, iconColor }) => {
               Typography.text_paragraph_1,
               {fontWeight: 'bold', color: colors.black, marginLeft: 13},
             ]}>
-            {cityAndCountryName}
+            <CityAndCountry lat={savedCords[0]} lng={savedCords[1]} />
           </Text>
         </View>
 
@@ -198,7 +145,7 @@ const Home = ({navigation, iconColor }) => {
               style={styles.input}
               value={search}
               onChangeText={e => {
-                setsearch(e);
+                setsearch(e)
               }}
               placeholder={t('search')}
               placeholderTextColor={
@@ -248,7 +195,8 @@ const Home = ({navigation, iconColor }) => {
         {/* My Ads Tab */}
         {((user.role !== 'user' && selectedTab === t('myads')) ||
           (user.role === 'user' && selectedTab === t('myjobs'))) && (
-          <View style={{width: '100%', alignItems:'flex-start', marginTop: 10}}>
+          <View
+            style={{width: '100%', alignItems: 'flex-start', marginTop: 10}}>
             <FlatList
               data={myAds}
               style={{marginTop: 10}}
@@ -260,7 +208,7 @@ const Home = ({navigation, iconColor }) => {
                   data={item}
                   isFav={true}
                   submitHandler={() => {
-                    navigation.navigate('AdFullView', {item: item});
+                    navigation.navigate('AdFullView', {item: item})
                   }}
                 />
               )}
@@ -322,7 +270,7 @@ const Home = ({navigation, iconColor }) => {
                       icon={item.image}
                       title={item.categoryName}
                       submitHandler={(title, subCategories) => {
-                        selectedCatHandler(title, subCategories);
+                        selectedCatHandler(title, subCategories)
                       }}
                     />
                   )}
@@ -346,7 +294,7 @@ const Home = ({navigation, iconColor }) => {
                       navigation.navigate('CategoriesList', {
                         subCatTitle: key,
                         ads: groupedAds[key],
-                      });
+                      })
                     }}>
                     <Text
                       style={[
@@ -373,7 +321,7 @@ const Home = ({navigation, iconColor }) => {
                       data={item}
                       isFav={true}
                       submitHandler={() => {
-                        navigation.navigate('AdFullView', {item: item});
+                        navigation.navigate('AdFullView', {item: item})
                       }}
                     />
                   )}
@@ -390,7 +338,7 @@ const Home = ({navigation, iconColor }) => {
         onPress={() => {
           navigation.navigate('ServiceCreate', {
             isJobCreate: user.role === 'user' ? true : false,
-          });
+          })
         }}>
         <Ionicons
           name="add-outline"
@@ -401,10 +349,10 @@ const Home = ({navigation, iconColor }) => {
         />
       </TouchableOpacity>
     </View>
-  );
-};
+  )
+}
 
-export default Home;
+export default Home
 const createStyles = (colors, theme) => {
   return StyleSheet.create({
     container: {
@@ -488,5 +436,5 @@ const createStyles = (colors, theme) => {
       width: '97%',
       justifyContent: 'space-between',
     },
-  });
-};
+  })
+}

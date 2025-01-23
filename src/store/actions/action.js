@@ -396,7 +396,7 @@ export const fetchAdsByUser = (userId, collection) => dispatch => {
 
 //update userAds
 
-export const updateUserAdsById = (adId, data, collection) => dispatch => {
+export const updateUserAdsById = (adId, data, collection , navigation) => dispatch => {
   try {
     dispatch({type: 'IS_LOADER', payload: true});
 
@@ -406,26 +406,27 @@ export const updateUserAdsById = (adId, data, collection) => dispatch => {
       .update(data)
       .then(() => {
         console.log('Service updated successfully!');
-        dispatch({type: 'UPDATE_AD_SUCCESS', payload: adId}); // Optional: Dispatch success action
+        dispatch({type: 'UPDATE_AD_SUCCESS', payload: adId}); 
         dispatch({type: 'IS_LOADER', payload: false});
         Toast.show({
           type: 'success',
           text1: 'Ad updated successfully!',
           position: 'bottom',
         });
+
       })
       .catch(error => {
         console.error('Error updating service:', error);
         dispatch({type: 'IS_LOADER', payload: false});
         const errorMessage = getFirebaseErrorMessage(error.code);
         Toast.show({type: 'error', text1: errorMessage, position: 'bottom'});
+       
       });
   } catch (error) {
     console.error('Unexpected error while updating ad:', error);
     dispatch({type: 'IS_LOADER', payload: false});
   }
 };
-
 //delete the user ad
 
 export const deleteAdById =

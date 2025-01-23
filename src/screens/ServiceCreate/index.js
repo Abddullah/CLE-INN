@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect} from 'react'
 import {
   StyleSheet,
   View,
@@ -9,110 +9,108 @@ import {
   FlatList,
   ActivityIndicator,
   Image,
-} from 'react-native';
-import {useDispatch, useSelector} from 'react-redux';
-import firestore from '@react-native-firebase/firestore';
-import {CurrentRenderContext, useRoute} from '@react-navigation/native';
-import {launchImageLibrary} from 'react-native-image-picker';
-import {Select} from 'native-base';
-import {RFValue} from 'react-native-responsive-fontsize';
-import {t} from 'i18next';
+} from 'react-native'
+import {useDispatch, useSelector} from 'react-redux'
+import firestore from '@react-native-firebase/firestore'
+import {CurrentRenderContext, useRoute} from '@react-navigation/native'
+import {launchImageLibrary} from 'react-native-image-picker'
+import {Select} from 'native-base'
+import {RFValue} from 'react-native-responsive-fontsize'
+import {t} from 'i18next'
 // icons
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import AntDesign from 'react-native-vector-icons/AntDesign';
-import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
-import moment from 'moment';
-import Entypo from 'react-native-vector-icons/Entypo';
-import DatePicker from 'react-native-date-picker';
-import Fontisto from 'react-native-vector-icons/Fontisto';
-import Feather from 'react-native-vector-icons/Feather';
+import Ionicons from 'react-native-vector-icons/Ionicons'
+import AntDesign from 'react-native-vector-icons/AntDesign'
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5'
+import moment from 'moment'
+import Entypo from 'react-native-vector-icons/Entypo'
+import DatePicker from 'react-native-date-picker'
+import Fontisto from 'react-native-vector-icons/Fontisto'
+import Feather from 'react-native-vector-icons/Feather'
 // local imports
-import {useTheme} from '../../../ThemeContext';
-import {LightThemeColors, DarkThemeColors} from '../../utilities/constants';
-import {Typography} from '../../utilities/constants/constant.style';
-import CTAButton1 from '../../components/CTA_BUTTON1';
-import CustomHeader from '../../components/Header';
-import WeekTimeSelector from '../../components/WeekTimeSelector';
-import Images from '../../assets/images/index';
-import screenResolution from '../../utilities/constants/screenResolution';
-import RepeatService from '../../components/RepeatService_Popup';
-import InformationPopup from '../../components/Information_Popup';
-import BookingStatusTab from '../../components/BookingStatusTab';
-import HorizontalList from '../../components/horizontalList';
-import AdditionalServices from '../../components/AdditionalServices';
+import {useTheme} from '../../../ThemeContext'
+import {LightThemeColors, DarkThemeColors} from '../../utilities/constants'
+import {Typography} from '../../utilities/constants/constant.style'
+import CTAButton1 from '../../components/CTA_BUTTON1'
+import CustomHeader from '../../components/Header'
+import WeekTimeSelector from '../../components/WeekTimeSelector'
+import Images from '../../assets/images/index'
+import screenResolution from '../../utilities/constants/screenResolution'
+import RepeatService from '../../components/RepeatService_Popup'
+import InformationPopup from '../../components/Information_Popup'
+import BookingStatusTab from '../../components/BookingStatusTab'
+import HorizontalList from '../../components/horizontalList'
+import AdditionalServices from '../../components/AdditionalServices'
 import {
   createJob,
   createService,
   showError,
   updateUserAdsById,
-} from '../../store/actions/action';
-import SmallMap from '../../components/smallMap';
-import Toast from 'react-native-toast-message';
+} from '../../store/actions/action'
+import SmallMap from '../../components/smallMap'
+import Toast from 'react-native-toast-message'
 
-const deviceWidth = screenResolution.screenWidth;
-const CleaningAndHygineService = 'Cleaning and Hygiene Services';
+const deviceWidth = screenResolution.screenWidth
+const CleaningAndHygineService = 'Cleaning and Hygiene Services'
 
 const CreateService = ({navigation}) => {
   // styling themes state
-  const {theme, toggleTheme} = useTheme();
-  const colors = theme === 'dark' ? DarkThemeColors : LightThemeColors;
-  const styles = createStyles(colors, theme, deviceWidth);
+  const {theme, toggleTheme} = useTheme()
+  const colors = theme === 'dark' ? DarkThemeColors : LightThemeColors
+  const styles = createStyles(colors, theme, deviceWidth)
 
-  const route = useRoute();
-  const dispatch = useDispatch();
+  const route = useRoute()
+  const dispatch = useDispatch()
   // let isJobCreate = route.params.isJobCreate;
-  let isJobCreate = route.params?.isJobCreate || false;
-  let user = useSelector(state => state.reducer.user);
-  let isError = useSelector(state => state.reducer.isError);
-  let savedCords = useSelector(state => state.reducer.savedCords);
-  let allcategories = useSelector(state => state.reducer.categories);
+  let isJobCreate = route.params?.isJobCreate || false
+  let user = useSelector(state => state.reducer.user)
+  let isError = useSelector(state => state.reducer.isError)
+  let savedCords = useSelector(state => state.reducer.savedCords)
+  let allcategories = useSelector(state => state.reducer.categories)
   // let hourlyRates = useSelector((state) => state.reducer.hourlyRates);
-  let roomSizes = useSelector(state => state.reducer.roomSize);
-  let noOfRooms = useSelector(state => state.reducer.noOfRooms);
-  let taxes = useSelector(state => state.reducer.taxes);
-  let fixRates = useSelector(state => state.reducer.fixRates);
+  let roomSizes = useSelector(state => state.reducer.roomSize)
+  let noOfRooms = useSelector(state => state.reducer.noOfRooms)
+  let taxes = useSelector(state => state.reducer.taxes)
+  let fixRates = useSelector(state => state.reducer.fixRates)
 
-  const [step, setstep] = useState(0);
+  const [step, setstep] = useState(0)
   // repeate service modal state
-  const [hourlyRates, sethourlyRates] = useState('0');
-  const [modalVisible, setModalVisible] = useState(true);
-  const [repeateService, setrepeateService] = useState('One Time');
+  const [hourlyRates, sethourlyRates] = useState('0')
+  const [modalVisible, setModalVisible] = useState(true)
+  const [repeateService, setrepeateService] = useState('One Time')
   // informationPopups state
-  const [informationPopup, setinformationPopup] = useState(false);
-  const [informationPopup1, setinformationPopup1] = useState(false);
+  const [informationPopup, setinformationPopup] = useState(false)
+  const [informationPopup1, setinformationPopup1] = useState(false)
 
-  const [previousHourlyRates, setPreviousHourlyRates] = useState(0);
+  const [previousHourlyRates, setPreviousHourlyRates] = useState(0)
 
-  const [selectedHour, setselectedHour] = useState(isJobCreate ? '1' : '0');
-  const [previousSelectedHour, setPreviousSelectedHour] = useState(0);
+  const [selectedHour, setselectedHour] = useState(isJobCreate ? '1' : '0')
+  const [previousSelectedHour, setPreviousSelectedHour] = useState(0)
 
   const [selectedProfessional, setselectedProfessional] = useState(
     isJobCreate ? '1' : '0',
-  );
+  )
   const [previousSelectedProfessional, setPreviousSelectedProfessional] =
-    useState(0);
+    useState(0)
 
-  const [selectedCategories, setselectedCategories] = useState('');
-  const [subcategories, setsubcategories] = useState([]);
-  const [selectedsubcategories, setselectedsubcategories] = useState('');
+  const [selectedCategories, setselectedCategories] = useState('')
+  const [subcategories, setsubcategories] = useState([])
+  const [selectedsubcategories, setselectedsubcategories] = useState('')
 
-  const [roomsize, setroomsize] = useState('');
-  const [previousRoomRate, setPreviousRoomRate] = useState(0);
+  const [roomsize, setroomsize] = useState('')
+  const [previousRoomRate, setPreviousRoomRate] = useState(0)
 
-  const [roomsQty, setroomsQty] = useState('');
-  const [previousRoomQtyPrice, setPreviousRoomQtyPrice] = useState(0);
+  const [roomsQty, setroomsQty] = useState('')
+  const [previousRoomQtyPrice, setPreviousRoomQtyPrice] = useState(0)
 
-  const [needCleaningMaterials, setneedCleaningMaterials] = useState('');
+  const [needCleaningMaterials, setneedCleaningMaterials] = useState('')
 
-  const [aditionalSelectedServices, setaditionalSelectedServices] = useState(
-    [],
-  );
+  const [aditionalSelectedServices, setaditionalSelectedServices] = useState([])
   const [previousAdditionalServices, setPreviousAdditionalServices] = useState(
     [],
-  );
+  )
 
-  const [totalPrice, settotalPrice] = useState('0');
-  const [totalPriceWithTax, settotalPriceWithTax] = useState('0');
+  const [totalPrice, settotalPrice] = useState('0')
+  const [totalPriceWithTax, settotalPriceWithTax] = useState('0')
 
   const [productImages, setProductImages] = useState([
     {imagURL: ''},
@@ -121,127 +119,150 @@ const CreateService = ({navigation}) => {
     {imagURL: ''},
     {imagURL: ''},
     {imagURL: ''},
-  ]);
+  ])
 
-  const [date, setDate] = useState(new Date());
-  const [openBs, setopenBs] = useState(false);
-  const [showBs, setshowBs] = useState(false);
-  const [dateSelected, setDateSelected] = useState(false);
+  const [date, setDate] = useState(new Date())
+  const [openBs, setopenBs] = useState(false)
+  const [showBs, setshowBs] = useState(false)
+  const [dateSelected, setDateSelected] = useState(false)
 
-  const [timeStart, settimeStart] = useState(new Date());
-  const [timeStartOpen, settimeStartOpen] = useState(false);
-  const [timeStartShow, settimeStartShow] = useState(false);
-  const [timeStartSelected, settimeStartSelected] = useState(false);
+  const [timeStart, settimeStart] = useState(new Date())
+  const [timeStartOpen, settimeStartOpen] = useState(false)
+  const [timeStartShow, settimeStartShow] = useState(false)
+  const [timeStartSelected, settimeStartSelected] = useState(false)
 
-  const [timeEnd, settimeEnd] = useState(new Date());
-  const [timeEndOpen, settimeEndOpen] = useState(false);
-  const [timeEndShow, settimeEndShow] = useState(false);
-  const [timeEndSelected, settimeEndSelected] = useState(false);
+  const [timeEnd, settimeEnd] = useState(new Date())
+  const [timeEndOpen, settimeEndOpen] = useState(false)
+  const [timeEndShow, settimeEndShow] = useState(false)
+  const [timeEndSelected, settimeEndSelected] = useState(false)
 
-  const [location, setlocation] = useState('');
+  const [location, setlocation] = useState('')
 
-  const [instructions, setinstructions] = useState('');
-  const [description, setdescription] = useState('');
+  const [instructions, setinstructions] = useState('')
+  const [description, setdescription] = useState('')
 
-  const [selectedDays, setSelectedDays] = useState([]);
+  const [selectedDays, setSelectedDays] = useState([])
 
-  const [isLoader, setisLoader] = useState(false);
+  const [isLoader, setisLoader] = useState(false)
 
-  const {adId, data , addType} = route.params || null;
+  const {adId, data, addType} = route.params || null
 
-  
+ 
+
+  useEffect(() => {
+    if (data != null) {
+      setselectedHour(data.howManyHourDoYouNeed)
+      setselectedProfessional(data.howManyProfessionalDoYouNeed)
+      setselectedCategories(data.category)
+      let subCat = allcategories.find(
+        category => category.categoryName === data.category,
+      )
+      setsubcategories(subCat.subCategories)
+      setselectedsubcategories(data.subCategory)
+      setProductImages(data.images)
+      setlocation(data.geoPoint._latitude, data.geoPoint._longitude)
+      setneedCleaningMaterials(data.needCleaningMaterials)
+      setaditionalSelectedServices(data.aditionalServices)
+      setroomsQty(data.roomsQty)
+      setroomsize(data.roomSize)
+      setlocation(data.address)
+      setinstructions(data.instructions)
+      setdescription(data.description)
+      setSelectedDays(data.timeSlots)
+
+      return
+    }
+  }, [data])
 
   //set the previous data in the fields for edit
 
-
-
   useEffect(() => {
-    setneedCleaningMaterials(t('noIhavethem'));
+    setneedCleaningMaterials(t('noIhavethem'))
     let previousTotal =
-      previousSelectedHour * previousHourlyRates * previousSelectedProfessional;
-    let newTotal = selectedHour * hourlyRates * selectedProfessional;
-    let total = Number(totalPrice) - previousTotal + newTotal;
-    settotalPrice(total);
+      previousSelectedHour * previousHourlyRates * previousSelectedProfessional
+    let newTotal = selectedHour * hourlyRates * selectedProfessional
+    let total = Number(totalPrice) - previousTotal + newTotal
+    settotalPrice(total)
     // Update previous values
-    setPreviousHourlyRates(hourlyRates);
-    setPreviousSelectedHour(selectedHour);
-    setPreviousSelectedProfessional(selectedProfessional);
-    taxHandler();
+    setPreviousHourlyRates(hourlyRates)
+    setPreviousSelectedHour(selectedHour)
+    setPreviousSelectedProfessional(selectedProfessional)
+    taxHandler()
   }, [
     hourlyRates,
     selectedHour,
     selectedProfessional,
     aditionalSelectedServices,
-  ]);
+  ])
 
   useEffect(() => {
-    sethourlyRates(user.hourlyRate);
-  }, [user]);
+    sethourlyRates(user.hourlyRate)
+  }, [user])
 
   useEffect(() => {
-    taxHandler();
-  }, [totalPrice]);
+    taxHandler()
+  }, [totalPrice])
 
   const categoryHandler = categoryName => {
-    setselectedCategories(categoryName);
+    setselectedCategories(categoryName)
     let subCat = allcategories.find(
       category => category.categoryName === categoryName,
-    );
-    setsubcategories(subCat.subCategories);
+    )
+    setsubcategories(subCat.subCategories)
     // Clear the previous values
-    let newTotal = selectedHour * hourlyRates * selectedProfessional;
-    settotalPrice(newTotal);
-    setselectedsubcategories('');
-    setroomsize('');
-    setroomsQty('');
-    setneedCleaningMaterials('');
-    setaditionalSelectedServices([]);
-  };
+    let newTotal = selectedHour * hourlyRates * selectedProfessional
+    settotalPrice(newTotal)
+    setselectedsubcategories('')
+    setroomsize('')
+    setroomsQty('')
+    setneedCleaningMaterials('')
+    setaditionalSelectedServices([])
+  }
 
   const roomSizeHandler = itemValue => {
-    setroomsize(itemValue);
-    let find = roomSizes.find(item => item.title === itemValue);
+    setroomsize(itemValue)
+    let find = roomSizes.find(item => item.title === itemValue)
     let total =
-      Number(totalPrice) - Number(previousRoomRate) + Number(find.rate);
-    settotalPrice(total);
+      Number(totalPrice) - Number(previousRoomRate) + Number(find.rate)
+    settotalPrice(total)
     // Update previous values
-    setPreviousRoomRate(Number(find.rate));
-  };
+    setPreviousRoomRate(Number(find.rate))
+  }
 
   const roomQtyHandler = itemValue => {
-    console.log(itemValue, 'itemValue');
-    setroomsQty(itemValue);
-    let find = noOfRooms.find(item => item.title === itemValue);
+    console.log(itemValue, 'itemValue')
+    setroomsQty(itemValue)
+    let find = noOfRooms.find(item => item.title === itemValue)
     let total =
-      Number(totalPrice) - Number(previousRoomQtyPrice) + Number(find.price);
-    settotalPrice(total);
+      Number(totalPrice) - Number(previousRoomQtyPrice) + Number(find.price)
+    settotalPrice(total)
     // Update previous values
-    setPreviousRoomQtyPrice(Number(find.price));
-  };
+    setPreviousRoomQtyPrice(Number(find.price))
+  }
 
   const cleaningMaterialHandler = itemValue => {
     if (itemValue === 'No, I have them' || itemValue === 'No, li ho') {
-      let total = Number(totalPrice) - 6;
-      settotalPrice(total);
+      let total = Number(totalPrice) - 6
+      settotalPrice(total)
     } else {
-      let total = Number(totalPrice) + 6;
-      settotalPrice(total);
+      let total = Number(totalPrice) + 6
+      settotalPrice(total)
     }
-    setneedCleaningMaterials(itemValue);
-  };
+    setneedCleaningMaterials(itemValue)
+  }
 
   const additionalServicesHandler = itemValue => {
-    let total = Number(totalPrice);
+    let total = Number(totalPrice)
     previousAdditionalServices.forEach(item => {
-      total -= Number(item.price);
-    });
+      total -= Number(item.price)
+    })
     itemValue.forEach(item => {
-      total += Number(item.price);
-    });
-    setaditionalSelectedServices(itemValue);
-    settotalPrice(total);
-    setPreviousAdditionalServices(itemValue);
-  };
+      total += Number(item.price)
+    })
+    setaditionalSelectedServices(itemValue)
+    settotalPrice(total)
+    setPreviousAdditionalServices(itemValue)
+  }
 
   useEffect(() => {
     if (route?.params?.item) {
@@ -268,31 +289,31 @@ const CreateService = ({navigation}) => {
         {imagURL: ''},
         {imagURL: ''},
         {imagURL: ''},
-      ]);
-    };
-  }, [route?.params]);
+      ])
+    }
+  }, [route?.params])
 
   const crossImage = async index => {
-    const updatedImages = [...productImages];
-    updatedImages[index].imagURL = '';
-    setProductImages(updatedImages);
-  };
+    const updatedImages = [...productImages]
+    updatedImages[index].imagURL = ''
+    setProductImages(updatedImages)
+  }
 
   const uploadImageToStorage = async (path, name) => {
     try {
-      setisLoader(true);
-      let reference = storage().ref(name);
-      let task = await reference.putFile(path);
-      setisLoader(false);
+      setisLoader(true)
+      let reference = storage().ref(name)
+      let task = await reference.putFile(path)
+      setisLoader(false)
       if (task) {
-        return await reference.getDownloadURL();
+        return await reference.getDownloadURL()
       }
     } catch (error) {
-      console.log('Error uploading image:', error);
-      setisLoader(false);
-      return null;
+      console.log('Error uploading image:', error)
+      setisLoader(false)
+      return null
     }
-  };
+  }
 
   const pickImage = async index => {
     try {
@@ -310,23 +331,23 @@ const CreateService = ({navigation}) => {
           path: 'images',
         },
         quality: 0.1,
-      };
+      }
       launchImageLibrary(options, async res => {
         if (res.didCancel) {
           // User canceled the image selection
         } else if (res.error) {
           // Error occurred while selecting an image
         } else {
-          const updatedImages = [...productImages];
-          updatedImages[index].imagURL = res.assets[0].uri;
+          const updatedImages = [...productImages]
+          updatedImages[index].imagURL = res.assets[0].uri
           // updatedImages[index].imagURL = await uploadImageToStorage(res?.assets[0]?.uri, res?.assets[0]?.fileName);
-          setProductImages(updatedImages);
+          setProductImages(updatedImages)
         }
-      });
+      })
     } catch (err) {
-      console.log(err);
+      console.log(err)
     }
-  };
+  }
 
   const pickImages = async () => {
     try {
@@ -345,75 +366,75 @@ const CreateService = ({navigation}) => {
           path: 'images',
         },
         quality: 0.1,
-      };
+      }
 
       launchImageLibrary(options, async res => {
         if (res.didCancel) {
-          console.log('User canceled the image selection');
+          console.log('User canceled the image selection')
         } else if (res.error) {
-          console.log('Error occurred while selecting an image:', res.error);
+          console.log('Error occurred while selecting an image:', res.error)
         } else {
-          const selectedImages = res.assets.map(asset => asset.uri);
-          const updatedImages = [...productImages];
+          const selectedImages = res.assets.map(asset => asset.uri)
+          const updatedImages = [...productImages]
           for (let i = 0; i < selectedImages.length; i++) {
-            const imageName = `image_${Date.now()}_${i}.jpg`; // Unique name for each image
+            const imageName = `image_${Date.now()}_${i}.jpg` // Unique name for each image
             const downloadURL = await uploadImageToStorage(
               selectedImages[i],
               imageName,
-            );
+            )
             if (downloadURL) {
-              let imageReplaced = false;
-              let emptySlotIndex = 0;
+              let imageReplaced = false
+              let emptySlotIndex = 0
               // Check if there's an empty slot
               while (emptySlotIndex < updatedImages.length) {
                 if (updatedImages[emptySlotIndex].imagURL === '') {
-                  updatedImages[emptySlotIndex].imagURL = downloadURL;
-                  imageReplaced = true;
-                  emptySlotIndex++;
-                  break;
+                  updatedImages[emptySlotIndex].imagURL = downloadURL
+                  imageReplaced = true
+                  emptySlotIndex++
+                  break
                 }
-                emptySlotIndex++;
+                emptySlotIndex++
               }
               // If no empty slot was found, replace images starting from the beginning
               if (!imageReplaced) {
-                updatedImages[i % updatedImages.length].imagURL = downloadURL;
+                updatedImages[i % updatedImages.length].imagURL = downloadURL
               }
             }
           }
-          setProductImages(updatedImages);
+          setProductImages(updatedImages)
         }
-      });
+      })
     } catch (err) {
-      console.log('Error in pickImages:', err);
+      console.log('Error in pickImages:', err)
     }
-  };
+  }
 
   const handleSelectedDaysChange = data => {
-    setSelectedDays(data);
-  };
+    setSelectedDays(data)
+  }
 
   const taxHandler = () => {
-    let total = Number(totalPrice);
-    let tax = 0;
+    let total = Number(totalPrice)
+    let tax = 0
     for (let i = 0; i < taxes.length; i++) {
-      let taxPercentage = Number(taxes[i].percentage);
-      let taxAmount = (total * taxPercentage) / 100;
-      tax += taxAmount;
+      let taxPercentage = Number(taxes[i].percentage)
+      let taxAmount = (total * taxPercentage) / 100
+      tax += taxAmount
     }
-    settotalPriceWithTax(Number(total + tax));
-  };
+    settotalPriceWithTax(Number(total + tax))
+  }
 
   const formatTime = milliseconds => {
-    if (milliseconds === null) return 'Select Time';
-    const date = new Date();
-    date.setHours(Math.floor(milliseconds / 3600000));
-    date.setMinutes((milliseconds % 3600000) / 60000);
+    if (milliseconds === null) return 'Select Time'
+    const date = new Date()
+    date.setHours(Math.floor(milliseconds / 3600000))
+    date.setMinutes((milliseconds % 3600000) / 60000)
     return date.toLocaleTimeString([], {
       hour: '2-digit',
       minute: '2-digit',
       hour12: true,
-    });
-  };
+    })
+  }
 
   const stepsHandler = () => {
     if (isJobCreate) {
@@ -423,13 +444,13 @@ const CreateService = ({navigation}) => {
             type: 'error',
             text1: t('Pleaseselectcategory'),
             position: 'bottom',
-          });
+          })
         } else if (selectedsubcategories === '') {
           Toast.show({
             type: 'error',
             text1: t('Pleaseselectsubcategory'),
             position: 'bottom',
-          });
+          })
         } else if (
           selectedCategories === CleaningAndHygineService &&
           roomsize === ''
@@ -438,7 +459,7 @@ const CreateService = ({navigation}) => {
             type: 'error',
             text1: t('Pleaseselectroomsize'),
             position: 'bottom',
-          });
+          })
         } else if (
           selectedCategories === CleaningAndHygineService &&
           roomsQty === ''
@@ -447,7 +468,7 @@ const CreateService = ({navigation}) => {
             type: 'error',
             text1: t('Pleaseselectroomquantity'),
             position: 'bottom',
-          });
+          })
         } else if (
           selectedCategories === CleaningAndHygineService &&
           needCleaningMaterials === ''
@@ -456,9 +477,9 @@ const CreateService = ({navigation}) => {
             type: 'error',
             text1: t('Pleaseselectcleaningmaterial'),
             position: 'bottom',
-          });
+          })
         } else {
-          setstep(step + 1);
+          setstep(step + 1)
         }
       }
       if (step === 1) {
@@ -467,9 +488,9 @@ const CreateService = ({navigation}) => {
             type: 'error',
             text1: t('Pleaseselectimage'),
             position: 'bottom',
-          });
+          })
         } else {
-          setstep(step + 1);
+          setstep(step + 1)
         }
       }
       if (step === 2) {
@@ -478,27 +499,27 @@ const CreateService = ({navigation}) => {
             type: 'error',
             text1: t('Pleaseselectadate'),
             position: 'bottom',
-          });
+          })
         } else if (!timeStart || isNaN(new Date(timeStart).getTime())) {
           Toast.show({
             type: 'error',
             text1: t('Pleaseselectavalidstarttime'),
             position: 'bottom',
-          });
+          })
         } else if (!timeEnd || isNaN(new Date(timeEnd).getTime())) {
           Toast.show({
             type: 'error',
             text1: t('Pleaseselectavalidendtime'),
             position: 'bottom',
-          });
+          })
         } else if (new Date(timeStart) >= new Date(timeEnd)) {
           Toast.show({
             type: 'error',
             text1: t('Starttimemustbebeforeendtime'),
             position: 'bottom',
-          });
+          })
         } else {
-          setstep(step + 1);
+          setstep(step + 1)
         }
       }
       if (step === 3) {
@@ -507,21 +528,21 @@ const CreateService = ({navigation}) => {
             type: 'error',
             text1: t('Pleasetypelocation'),
             position: 'bottom',
-          });
+          })
         } else if (instructions === '') {
           Toast.show({
             type: 'error',
             text1: t('Pleasetypeinstructions'),
             position: 'bottom',
-          });
+          })
         } else {
-          setstep(step + 1);
+          setstep(step + 1)
         }
       }
       if (step === 4) {
-        createJobHandler();
+        createJobHandler()
       }
-      dispatch(showError());
+      dispatch(showError())
     } else {
       if (step === 0) {
         if (selectedCategories === '') {
@@ -529,15 +550,15 @@ const CreateService = ({navigation}) => {
             type: 'error',
             text1: t('Pleaseselectcategory'),
             position: 'bottom',
-          });
+          })
         } else if (selectedsubcategories === '') {
           Toast.show({
             type: 'error',
             text1: t('Pleaseselectsubcategory'),
             position: 'bottom',
-          });
+          })
         } else {
-          setstep(step + 1);
+          setstep(step + 1)
         }
       }
       if (step === 1) {
@@ -546,21 +567,21 @@ const CreateService = ({navigation}) => {
             type: 'error',
             text1: t('Pleaseselectrates'),
             position: 'bottom',
-          });
+          })
         } else if (description === '') {
           Toast.show({
             type: 'error',
             text1: t('Pleasetypedescription'),
             position: 'bottom',
-          });
+          })
         } else if (productImages[0].imagURL === '') {
           Toast.show({
             type: 'error',
             text1: t('Pleaseselectimage'),
             position: 'bottom',
-          });
+          })
         } else {
-          setstep(step + 1);
+          setstep(step + 1)
         }
       }
       if (step === 2) {
@@ -573,28 +594,28 @@ const CreateService = ({navigation}) => {
             type: 'error',
             text1: t('Pleaseselectrates'),
             position: 'bottom',
-          });
+          })
         } else {
-          setstep(step + 1);
+          setstep(step + 1)
         }
       }
       if (step === 3) {
-        createServiceHandler();
+        createServiceHandler()
       }
-      dispatch(showError());
+      dispatch(showError())
     }
-  };
+  }
 
   const backHandler = () => {
     if (step === 0) {
-      navigation.goBack();
+      navigation.goBack()
     } else {
-      setstep(step - 1);
+      setstep(step - 1)
     }
-  };
+  }
 
   const createJobHandler = () => {
-    const geoPoint = new firestore.GeoPoint(savedCords[0], savedCords[1]);
+    const geoPoint = new firestore.GeoPoint(savedCords[0], savedCords[1])
     let data = {
       repeateService: repeateService,
       howManyHourDoYouNeed: selectedHour,
@@ -615,14 +636,18 @@ const CreateService = ({navigation}) => {
       geoPoint: geoPoint,
       instructions: instructions,
       addStatus: 'pending',
-      addType: 'jobs',
+      addType: 'job',
       postedBy: user.userId,
-    };
-    dispatch(createJob(data, navigation));
-  };
+    }
+    if (adId != null) {
+      dispatch(updateUserAdsById(adId, data, 'jobs', navigation))
+    } else {
+      dispatch(createJob(data, navigation))
+    }
+  }
 
   const createServiceHandler = () => {
-    const geoPoint = new firestore.GeoPoint(savedCords[0], savedCords[1]);
+    const geoPoint = new firestore.GeoPoint(savedCords[0], savedCords[1])
 
     let data = {
       category: selectedCategories,
@@ -637,15 +662,15 @@ const CreateService = ({navigation}) => {
       addStatus: 'pending',
       addType: 'service',
       postedBy: user.userId,
-    };
+    }
 
     if (adId != null) {
-      dispatch(updateUserAdsById(adId, data, addType));
+      dispatch(updateUserAdsById(adId, data, 'service', navigation))
     } else {
       // Create a new document
-      dispatch(createService(data, navigation));
+      dispatch(createService(data, navigation))
     }
-  };
+  }
 
   return hourlyRates === 0 || hourlyRates === '' || hourlyRates === '0' ? (
     <View style={styles.container}>
@@ -653,7 +678,7 @@ const CreateService = ({navigation}) => {
         title={isJobCreate ? t('createJob') : t('createService')}
         isLeft={true}
         leftPress={() => {
-          backHandler();
+          backHandler()
         }}
       />
       <View style={[styles.body, {justifyContent: 'center', width: '70%'}]}>
@@ -673,7 +698,7 @@ const CreateService = ({navigation}) => {
         title={isJobCreate ? t('createJob') : t('createService')}
         isLeft={true}
         leftPress={() => {
-          backHandler();
+          backHandler()
         }}
       />
 
@@ -681,8 +706,8 @@ const CreateService = ({navigation}) => {
         <RepeatService
           modalVisible={modalVisible}
           setModalVisible={selected => {
-            setModalVisible(false);
-            setrepeateService(selected);
+            setModalVisible(false)
+            setrepeateService(selected)
           }}
         />
       )}
@@ -712,7 +737,7 @@ const CreateService = ({navigation}) => {
                 <View style={styles.heading}>
                   <TouchableOpacity
                     onPress={() => {
-                      setinformationPopup(!informationPopup);
+                      setinformationPopup(!informationPopup)
                     }}
                     activeOpacity={0.8}
                     style={{
@@ -972,7 +997,7 @@ const CreateService = ({navigation}) => {
               <>
                 <TouchableOpacity
                   onPress={() => {
-                    setinformationPopup1(!informationPopup1);
+                    setinformationPopup1(!informationPopup1)
                   }}
                   activeOpacity={0.8}
                   style={{flexDirection: 'row', marginTop: 30}}>
@@ -1013,7 +1038,7 @@ const CreateService = ({navigation}) => {
             {isJobCreate && selectedCategories === CleaningAndHygineService && (
               <AdditionalServices
                 onSelectedServicesChange={e => {
-                  additionalServicesHandler(e);
+                  additionalServicesHandler(e)
                 }}
                 selectedService={aditionalSelectedServices}
               />
@@ -1086,7 +1111,7 @@ const CreateService = ({navigation}) => {
                   }}
                   value={description}
                   onChangeText={e => {
-                    setdescription(e);
+                    setdescription(e)
                   }}
                   placeholder={t('description')}
                   placeholderTextColor={colors.Neutral_01}
@@ -1150,7 +1175,7 @@ const CreateService = ({navigation}) => {
                       />
                       <TouchableOpacity
                         onPress={async () => {
-                          crossImage(index);
+                          crossImage(index)
                         }}
                         style={{
                           width: '100%',
@@ -1171,7 +1196,7 @@ const CreateService = ({navigation}) => {
                   ) : (
                     <TouchableOpacity
                       onPress={async () => {
-                        await pickImage(index);
+                        await pickImage(index)
                       }}>
                       <AntDesign
                         color={colors.White_Primary_01}
@@ -1245,7 +1270,7 @@ const CreateService = ({navigation}) => {
                     {/* Date Picker */}
                     <TouchableOpacity
                       onPress={() => {
-                        setopenBs(true);
+                        setopenBs(true)
                       }}>
                       {!showBs && (
                         <Text
@@ -1274,21 +1299,21 @@ const CreateService = ({navigation}) => {
                       open={openBs}
                       date={date}
                       onConfirm={date => {
-                        setopenBs(false);
-                        setDate(date);
-                        setshowBs(true);
-                        setDateSelected(true);
+                        setopenBs(false)
+                        setDate(date)
+                        setshowBs(true)
+                        setDateSelected(true)
                       }}
                       onCancel={() => {
-                        setopenBs(false);
-                        setshowBs(false);
+                        setopenBs(false)
+                        setshowBs(false)
                       }}
                     />
 
                     {/* Date Icon */}
                     <TouchableOpacity
                       onPress={() => {
-                        setopenBs(true);
+                        setopenBs(true)
                       }}>
                       <Fontisto name="date" style={styles.listIcon} />
                     </TouchableOpacity>
@@ -1312,7 +1337,7 @@ const CreateService = ({navigation}) => {
                     {/* Date Picker */}
                     <TouchableOpacity
                       onPress={() => {
-                        settimeStartOpen(true);
+                        settimeStartOpen(true)
                       }}>
                       {!timeStartShow && (
                         <Text
@@ -1340,20 +1365,20 @@ const CreateService = ({navigation}) => {
                       open={timeStartOpen}
                       date={timeStart}
                       onConfirm={date => {
-                        settimeStart(date);
-                        settimeStartOpen(false);
-                        settimeStartShow(true);
-                        settimeStartSelected(true);
+                        settimeStart(date)
+                        settimeStartOpen(false)
+                        settimeStartShow(true)
+                        settimeStartSelected(true)
                       }}
                       onCancel={() => {
-                        settimeStartOpen(false);
-                        settimeStartShow(false);
+                        settimeStartOpen(false)
+                        settimeStartShow(false)
                       }}
                     />
                     {/* Date Icon */}
                     <TouchableOpacity
                       onPress={() => {
-                        settimeStartOpen(true);
+                        settimeStartOpen(true)
                       }}>
                       <Fontisto name="date" style={styles.listIcon} />
                     </TouchableOpacity>
@@ -1377,7 +1402,7 @@ const CreateService = ({navigation}) => {
                     {/* Date Picker */}
                     <TouchableOpacity
                       onPress={() => {
-                        settimeEndOpen(true);
+                        settimeEndOpen(true)
                       }}>
                       {!timeEndShow && (
                         <Text
@@ -1405,20 +1430,20 @@ const CreateService = ({navigation}) => {
                       open={timeEndOpen}
                       date={timeEnd}
                       onConfirm={date => {
-                        settimeEnd(date);
-                        settimeEndOpen(false);
-                        settimeEndShow(true);
-                        settimeEndSelected(true);
+                        settimeEnd(date)
+                        settimeEndOpen(false)
+                        settimeEndShow(true)
+                        settimeEndSelected(true)
                       }}
                       onCancel={() => {
-                        settimeEndOpen(false);
-                        settimeEndShow(false);
+                        settimeEndOpen(false)
+                        settimeEndShow(false)
                       }}
                     />
                     {/* Date Icon */}
                     <TouchableOpacity
                       onPress={() => {
-                        settimeEndOpen(true);
+                        settimeEndOpen(true)
                       }}>
                       <Fontisto name="date" style={styles.listIcon} />
                     </TouchableOpacity>
@@ -1448,7 +1473,7 @@ const CreateService = ({navigation}) => {
                   style={{color: colors.black}}
                   value={location}
                   onChangeText={e => {
-                    setlocation(e);
+                    setlocation(e)
                   }}
                   placeholder={t('location')}
                   placeholderTextColor={colors.Neutral_01}
@@ -1474,7 +1499,7 @@ const CreateService = ({navigation}) => {
                   }}
                   value={instructions}
                   onChangeText={e => {
-                    setinstructions(e);
+                    setinstructions(e)
                   }}
                   placeholder={t('yourtext')}
                   placeholderTextColor={colors.Neutral_01}
@@ -1556,7 +1581,7 @@ const CreateService = ({navigation}) => {
                               formatTime(key.closingTime)}
                           </Text>
                         </View>
-                      );
+                      )
                     })}
                 </View>
 
@@ -1595,7 +1620,7 @@ const CreateService = ({navigation}) => {
                             )}
                         </Text>
                       </View>
-                    );
+                    )
                   })}
                   <View style={styles.taxContainer_C1}>
                     <Text
@@ -1789,7 +1814,7 @@ const CreateService = ({navigation}) => {
                           )}
                       </Text>
                     </View>
-                  );
+                  )
                 })}
                 <View style={styles.taxContainer_C1}>
                   <Text
@@ -1836,7 +1861,7 @@ const CreateService = ({navigation}) => {
                   <CTAButton1
                     title={step < 4 ? t('next') : t('createJob')}
                     submitHandler={() => {
-                      stepsHandler();
+                      stepsHandler()
                     }}
                   />
                 )}
@@ -1844,7 +1869,7 @@ const CreateService = ({navigation}) => {
                   <CTAButton1
                     title={step < 3 ? t('next') : t('createService')}
                     submitHandler={() => {
-                      stepsHandler();
+                      stepsHandler()
                     }}
                   />
                 )}
@@ -1854,24 +1879,24 @@ const CreateService = ({navigation}) => {
             <CTAButton1
               title={step < 4 ? t('next') : t('createJob')}
               submitHandler={() => {
-                stepsHandler();
+                stepsHandler()
               }}
             />
           ) : (
             <CTAButton1
               title={step < 3 ? t('next') : t('createService')}
               submitHandler={() => {
-                stepsHandler();
+                stepsHandler()
               }}
             />
           )}
         </View>
       </View>
     </View>
-  );
-};
+  )
+}
 
-export default CreateService;
+export default CreateService
 
 const createStyles = (colors, theme, deviceWidth) => {
   return StyleSheet.create({
@@ -2038,5 +2063,5 @@ const createStyles = (colors, theme, deviceWidth) => {
       overflow: 'hidden',
       backgroundColor: colors.white,
     },
-  });
-};
+  })
+}

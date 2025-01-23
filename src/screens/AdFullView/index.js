@@ -1,49 +1,46 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react'
 import {
-  StyleSheet,
+  StyleSheet, 
   View,
   Text,
   TouchableOpacity,
   Image,
   ScrollView,
-} from 'react-native';
-import {useDispatch, useSelector} from 'react-redux';
-import {t} from 'i18next';
-import {useRoute} from '@react-navigation/native';
-import {RFValue} from 'react-native-responsive-fontsize';
-import {SliderBox} from 'react-native-image-slider-box';
-import FastImage from 'react-native-fast-image';
+} from 'react-native'
+import {useDispatch, useSelector} from 'react-redux'
+import {t} from 'i18next'
+import {useRoute} from '@react-navigation/native'
+import {RFValue} from 'react-native-responsive-fontsize'
+import {SliderBox} from 'react-native-image-slider-box'
+import FastImage from 'react-native-fast-image'
 // local imports
-import {Typography} from '../../utilities/constants/constant.style';
-import {MapSmall} from '../../assets/icons';
-import Images from '../../assets/images/index';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
-import {LightThemeColors, DarkThemeColors} from '../../utilities/constants';
-import {useTheme} from '../../../ThemeContext';
-import screenResolution from '../../utilities/constants/screenResolution';
-import CustomHeader from '../../components/Header';
-import CTAButton1 from '../../components/CTA_BUTTON1';
-import CTAButton2 from '../../components/CTA_BUTTON2';
-import moment from 'moment';
-import SmallMap from '../../components/smallMap';
-import {deleteAdById} from '../../store/actions/action';
-
-const CleaningAndHygineService = 'Cleaning and Hygiene Services';
+import {Typography} from '../../utilities/constants/constant.style'
+import {MapSmall} from '../../assets/icons'
+import Images from '../../assets/images/index'
+import FontAwesome from 'react-native-vector-icons/FontAwesome'
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5'
+import {LightThemeColors, DarkThemeColors} from '../../utilities/constants'
+import {useTheme} from '../../../ThemeContext'
+import screenResolution from '../../utilities/constants/screenResolution'
+import CustomHeader from '../../components/Header'
+import CTAButton1 from '../../components/CTA_BUTTON1'
+import CTAButton2 from '../../components/CTA_BUTTON2'
+import moment from 'moment'
+import SmallMap from '../../components/smallMap'
+import {deleteAdById} from '../../store/actions/action'
+const CleaningAndHygineService = 'Cleaning and Hygiene Services'
 
 const AdFullView = ({navigation}) => {
-  const dispatch = useDispatch();
-  const route = useRoute();
-  const {theme} = useTheme();
-  const colors = theme === 'dark' ? DarkThemeColors : LightThemeColors;
-  const styles = createStyles(colors, theme);
-  let user = useSelector(state => state.reducer.user);
+  const dispatch = useDispatch()
+  const route = useRoute()
+  const {theme} = useTheme()
+  const colors = theme === 'dark' ? DarkThemeColors : LightThemeColors
+  const styles = createStyles(colors, theme)
+  let user = useSelector(state => state.reducer.user)
 
-  let data = route.params?.item;
-  let isBooking = route.params?.isBooking;
-  let isReviewBooking = route.params?.isReviewBooking;
-
-  console.log(data, 'data');
+  let data = route.params?.item
+  let isBooking = route.params?.isBooking
+  let isReviewBooking = route.params?.isReviewBooking
 
   let images = [
     Images.cleaning,
@@ -51,31 +48,42 @@ const AdFullView = ({navigation}) => {
     Images.cleaning,
     Images.cleaning,
     Images.cleaning,
-  ];
+  ]
 
   const formatTime = milliseconds => {
-    if (milliseconds === null) return 'Select Time';
-    const date = new Date();
-    date.setHours(Math.floor(milliseconds / 3600000));
-    date.setMinutes((milliseconds % 3600000) / 60000);
+    if (milliseconds === null) return 'Select Time'
+    const date = new Date()
+    date.setHours(Math.floor(milliseconds / 3600000))
+    date.setMinutes((milliseconds % 3600000) / 60000)
     return date.toLocaleTimeString([], {
       hour: '2-digit',
       minute: '2-digit',
       hour12: true,
-    });
-  };
+    })
+  }
 
   //for delete the selected my Ad from app
 
+  let collection = ''
+  useEffect(() => {
+    if (user.role == 'provider') {
+      collection = 'service'
+    } else {
+      collection = 'jobs'
+    }
+  }, [])
+
   const deleteMyAd = async adId => {
-    dispatch(deleteAdById(adId, 'service', navigation));
-  };
-
+    dispatch(deleteAdById(adId, collection, navigation))
+  }
   //for edit the selected my Ad from app
-
   const editMyAd = adId => {
-    navigation.navigate('ServiceCreate', {adId,data });
-  };
+    navigation.navigate('ServiceCreate', {
+      adId,
+      data,
+      isJobCreate: user.role === 'user' ? true : false,
+    })
+  }
 
   return (
     <View style={styles.container}>
@@ -89,7 +97,7 @@ const AdFullView = ({navigation}) => {
         }
         isLeft={true}
         leftPress={() => {
-          navigation.goBack();
+          navigation.goBack()
         }}
       />
       <ScrollView
@@ -394,7 +402,7 @@ const AdFullView = ({navigation}) => {
                         formatTime(key.closingTime)}
                     </Text>
                   </View>
-                );
+                )
               })}
           </View>
         )}
@@ -445,7 +453,7 @@ const AdFullView = ({navigation}) => {
           onPress={() => {
             navigation.navigate('CustomerInfo', {
               isJobCreate: data.addType === 'job' ? true : false,
-            });
+            })
           }}>
           <FontAwesome5
             name="info-circle"
@@ -480,7 +488,7 @@ const AdFullView = ({navigation}) => {
               <TouchableOpacity
                 activeOpacity={0.8}
                 onPress={() => {
-                  navigation.navigate('Reviews');
+                  navigation.navigate('Reviews')
                 }}>
                 <Text
                   style={[
@@ -566,7 +574,7 @@ const AdFullView = ({navigation}) => {
           <CTAButton1
             title={t('post')}
             submitHandler={() => {
-              navigation.navigate('Home');
+              navigation.navigate('Home')
             }}
           />
         )}
@@ -586,7 +594,7 @@ const AdFullView = ({navigation}) => {
           <CTAButton1
             title={t('book')}
             submitHandler={() => {
-              navigation.navigate('CreateBooking');
+              navigation.navigate('CreateBooking')
             }}
           />
         )}
@@ -595,7 +603,7 @@ const AdFullView = ({navigation}) => {
           <CTAButton1
             title={t('apply')}
             submitHandler={() => {
-              navigation.navigate('SignatureScreen');
+              navigation.navigate('SignatureScreen')
             }}
           />
         )}
@@ -606,9 +614,7 @@ const AdFullView = ({navigation}) => {
               <CTAButton1
                 title={t('edit')}
                 submitHandler={() => {
-                  editMyAd(
-                    data.addType === 'job' ? data.jobId : data.serviceId,
-                  );
+                  editMyAd(data.addType === 'job' ? data.jobId : data.serviceId)
                 }}
               />
             </View>
@@ -616,7 +622,9 @@ const AdFullView = ({navigation}) => {
               <CTAButton2
                 title={t('delete')}
                 submitHandler={() => {
-                  deleteMyAd(data.serviceId);
+                  deleteMyAd(
+                    data.addType === 'job' ? data.jobId : data.serviceId,
+                  )
                 }}
               />
             </View>
@@ -624,10 +632,10 @@ const AdFullView = ({navigation}) => {
         )}
       </View>
     </View>
-  );
-};
+  )
+}
 
-export default AdFullView;
+export default AdFullView
 
 const createStyles = colors => {
   return StyleSheet.create({
@@ -689,5 +697,5 @@ const createStyles = colors => {
       fontWeight: 'bold',
       marginLeft: 10,
     },
-  });
-};
+  })
+}
