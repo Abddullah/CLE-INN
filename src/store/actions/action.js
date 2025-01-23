@@ -352,3 +352,41 @@ export const fetchAdsByUser = (userId, collection) => async (dispatch) => {
     Toast.show({ type: 'error', text1: errorMessage, position: 'bottom' });
   }
 };
+
+export const saveBookMark = (userId, adId) => async (dispatch) => {
+  try {
+    const userRef = firestore().collection('users').doc(userId);
+    await userRef.update({
+      bookMarks: firestore.FieldValue.arrayUnion(adId),
+    });
+    const userDoc = await firestore().collection('users').doc(userId).get();
+    const userData = userDoc.data();
+    setItem('user', userData)
+    dispatch({ type: 'SET_USER', payload: userData });
+    console.log('Ad ID added to bookMarks array successfully.');
+  } catch (error) {
+    console.log(error, 'bookmark_error');
+    dispatch({ type: 'IS_LOADER', payload: false });
+    const errorMessage = await getFirebaseErrorMessage(error.code);
+    Toast.show({ type: 'error', text1: errorMessage, position: 'bottom' });
+  }
+};
+
+export const removeBookMark = (userId, adId) => async (dispatch) => {
+  try {
+    const userRef = firestore().collection('users').doc(userId);
+    await userRef.update({
+      bookMarks: firestore.FieldValue.arrayRemove(adId),
+    });
+    const userDoc = await firestore().collection('users').doc(userId).get();
+    const userData = userDoc.data();
+    setItem('user', userData)
+    dispatch({ type: 'SET_USER', payload: userData });
+    console.log('Ad ID removed from bookMarks array successfully.');
+  } catch (error) {
+    console.log(error, 'bookmark_error');
+    dispatch({ type: 'IS_LOADER', payload: false });
+    const errorMessage = await getFirebaseErrorMessage(error.code);
+    Toast.show({ type: 'error', text1: errorMessage, position: 'bottom' });
+  }
+};

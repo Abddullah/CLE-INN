@@ -1,5 +1,5 @@
-import React from 'react'
-import { StyleSheet, View, Text, TouchableOpacity, Image, Dimensions } from 'react-native';
+import React, { useEffect, useState } from 'react'
+import { StyleSheet, View, Text, TouchableOpacity, Image, Dimensions, } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { Typography } from '../utilities/constants/constant.style';
 import images from '../assets/images';
@@ -8,13 +8,13 @@ import { LightThemeColors, DarkThemeColors } from '../utilities/constants';
 import { useTheme } from '../../ThemeContext';
 import { RFValue } from "react-native-responsive-fontsize";
 import screenResolution from '../utilities/constants/screenResolution';
+import { saveBookMark, removeBookMark } from '../store/actions/action';
 
 const { width } = Dimensions.get('window');
 
 const ServiceCard = ({
     data,
     submitHandler,
-    isFav,
     index
 }) => {
     let user = useSelector((state) => state.reducer.user);
@@ -22,7 +22,34 @@ const ServiceCard = ({
     const colors = theme === 'dark' ? DarkThemeColors : LightThemeColors;
     const styles = createStyles(colors, theme, user, index);
 
-    // console.log('data', data);
+    let userId = user.userId;
+    let bookMarks = user?.bookMarks;
+    let adId = data.addType !== 'service' ? data.jobId : data.serviceId;
+
+    const dispatch = useDispatch()
+    const [isFav, setisFav] = useState(false);
+
+    useEffect(() => {
+        checkIfFave();
+    }, [bookMarks, adId]);
+
+    const checkIfFave = () => {
+        if (bookMarks && bookMarks.includes(adId)) {
+            setisFav(true);
+        } else {
+            setisFav(false);
+        }
+    };
+
+    const bookMarkHandler = (e) => {
+        if (e === true) {
+            setisFav(true);
+            dispatch(saveBookMark(userId, adId))
+        } else {
+            setisFav(false);
+            dispatch(removeBookMark(userId, adId))
+        }
+    };
 
     return (
         <TouchableOpacity
@@ -39,8 +66,18 @@ const ServiceCard = ({
                 <View style={styles.overlay} />
                 {
                     isFav === true &&
-                    <TouchableOpacity activeOpacity={.8} style={styles.favIcon}>
+                    <TouchableOpacity activeOpacity={.8} style={styles.favIcon}
+                        onPress={() => { bookMarkHandler(false) }}
+                    >
                         <AntDesign name="heart" style={styles.favIconHeart} />
+                    </TouchableOpacity>
+                }
+                {
+                    isFav === false &&
+                    <TouchableOpacity activeOpacity={.8} style={styles.favIcon}
+                        onPress={() => { bookMarkHandler(true) }}
+                    >
+                        <AntDesign name="hearto" style={styles.favIconHeart} />
                     </TouchableOpacity>
                 }
                 <View style={styles.titleContainer}>
