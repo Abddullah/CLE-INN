@@ -390,3 +390,24 @@ export const removeBookMark = (userId, adId) => async (dispatch) => {
     Toast.show({ type: 'error', text1: errorMessage, position: 'bottom' });
   }
 };
+
+export const fetchBookMarkAds = (bookMarksIds, collection) => async (dispatch) => {
+  let adId = collection != 'service' ? 'jobId' : 'serviceId';
+  try {
+    dispatch({ type: 'IS_LOADER', payload: true });
+    const snapshot = await firestore()
+      .collection(collection)
+      .where(adId, 'in', bookMarksIds)
+      .get();
+    const bookMarks = snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
+    dispatch({ type: 'SET_BOOK_MARKS', payload: bookMarks });
+    dispatch({ type: 'IS_LOADER', payload: false });
+  } catch (error) {
+    console.log(error, 'fetch_bookmark_ads_error');
+    dispatch({ type: 'IS_LOADER', payload: false });
+    const errorMessage = await getFirebaseErrorMessage(error.code);
+    Toast.show({ type: 'error', text1: errorMessage, position: 'bottom' });
+  }
+};
+
+

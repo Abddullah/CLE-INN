@@ -18,6 +18,7 @@ const initState = {
   fixRates: [],
   allAds: [],
   myAds: [],
+  bookMarks: [],
 };
 
 const reducer = (state = initState, action) => {
@@ -97,7 +98,11 @@ const reducer = (state = initState, action) => {
         ...state,
         myAds: action.payload,
       }
-
+    case 'SET_BOOK_MARKS':
+      return {
+        ...state,
+        bookMarks: action.payload,
+      }
     default:
       return state;
   }

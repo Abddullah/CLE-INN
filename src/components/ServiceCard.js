@@ -140,7 +140,7 @@ const createStyles = (colors, theme, user, index) => {
         },
         titleContainer: {
             width: '100%',
-            height: 20,
+            // height: 20,
             justifyContent: 'center',
             alignItems: 'flex-start',
             // backgroundColor: colors.Neutral_02,
