@@ -20,10 +20,12 @@ import CTAButton1 from '../../components/CTA_BUTTON1';
 import CTAButton2 from '../../components/CTA_BUTTON2';
 import moment from 'moment';
 import SmallMap from '../../components/smallMap';
+import { deleteAdById } from '../../store/actions/action';
 
 const CleaningAndHygineService = "Cleaning and Hygiene Services";
 
 const AdFullView = ({ navigation }) => {
+    const dispatch = useDispatch()
     const route = useRoute();
     const { theme } = useTheme();
     const colors = theme === 'dark' ? DarkThemeColors : LightThemeColors;
@@ -33,6 +35,7 @@ const AdFullView = ({ navigation }) => {
     let data = route.params?.item;
     let isBooking = route.params?.isBooking;
     let isReviewBooking = route.params?.isReviewBooking;
+    let collection = user.role == 'provider' ? 'service' : 'jobs'
 
     console.log(data, "data");
 
@@ -45,6 +48,18 @@ const AdFullView = ({ navigation }) => {
         date.setMinutes((milliseconds % 3600000) / 60000);
         return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
     };
+
+    const editMyAd = (adId) => {
+        navigation.navigate('ServiceCreate', {
+            adId,
+            isEdit: data,
+            isJobCreate: user.role === 'user' ? true : false,
+        })
+    }
+
+    const deleteMyAd = (adId) => {
+        dispatch(deleteAdById(adId, collection, navigation))
+    }
 
     return (
         <View style={styles.container}>
@@ -309,15 +324,26 @@ const AdFullView = ({ navigation }) => {
                     (data.postedBy === user.userId) &&
                     <>
                         <View>
-                            <CTAButton1 title={t('edit')} submitHandler={() => { }} />
+                            <CTAButton1
+                                title={t('edit')}
+                                submitHandler={() => {
+                                    editMyAd(data.addType === 'job' ? data.jobId : data.serviceId)
+                                }}
+                            />
                         </View>
                         <View style={{ marginTop: 10 }}>
-                            <CTAButton2 title={t('delete')} submitHandler={() => { }} />
+                            <CTAButton2
+                                title={t('delete')}
+                                submitHandler={() => {
+                                    deleteMyAd(
+                                        data.addType === 'job' ? data.jobId : data.serviceId,
+                                    )
+                                }}
+                            />
                         </View>
                     </>
                 }
             </View>
-
         </View>
     );
 };

@@ -316,6 +316,7 @@ export const languageData = [
 
             Pleaseselectrates: 'Please select rates',
             Pleasetypedescription: 'Please type decription',
+            PleaseSelectTimeSlot: 'Please Select Time Slot',
             closingTimeMustBeLater: 'Closing time must be Later',
             hourlyRate: 'Hourly Rate',
             pleaseSetYourHourlyRate: 'Please set your hourly rate in your profile before proceeding.',
@@ -648,6 +649,7 @@ export const languageData = [
             Pleasetypeinstructions: 'Digita le istruzioni',
             Pleaseselectrates: 'Seleziona le tariffe',
             Pleasetypedescription: 'Scrivi la descrizione',
+            PleaseSelectTimeSlot: 'Si prega di selezionare una fascia oraria',
             closingTimeMustBeLater: "L'orario di chiusura deve essere successivo",
             hourlyRate: 'Tariffa oraria',
             pleaseSetYourHourlyRate: 'Imposta la tua tariffa oraria nel tuo profilo prima di procedere.',

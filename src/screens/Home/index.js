@@ -9,15 +9,17 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Feather from 'react-native-vector-icons/Feather';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import { RFValue } from 'react-native-responsive-fontsize';
 // local imports
+import { useTheme } from '../../../ThemeContext';
 import Images from '../../assets/images/index'
 import { LightThemeColors, DarkThemeColors } from '../../utilities/constants';
-import { useTheme } from '../../../ThemeContext';
 import Categories from '../../components/Categories';
 import screenResolution from '../../utilities/constants/screenResolution';
 import CustomTabs from '../../components/CustomTabs';
 import ServiceCard from '../../components/ServiceCard';
-import { RFValue } from 'react-native-responsive-fontsize';
+import getGreetingMessage from '../../services/greetUserByCurrentTime'
+import CityAndCountry from '../../components/GetCityAndCountry'
 import { fetchAds, fetchAdsByUser, } from '../../store/actions/action'
 
 const Home = ({ navigation }) => {
@@ -26,9 +28,11 @@ const Home = ({ navigation }) => {
     const colors = theme === 'dark' ? DarkThemeColors : LightThemeColors;
     const styles = createStyles(colors, theme);
     let user = useSelector((state) => state.reducer.user);
+    let savedCords = useSelector(state => state.reducer.savedCords)
     let allcategories = useSelector((state) => state.reducer.categories);
     let ads = useSelector((state) => state.reducer.allAds);
     let myAds = useSelector((state) => state.reducer.myAds);
+    const { message, icon, color } = getGreetingMessage()
 
     const [search, setsearch] = useState('');
     const [selectedTab, setselectedTab] = useState();
@@ -65,18 +69,21 @@ const Home = ({ navigation }) => {
 
     return (
         <View style={styles.container}>
-
             <View style={styles.boxContainer}>
                 <View style={{ flexDirection: 'row', width: '100%', }}>
-                    <Feather name="sun" style={{ fontSize: RFValue(20, screenResolution.screenHeight), color: colors.yellow, }} />
-                    <Text style={[Typography.text_paragraph_1, { color: colors.black, marginLeft: 10 }]}>{'Good Morning,'}</Text>
-                    <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{' Mark Wisdom'}</Text>
-                    <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{'  ' + user.role}</Text>
+                    <Feather name={icon} style={{ fontSize: 20, iconColor: color, }} />
+                    <Text style={[Typography.text_paragraph_1, { color: colors.black, marginLeft: 10 }]}>{message}</Text>
+                    <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{'  ' + user.fullName}</Text>
                 </View>
 
-                <View style={{ flexDirection: 'row', width: '100%', }}>
-                    <FontAwesome5 name="map-marker-alt" style={{ fontSize: RFValue(18, screenResolution.screenHeight), color: colors.BothPrimary_01, left: 3 }} />
-                    <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, marginLeft: 13 }]}>{'Italy, Teramo city'}</Text>
+                <View style={{ flexDirection: 'row', width: '100%' }}>
+                    <FontAwesome5
+                        name="map-marker-alt"
+                        style={{ fontSize: RFValue(18, screenResolution.screenHeight), color: colors.BothPrimary_01, left: 3 }}
+                    />
+                    <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, marginLeft: 13 }]}>
+                        <CityAndCountry lat={savedCords[0]} lng={savedCords[1]} />
+                    </Text>
                 </View>
 
                 <View style={{ width: '100%', }}>
@@ -121,7 +128,7 @@ const Home = ({ navigation }) => {
                 {
                     ((user.role !== 'user' && selectedTab === t('myads')) || (user.role === 'user' && selectedTab === t('myjobs'))) &&
 
-                    <View style={{ width: '100%', alignItems: 'center', marginTop: 10 }}>
+                    <View style={{ width: '95%', alignItems: myAds.length != 1 ? 'center' : 'flex-start', marginTop: 10 }}>
                         <FlatList
                             data={myAds}
                             style={{ marginTop: 10, }}

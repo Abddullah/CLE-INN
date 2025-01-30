@@ -320,6 +320,28 @@ export const createService = (data, navigation) => async (dispatch) => {
   }
 };
 
+export const fetchAdsByUser = (userId, collection) => dispatch => {
+  try {
+    dispatch({ type: 'IS_LOADER', payload: true });
+    return firestore()
+      .collection(collection)
+      .where('postedBy', '==', userId)
+      .onSnapshot(snapshot => {
+        const myAds = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+        dispatch({ type: 'SET_My_ADS', payload: myAds });
+        dispatch({ type: 'IS_LOADER', payload: false });
+      }, error => {
+        console.log(error, 'fetch_jobs_error');
+        dispatch({ type: 'IS_LOADER', payload: false });
+        const errorMessage = getFirebaseErrorMessage(error.code);
+        Toast.show({ type: 'error', text1: errorMessage, position: 'bottom' });
+      });
+  } catch (error) {
+    console.log(error, 'fetch_jobs_error');
+    dispatch({ type: 'IS_LOADER', payload: false });
+  }
+};
+
 export const fetchAds = (selectedCategory, collection) => async (dispatch) => {
   try {
     dispatch({ type: 'IS_LOADER', payload: true });
@@ -335,23 +357,37 @@ export const fetchAds = (selectedCategory, collection) => async (dispatch) => {
   }
 };
 
-export const fetchAdsByUser = (userId, collection) => async (dispatch) => {
+export const updateUserAdsById = (adId, data, collection) => async dispatch => {
   try {
     dispatch({ type: 'IS_LOADER', payload: true });
-    const snapshot = await firestore()
-      .collection(collection)
-      .where('postedBy', '==', userId)
-      .get();
-    const myAds = snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
-    dispatch({ type: 'SET_My_ADS', payload: myAds });
+    await firestore().collection(collection).doc(adId).update(data);
+    dispatch({ type: 'UPDATE_AD_SUCCESS', payload: adId });
     dispatch({ type: 'IS_LOADER', payload: false });
+    Toast.show({ type: 'success', text1: 'Ad updated successfully!', position: 'bottom' });
   } catch (error) {
-    console.log(error, 'fetch_jobs_error');
+    console.error('Error updating service:', error);
     dispatch({ type: 'IS_LOADER', payload: false });
-    const errorMessage = await getFirebaseErrorMessage(error.code);
+    const errorMessage = getFirebaseErrorMessage(error.code);
     Toast.show({ type: 'error', text1: errorMessage, position: 'bottom' });
   }
 };
+
+export const deleteAdById = (adId, collection, navigation) => async dispatch => {
+  try {
+    dispatch({ type: 'IS_LOADER', payload: true });
+    await firestore().collection(collection).doc(adId).delete();
+    dispatch({ type: 'DELETE_AD_SUCCESS', payload: adId });
+    dispatch({ type: 'IS_LOADER', payload: false });
+    Toast.show({ type: 'success', text1: 'Ad deleted successfully!', position: 'bottom', });
+    navigation.navigate('Home');
+  } catch (error) {
+    console.error('Error deleting ad:', error.message);
+    dispatch({ type: 'IS_LOADER', payload: false });
+    const errorMessage = getFirebaseErrorMessage(error.code);
+    Toast.show({ type: 'error', text1: errorMessage, position: 'bottom' });
+  }
+};
+
 
 export const saveBookMark = (userId, adId) => async (dispatch) => {
   try {
@@ -395,10 +431,7 @@ export const fetchBookMarkAds = (bookMarksIds, collection) => async (dispatch) =
   let adId = collection != 'service' ? 'jobId' : 'serviceId';
   try {
     dispatch({ type: 'IS_LOADER', payload: true });
-    const snapshot = await firestore()
-      .collection(collection)
-      .where(adId, 'in', bookMarksIds)
-      .get();
+    const snapshot = await firestore().collection(collection).where(adId, 'in', bookMarksIds).get();
     const bookMarks = snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
     dispatch({ type: 'SET_BOOK_MARKS', payload: bookMarks });
     dispatch({ type: 'IS_LOADER', payload: false });
@@ -408,6 +441,4 @@ export const fetchBookMarkAds = (bookMarksIds, collection) => async (dispatch) =
     const errorMessage = await getFirebaseErrorMessage(error.code);
     Toast.show({ type: 'error', text1: errorMessage, position: 'bottom' });
   }
-};
-
-
+} 
