@@ -411,6 +411,10 @@ const CreateService = ({ navigation }) => {
         total = total + Number(findNoOfRooms.price);
         setPreviousRoomQtyPrice(Number(findNoOfRooms.price))
         // set aditionalServices price
+        if (isEdit.needCleaningMaterials === 'Yes, Please') {
+            total = total + 6;
+        }
+        // set aditionalServices price
         isEdit?.aditionalServices?.forEach(item => { total += Number(item.price); });
         settotalPrice(total + totalPrice)
     }
@@ -580,7 +584,7 @@ const CreateService = ({ navigation }) => {
             postedBy: user.userId,
         }
         if (adId != null) {
-            dispatch(updateUserAdsById(adId, data, 'jobs'))
+            dispatch(updateUserAdsById(adId, data, 'jobs', navigation))
         } else {
             dispatch(createJob(data, navigation))
         }
@@ -603,7 +607,7 @@ const CreateService = ({ navigation }) => {
             postedBy: user.userId,
         }
         if (adId != null) {
-            dispatch(updateUserAdsById(adId, data, 'service'))
+            dispatch(updateUserAdsById(adId, data, 'service', navigation))
         } else {
             dispatch(createService(data, navigation))
         }
@@ -1355,18 +1359,18 @@ const CreateService = ({ navigation }) => {
                                     <View style={{ width: '45%', }}>
                                         {
                                             isJobCreate &&
-                                            <CTAButton1 title={step < 4 ? t('next') : t('createJob')} submitHandler={() => { stepsHandler() }} />
+                                            <CTAButton1 title={step < 4 ? t('next') : isEdit != null ? t('updateJob') : t('createJob')} submitHandler={() => { stepsHandler() }} />
                                         }
                                         {
                                             !isJobCreate &&
-                                            <CTAButton1 title={step < 3 ? t('next') : t('createService')} submitHandler={() => { stepsHandler() }} />
+                                            <CTAButton1 title={step < 3 ? t('next') : isEdit != null ? t('updateService') : t('createService')} submitHandler={() => { stepsHandler() }} />
                                         }
                                     </View>
                                 </>
                             ) : (
                                 (isJobCreate) ? (
-                                    <CTAButton1 title={step < 4 ? t('next') : t('createJob')} submitHandler={() => { stepsHandler() }} />
-                                ) : (<CTAButton1 title={step < 3 ? t('next') : t('createService')} submitHandler={() => { stepsHandler() }} />)
+                                    <CTAButton1 title={step < 4 ? t('next') : isEdit != null ? t('updateJob') : t('createJob')} submitHandler={() => { stepsHandler() }} />
+                                ) : (<CTAButton1 title={step < 3 ? t('next') : isEdit != null ? t('updateService') : t('createService')} submitHandler={() => { stepsHandler() }} />)
                             )
                         }
                     </View>

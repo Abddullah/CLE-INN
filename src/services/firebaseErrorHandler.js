@@ -33,6 +33,8 @@ const translations = {
         "User update successfully!": "User update successfully!",
         "jobCreatedSuccess": 'Job created successfully!',
         "serviceCreatedSuccess": 'Service created successfully!',
+        'Ad updated successfully!': 'Ad updated successfully!',
+        'Ad deleted successfully!': 'Ad deleted successfully!',
         "": "",
     },
     it: {
@@ -67,6 +69,8 @@ const translations = {
         "User update successfully!": "Utente aggiornato con successo!",
         "jobCreatedSuccess": "Lavoro creato con successo!",
         "serviceCreatedSuccess": 'Servizio creato con successo!',
+        'Ad updated successfully!': 'Annuncio aggiornato con successo!',
+        'Ad deleted successfully!': 'Annuncio eliminato con successo!',
         "": "",
     }
 };

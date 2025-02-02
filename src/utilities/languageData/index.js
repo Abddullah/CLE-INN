@@ -323,8 +323,9 @@ export const languageData = [
             RequiredHours: 'Required Hours',
             bookingDate: 'Booking Date',
             bookingTime: 'Booking Time',
-
-
+            updateJob: 'Update Job',
+            updateService: 'Update Service',
+          
 
         }
     },
@@ -656,9 +657,8 @@ export const languageData = [
             RequiredHours: 'Ore richieste',
             bookingDate: 'Data di prenotazione',
             bookingTime: 'Orario di prenotazione',
-
-
-
+            updateJob: 'Aggiorna lavoro',
+            updateService: 'Aggiorna servizio'
 
         }
     },

@@ -357,13 +357,15 @@ export const fetchAds = (selectedCategory, collection) => async (dispatch) => {
   }
 };
 
-export const updateUserAdsById = (adId, data, collection) => async dispatch => {
+export const updateUserAdsById = (adId, data, collection, navigation) => async dispatch => {
   try {
     dispatch({ type: 'IS_LOADER', payload: true });
     await firestore().collection(collection).doc(adId).update(data);
     dispatch({ type: 'UPDATE_AD_SUCCESS', payload: adId });
     dispatch({ type: 'IS_LOADER', payload: false });
-    Toast.show({ type: 'success', text1: 'Ad updated successfully!', position: 'bottom' });
+    const customMessage = await getFirebaseErrorMessage('Ad updated successfully!');
+    Toast.show({ type: 'success', text1: customMessage, position: 'bottom' });
+    navigation.navigate('Home');
   } catch (error) {
     console.error('Error updating service:', error);
     dispatch({ type: 'IS_LOADER', payload: false });
@@ -378,7 +380,8 @@ export const deleteAdById = (adId, collection, navigation) => async dispatch => 
     await firestore().collection(collection).doc(adId).delete();
     dispatch({ type: 'DELETE_AD_SUCCESS', payload: adId });
     dispatch({ type: 'IS_LOADER', payload: false });
-    Toast.show({ type: 'success', text1: 'Ad deleted successfully!', position: 'bottom', });
+    const customMessage = await getFirebaseErrorMessage('Ad deleted successfully!');
+    Toast.show({ type: 'success', text1: customMessage, position: 'bottom', });
     navigation.navigate('Home');
   } catch (error) {
     console.error('Error deleting ad:', error.message);
@@ -399,7 +402,6 @@ export const saveBookMark = (userId, adId) => async (dispatch) => {
     const userData = userDoc.data();
     setItem('user', userData)
     dispatch({ type: 'SET_USER', payload: userData });
-    console.log('Ad ID added to bookMarks array successfully.');
   } catch (error) {
     console.log(error, 'bookmark_error');
     dispatch({ type: 'IS_LOADER', payload: false });
@@ -418,7 +420,6 @@ export const removeBookMark = (userId, adId) => async (dispatch) => {
     const userData = userDoc.data();
     setItem('user', userData)
     dispatch({ type: 'SET_USER', payload: userData });
-    console.log('Ad ID removed from bookMarks array successfully.');
   } catch (error) {
     console.log(error, 'bookmark_error');
     dispatch({ type: 'IS_LOADER', payload: false });
