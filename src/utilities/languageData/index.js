@@ -263,7 +263,7 @@ export const languageData = [
             Bedroom3: '3 Room',
             Bedroom4: '4 Room',
             Bedroom5: '5 Room',
-            Bedroom5: '6 Room',
+            Bedroom6: '6 Room',
             Hour1: '1 hour',
             Hour1to2: '1-2 hours',
             Hour2to3: '2-3 hours',

@@ -30,7 +30,7 @@ import InformationPopup from '../../components/Information_Popup';
 import BookingStatusTab from '../../components/BookingStatusTab';
 import HorizontalList from '../../components/horizontalList';
 import AdditionalServices from '../../components/AdditionalServices';
-import { createJob, createService, showError, } from '../../store/actions/action';
+import { createJob, createService, showError, updateUserAdsById, } from '../../store/actions/action';
 import SmallMap from '../../components/smallMap';
 import Toast from 'react-native-toast-message';
 
@@ -45,6 +45,7 @@ const CreateService = ({ navigation }) => {
 
     const route = useRoute();
     const dispatch = useDispatch();
+    const { adId, isEdit, } = route.params || null
     let isJobCreate = route.params.isJobCreate;
     let user = useSelector((state) => state.reducer.user);
     let isError = useSelector((state) => state.reducer.isError);
@@ -58,20 +59,20 @@ const CreateService = ({ navigation }) => {
 
     const [step, setstep] = useState(0);
     // repeate service modal state
-    const [hourlyRates, sethourlyRates] = useState('0');
     const [modalVisible, setModalVisible] = useState(true);
     const [repeateService, setrepeateService] = useState('One Time');
     // informationPopups state 
     const [informationPopup, setinformationPopup] = useState(false);
     const [informationPopup1, setinformationPopup1] = useState(false);
 
-    const [previousHourlyRates, setPreviousHourlyRates] = useState(0);
+    const [hourlyRates, sethourlyRates] = useState('0');
+    const [previousHourlyRates, setPreviousHourlyRates] = useState('0');
 
     const [selectedHour, setselectedHour] = useState(isJobCreate ? '1' : '0');
-    const [previousSelectedHour, setPreviousSelectedHour] = useState(0);
+    const [previousSelectedHour, setPreviousSelectedHour] = useState('0');
 
     const [selectedProfessional, setselectedProfessional] = useState(isJobCreate ? '1' : '0');
-    const [previousSelectedProfessional, setPreviousSelectedProfessional] = useState(0);
+    const [previousSelectedProfessional, setPreviousSelectedProfessional] = useState('0');
 
     const [selectedCategories, setselectedCategories] = useState('');
     const [subcategories, setsubcategories] = useState([]);
@@ -83,7 +84,7 @@ const CreateService = ({ navigation }) => {
     const [roomsQty, setroomsQty] = useState('');
     const [previousRoomQtyPrice, setPreviousRoomQtyPrice] = useState(0);
 
-    const [needCleaningMaterials, setneedCleaningMaterials] = useState('');
+    const [needCleaningMaterials, setneedCleaningMaterials] = useState(t('noIhavethem'));
 
     const [aditionalSelectedServices, setaditionalSelectedServices] = useState([]);
     const [previousAdditionalServices, setPreviousAdditionalServices] = useState([]);
@@ -116,9 +117,30 @@ const CreateService = ({ navigation }) => {
     const [selectedDays, setSelectedDays] = useState([]);
 
     const [isLoader, setisLoader] = useState(false);
+    const [isFlag, setIsFlag] = useState(false);
+    const [hasEdited, setHasEdited] = useState(false);
 
     useEffect(() => {
-        setneedCleaningMaterials(t('noIhavethem'));
+        sethourlyRates(user.hourlyRate);
+        if (isEdit != null && !hasEdited) {
+            const timeout = setTimeout(() => {
+                setHasEdited(true);
+                totalForEdit();
+            }, 0);
+            editHandler();
+            return () => clearTimeout(timeout);
+        }
+    }, [user, totalPrice]);
+
+    useEffect(() => {
+        taxHandler();
+    }, [totalPrice]);
+
+    useEffect(() => {
+        initialTotalPrice()
+    }, [hourlyRates, selectedHour, selectedProfessional, aditionalSelectedServices]);
+
+    const initialTotalPrice = async () => {
         let previousTotal = previousSelectedHour * previousHourlyRates * previousSelectedProfessional;
         let newTotal = selectedHour * hourlyRates * selectedProfessional;
         let total = Number(totalPrice) - previousTotal + newTotal;
@@ -127,16 +149,9 @@ const CreateService = ({ navigation }) => {
         setPreviousHourlyRates(hourlyRates);
         setPreviousSelectedHour(selectedHour);
         setPreviousSelectedProfessional(selectedProfessional);
+        setIsFlag(!isFlag);
         taxHandler();
-    }, [hourlyRates, selectedHour, selectedProfessional, aditionalSelectedServices]);
-
-    useEffect(() => {
-        sethourlyRates(user.hourlyRate);
-    }, [user]);
-
-    useEffect(() => {
-        taxHandler();
-    }, [totalPrice]);
+    };
 
     const categoryHandler = (categoryName) => {
         setselectedCategories(categoryName);
@@ -148,7 +163,7 @@ const CreateService = ({ navigation }) => {
         setselectedsubcategories('');
         setroomsize('');
         setroomsQty('');
-        setneedCleaningMaterials('');
+        setneedCleaningMaterials(t('noIhavethem'));
         setaditionalSelectedServices([]);
     };
 
@@ -162,7 +177,6 @@ const CreateService = ({ navigation }) => {
     }
 
     const roomQtyHandler = (itemValue) => {
-        console.log(itemValue, "itemValue");
         setroomsQty(itemValue);
         let find = noOfRooms.find(item => item.title === itemValue);
         let total = Number(totalPrice) - Number(previousRoomQtyPrice) + Number(find.price);
@@ -174,10 +188,10 @@ const CreateService = ({ navigation }) => {
     const cleaningMaterialHandler = (itemValue) => {
         if (itemValue === 'No, I have them' || itemValue === 'No, li ho') {
             let total = Number(totalPrice) - 6;
-            settotalPrice(total);
+            needCleaningMaterials !== ('No, I have them' || itemValue === 'No, li ho') && settotalPrice(total);
         } else {
             let total = Number(totalPrice) + 6;
-            settotalPrice(total);
+            needCleaningMaterials === ('No, I have them' || itemValue === 'No, li ho') && settotalPrice(total);
         }
         setneedCleaningMaterials(itemValue);
     }
@@ -185,10 +199,11 @@ const CreateService = ({ navigation }) => {
     const additionalServicesHandler = (itemValue) => {
         let total = Number(totalPrice);
         previousAdditionalServices.forEach(item => { total -= Number(item.price); });
-        itemValue.forEach(item => { total += Number(item.price); });
+        itemValue?.forEach(item => { total += Number(item.price); });
         setaditionalSelectedServices(itemValue);
         settotalPrice(total);
         setPreviousAdditionalServices(itemValue);
+        setIsFlag(false)
     }
 
     useEffect(() => {
@@ -333,9 +348,72 @@ const CreateService = ({ navigation }) => {
         }
     };
 
-    const handleSelectedDaysChange = (data) => {
-        setSelectedDays(data);
+    const handleSelectedDaysChange = (e) => {
+        setSelectedDays(e);
     };
+
+    const editHandler = () => {
+        setrepeateService(isEdit.repeateService)
+
+        setselectedHour(String(isEdit.howManyHourDoYouNeed))
+        setPreviousSelectedHour(String(isEdit.howManyHourDoYouNeed))
+
+        setselectedProfessional(String(isEdit.howManyProfessionalDoYouNeed))
+        setPreviousSelectedProfessional(String(isEdit.howManyProfessionalDoYouNeed))
+
+        setselectedCategories(isEdit.category)
+        let subCat = allcategories.find(category => category.categoryName === isEdit.category)
+        setsubcategories(subCat.subCategories)
+        setselectedsubcategories(isEdit.subCategory)
+
+        setroomsize(isEdit.roomSize)
+
+        setroomsQty(isEdit.roomsQty)
+
+        if (isEdit.needCleaningMaterials === 'No, I have them') {
+            setneedCleaningMaterials(t('noIhavethem'))
+        }
+        if (isEdit.needCleaningMaterials === 'Yes, Please') {
+            setneedCleaningMaterials(t('yesPlease'))
+        }
+
+        setaditionalSelectedServices(isEdit.aditionalServices);
+        setPreviousAdditionalServices(isEdit.aditionalServices);
+
+        setProductImages(isEdit.images)
+
+        setDate(new Date(isEdit.bookingDate));
+        setshowBs(true)
+        setDateSelected(true)
+
+        settimeStart(new Date(isEdit.bookingStart));
+        settimeStartShow(true)
+        settimeStartSelected(true)
+
+        settimeEnd(new Date(isEdit.bookingEnd));
+        settimeEndShow(true)
+        settimeEndSelected(true)
+
+        setlocation(isEdit.address)
+        setinstructions(isEdit.instructions)
+        setdescription(isEdit.description)
+        setSelectedDays(isEdit.timeSlots)
+    }
+
+    const totalForEdit = () => {
+        let total = 0;
+        // set roomSizes price
+        let findRoomSize = roomSizes.find(item => item.title === isEdit.roomSize);
+        total = total + Number(findRoomSize.rate);
+        setPreviousRoomRate(Number(findRoomSize.rate))
+        // set roomQty price
+        let findNoOfRooms = noOfRooms.find(item => item.title === isEdit.roomsQty);
+        total = total + Number(findNoOfRooms.price);
+        setPreviousRoomQtyPrice(Number(findNoOfRooms.price))
+        // set aditionalServices price
+        isEdit?.aditionalServices?.forEach(item => { total += Number(item.price); });
+        settotalPrice(total + totalPrice)
+    }
 
     const taxHandler = () => {
         let total = Number(totalPrice);
@@ -444,8 +522,8 @@ const CreateService = ({ navigation }) => {
                 }
             }
             if (step === 2) {
-                if (selectedDays.length == 0 || selectedDays[0]?.openingTime == null || selectedDays[0]?.closingTime == null) {
-                    Toast.show({ type: 'error', text1: t('Pleaseselectrates'), position: 'bottom' });
+                if (selectedDays.length === 0 || selectedDays.some(day => day?.openingTime == null || day?.closingTime == null)) {
+                    Toast.show({ type: 'error', text1: t('PleaseSelectTimeSlot'), position: 'bottom' });
                 }
                 else {
                     setstep(step + 1)
@@ -468,6 +546,16 @@ const CreateService = ({ navigation }) => {
 
     const createJobHandler = () => {
         const geoPoint = new firestore.GeoPoint(savedCords[0], savedCords[1]);
+
+        let formatCleaningMaterials = '';
+
+        if (needCleaningMaterials === t('noIhavethem')) {
+            formatCleaningMaterials = 'No, I have them'
+        }
+        if (needCleaningMaterials === t('yesPlease')) {
+            formatCleaningMaterials = 'Yes, Please'
+        }
+
         let data = {
             repeateService: repeateService,
             howManyHourDoYouNeed: selectedHour,
@@ -476,7 +564,7 @@ const CreateService = ({ navigation }) => {
             subCategory: selectedsubcategories,
             roomSize: roomsize,
             roomsQty: roomsQty,
-            needCleaningMaterials: needCleaningMaterials,
+            needCleaningMaterials: formatCleaningMaterials,
             aditionalServices: aditionalSelectedServices,
             totalPrice: totalPrice,
             totalPriceWithTax: totalPriceWithTax,
@@ -491,7 +579,11 @@ const CreateService = ({ navigation }) => {
             addType: 'job',
             postedBy: user.userId,
         }
-        dispatch(createJob(data, navigation))
+        if (adId != null) {
+            dispatch(updateUserAdsById(adId, data, 'jobs'))
+        } else {
+            dispatch(createJob(data, navigation))
+        }
     }
 
     const createServiceHandler = () => {
@@ -510,7 +602,11 @@ const CreateService = ({ navigation }) => {
             addType: 'service',
             postedBy: user.userId,
         }
-        dispatch(createService(data, navigation))
+        if (adId != null) {
+            dispatch(updateUserAdsById(adId, data, 'service'))
+        } else {
+            dispatch(createService(data, navigation))
+        }
     }
 
     return (
