@@ -125,7 +125,6 @@ const CreateService = ({ navigation }) => {
         if (isEdit != null && !hasEdited) {
             const timeout = setTimeout(() => {
                 setHasEdited(true);
-                console.log(isEdit);
                 isEdit.addType === 'job' && totalForEdit();
             }, 0);
             editHandler();
@@ -430,14 +429,6 @@ const CreateService = ({ navigation }) => {
             tax += taxAmount;
         }
         settotalPriceWithTax(Number(total + tax));
-    };
-
-    const formatTime = (milliseconds) => {
-        if (milliseconds === null) return 'Select Time';
-        const date = new Date();
-        date.setHours(Math.floor(milliseconds / 3600000));
-        date.setMinutes((milliseconds % 3600000) / 60000);
-        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
     };
 
     const stepsHandler = () => {
@@ -1208,7 +1199,7 @@ const CreateService = ({ navigation }) => {
                                                 return (
                                                     <View key={index} style={{ alignItems: 'flex-start' }}>
                                                         <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, marginTop: 5 }]}>{key.day}</Text>
-                                                        <Text style={[Typography.text_paragraph_1, { color: colors.White_Primary_01, }]}>{formatTime(key.openingTime) + ' to ' + formatTime(key.closingTime)}</Text>
+                                                        <Text style={[Typography.text_paragraph_1, { color: colors.White_Primary_01, }]}>{moment(key.openingTime).format('LT') + ' to ' + moment(key.closingTime).format('LT')}</Text>
                                                     </View>
                                                 )
                                             })
