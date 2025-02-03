@@ -16,7 +16,7 @@ import { t } from 'i18next';
 import Images from '../../assets/images/index'
 import { useTheme } from '../../../ThemeContext';
 import { LightThemeColors, DarkThemeColors } from '../../utilities/constants';
-import { isLocationSet } from '../../store/actions/action'
+import { isLocationSet, fetchAdsByLocation } from '../../store/actions/action'
 import { checkLocationPermission, } from '../../services/locationServiceCheck';
 import PlacesModal from '../../components/PlacesModal';
 import { Bubble } from '../../assets/icons';
@@ -36,74 +36,15 @@ export default function Map({ navigation }) {
     const styles = createStyles(colors, theme);
     const savedCords = useSelector((state) => state.reducer.savedCords);
     const isLocation = useSelector((state) => state.reducer.isLocation);
+    const adsByLocation = useSelector((state) => state.reducer.adsByLocation);
 
+    let collection = user.role == 'provider' ? 'jobs' : 'service'
+    const cameraRef = useRef(null);
     const [isLocationErr, setisLocationErr] = useState(false);
     const [isPlacesVisible, setisPlacesVisible] = useState(false);
     const [isFlag, setisFlag] = useState(false);
 
-    const [data, setdata] = useState([
-        {
-            title: 'Cleaning at Company',
-            description: 'We specialize in delivering top-quality house cleaning services, ensuring every corner is spotless. Our team is committed to using 100% effort and care in every task, from dusting and vacuuming to deep cleaning kitchens and bathrooms.',
-            price: 25,
-            discount: 30,
-            images: [Images.cleaning, Images.cleaning, Images.cleaning, Images.cleaning, Images.cleaning],
-            openTime: '10:00 AM to 12:00 PM',
-            let: 0,
-            lng: 0,
-            reviews: [{ img: Images.profilePic, name: 'Charollette Hanlin', date: '23 May, 2023 | 02:00 PM', star: '5', review: 'Lorem ipsum dolor sit amet consectetur. Purus massa tristique arcu tempus ut ac porttitor. Lorem ipsum dolor sit amet consectetur. ' },],
-            coordinates: [24.979781, 67.067024]
-        }, {
-            title: 'Cleaning at Company',
-            description: 'We specialize in delivering top-quality house cleaning services, ensuring every corner is spotless. Our team is committed to using 100% effort and care in every task, from dusting and vacuuming to deep cleaning kitchens and bathrooms.',
-            price: 25,
-            discount: 30,
-            images: [Images.cleaning],
-            openTime: '10:00 AM to 12:00 PM',
-            let: 0,
-            lng: 0,
-            reviews: [{ img: Images.profilePic, name: 'Charollette Hanlin', date: '23 May, 2023 | 02:00 PM', star: '5', review: 'Lorem ipsum dolor sit amet consectetur. Purus massa tristique arcu tempus ut ac porttitor. Lorem ipsum dolor sit amet consectetur. ' },],
-            coordinates: [24.979781, 67.067024]
-        },
-        {
-            title: 'Cleaning at Company',
-            description: 'We specialize in delivering top-quality house cleaning services, ensuring every corner is spotless. Our team is committed to using 100% effort and care in every task, from dusting and vacuuming to deep cleaning kitchens and bathrooms.',
-            price: 25,
-            discount: 30,
-            images: [Images.cleaning],
-            openTime: '10:00 AM to 12:00 PM',
-            let: 0,
-            lng: 0,
-            reviews: [{ img: Images.profilePic, name: 'Charollette Hanlin', date: '23 May, 2023 | 02:00 PM', star: '5', review: 'Lorem ipsum dolor sit amet consectetur. Purus massa tristique arcu tempus ut ac porttitor. Lorem ipsum dolor sit amet consectetur. ' },],
-            coordinates: [24.8854, 67.0159],
-        },
-        {
-            title: 'Cleaning at Company',
-            description: 'We specialize in delivering top-quality house cleaning services, ensuring every corner is spotless. Our team is committed to using 100% effort and care in every task, from dusting and vacuuming to deep cleaning kitchens and bathrooms.',
-            price: 25,
-            discount: 30,
-            images: [Images.cleaning],
-            openTime: '10:00 AM to 12:00 PM',
-            let: 0,
-            lng: 0,
-            reviews: [{ img: Images.profilePic, name: 'Charollette Hanlin', date: '23 May, 2023 | 02:00 PM', star: '5', review: 'Lorem ipsum dolor sit amet consectetur. Purus massa tristique arcu tempus ut ac porttitor. Lorem ipsum dolor sit amet consectetur. ' },],
-            coordinates: [24.963673, 67.06837]
-        },
-        {
-            title: 'Cleaning at Company',
-            description: 'We specialize in delivering top-quality house cleaning services, ensuring every corner is spotless. Our team is committed to using 100% effort and care in every task, from dusting and vacuuming to deep cleaning kitchens and bathrooms.',
-            price: 25,
-            discount: 30,
-            images: [Images.cleaning],
-            openTime: '10:00 AM to 12:00 PM',
-            let: 0,
-            lng: 0,
-            reviews: [{ img: Images.profilePic, name: 'Charollette Hanlin', date: '23 May, 2023 | 02:00 PM', star: '5', review: 'Lorem ipsum dolor sit amet consectetur. Purus massa tristique arcu tempus ut ac porttitor. Lorem ipsum dolor sit amet consectetur. ' },],
-            coordinates: [24.963673, 67.06837]
-        },
-
-
-    ]);
+    const [data, setdata] = useState(null);
 
     useEffect(() => {
         gpsenable()
@@ -117,8 +58,10 @@ export default function Map({ navigation }) {
         checkLocationPermission()
             .then(async (position) => {
                 let loc = [position.coords.latitude, position.coords.longitude]
-                let loc1 = [24.9107, 67.0311]
-                dispatch(isLocationSet(true, loc1));
+                let nazimabad = [24.9107, 67.0311]
+                let naganChowrangi = [24.963673, 67.06837]
+                dispatch(isLocationSet(true, naganChowrangi));
+                dispatch(fetchAdsByLocation(naganChowrangi, collection));
             })
             .catch((error) => {
                 console.log(error, "error");
@@ -126,10 +69,19 @@ export default function Map({ navigation }) {
             });
     }
 
-    const cameraRef = useRef(null);
+    useEffect(() => {
+        setisLocationErr(isLocation)
+    }, [isLocation]);
+
+
+    useEffect(() => {
+        setdata(adsByLocation)
+    }, [adsByLocation]);
+
+
     const recenterMap = (loc) => {
+        dispatch(fetchAdsByLocation(savedCords, collection));
         if (cameraRef.current) {
-            // dispatch(fetchPosts(savedCords?.length > 0 ? savedCords : ipLocation));
             cameraRef.current.setCamera({
                 centerCoordinate: [savedCords[1], savedCords[0]],
                 zoomLevel: 11,
@@ -195,9 +147,9 @@ export default function Map({ navigation }) {
 
                                     {/* services marker */}
                                     {
-                                        data.map((key, index) => {
-                                            const latitude = key.coordinates[0];
-                                            const longitude = key.coordinates[1];
+                                        data != null && data.length != 0 && data.map((key, index) => {
+                                            const latitude = Number(key.geoPoint._latitude);
+                                            const longitude = Number(key.geoPoint._longitude);
                                             const isSameLocation = longitude === savedCords[1] && latitude === savedCords[0];
                                             const offset = isSameLocation ? 0.00001 * (index + 1) : 0; // Apply offset to avoid exact overlap
                                             return (
@@ -208,7 +160,7 @@ export default function Map({ navigation }) {
                                                     <TouchableOpacity
                                                         activeOpacity={0.9}
                                                         onPress={() => {
-                                                            navigation.navigate('AdFullView', { item: key, isService: user.role === 'user' ? true : false, isJobCreate: user.role !== 'user' ? true : false, })
+                                                            navigation.navigate('AdFullView', { item: key, })
                                                         }}
                                                     >
                                                         <Bubble />
@@ -219,23 +171,48 @@ export default function Map({ navigation }) {
                                     }
 
                                     {/* current location marker */}
-                                    <Mapbox.MarkerView coordinate={[savedCords[1], savedCords[0]]}>
-                                        <View style={styles.locationMarke}>
-                                            <Animatable.View
-                                                iterationCount={200000}
-                                                useNativeDriver
-                                                animation={'zoomIn'}
-                                                duration={3000}
-                                                style={{
-                                                    alignSelf: 'center',
-                                                    borderRadius: 15,
-                                                    height: 19,
-                                                    width: 19,
-                                                    backgroundColor: colors.BothPrimary_01
-                                                }}
-                                            />
-                                        </View>
-                                    </Mapbox.MarkerView>
+
+                                    {
+                                        data.length == 0 &&
+                                        <Mapbox.MarkerView coordinate={[savedCords[1], savedCords[0]]}>
+                                            <View style={styles.locationMarke}>
+                                                <Animatable.View
+                                                    iterationCount={200000}
+                                                    useNativeDriver
+                                                    animation={'zoomIn'}
+                                                    duration={3000}
+                                                    style={{
+                                                        alignSelf: 'center',
+                                                        borderRadius: 15,
+                                                        height: 19,
+                                                        width: 19,
+                                                        backgroundColor: colors.BothPrimary_01
+                                                    }}
+                                                />
+                                            </View>
+                                        </Mapbox.MarkerView>
+                                    }
+
+                                    {
+                                        data.length !== 0 &&
+                                        <Mapbox.MarkerView coordinate={[savedCords[1], savedCords[0]]}>
+                                            <View style={styles.locationMarke}>
+                                                <Animatable.View
+                                                    iterationCount={200000}
+                                                    useNativeDriver
+                                                    animation={'zoomIn'}
+                                                    duration={3000}
+                                                    style={{
+                                                        alignSelf: 'center',
+                                                        borderRadius: 15,
+                                                        height: 19,
+                                                        width: 19,
+                                                        backgroundColor: colors.BothPrimary_01
+                                                    }}
+                                                />
+                                            </View>
+                                        </Mapbox.MarkerView>
+                                    }
 
                                 </MapView>
                             )

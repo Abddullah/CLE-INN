@@ -5,6 +5,11 @@ import getFirebaseErrorMessage from '../../services/firebaseErrorHandler';
 import { CommonActions } from '@react-navigation/native';
 import { setItem, deleteItem, getItem } from '../../services/assynsStorage';
 
+export const isLocationSet = (isLocationAvailable, loc) => async (dispatch) => {
+  dispatch({ type: 'IS_LOCATION', payload: isLocationAvailable });
+  dispatch({ type: 'SAVED_COORDS', payload: loc });
+};
+
 export const showError = (errMsg) => async dispatch => {
   dispatch({ type: 'IS_ERROR', payload: true });
   dispatch({ type: 'SET_ERROR_MSG', payload: errMsg });
@@ -338,6 +343,52 @@ export const fetchAdsByUser = (userId, collection) => dispatch => {
       });
   } catch (error) {
     console.log(error, 'fetch_jobs_error');
+    dispatch({ type: 'IS_LOADER', payload: false });
+  }
+};
+
+// Function to calculate the bounding box
+const calculateBoundingBox = (center, radius) => {
+  const earthRadius = 6371; // Earth's radius in kilometers
+  const latRadians = center.latitude * Math.PI / 180;
+  const lonRadians = center.longitude * Math.PI / 180;
+  const distanceRadians = radius / earthRadius;
+  // Calculate the minimum and maximum latitudes
+  const minLat = latRadians - distanceRadians;
+  const maxLat = latRadians + distanceRadians;
+  // Calculate the minimum and maximum longitudes
+  const minLon = lonRadians - distanceRadians / Math.cos(latRadians);
+  const maxLon = lonRadians + distanceRadians / Math.cos(latRadians);
+  // Convert back to degrees
+  const sw = new firestore.GeoPoint(minLat * 180 / Math.PI, minLon * 180 / Math.PI);
+  const ne = new firestore.GeoPoint(maxLat * 180 / Math.PI, maxLon * 180 / Math.PI);
+  return { sw, ne };
+};
+
+export const fetchAdsByLocation = (location, collection) => async dispatch => {
+  try {
+    console.log(location, collection, 'location');
+
+    if (location.length != 0) {
+      dispatch({ type: 'IS_LOADER', payload: true });
+      const latitude = location[0]
+      const longitude = location[1]
+      const center = new firestore.GeoPoint(latitude, longitude);
+      const radius = 5;
+      const bounds = calculateBoundingBox(center, radius);
+      const query = firestore().collection(collection)
+        .where('geoPoint', '>=', bounds.sw)
+        .where('geoPoint', '<=', bounds.ne)
+      const unsubscribe = query.onSnapshot((snapshot) => {
+        const data = [];
+        snapshot?.forEach(async (doc) => { data.push({ id: doc.id, ...doc.data() }) });
+        console.log(data, 'data');
+        dispatch({ type: 'FETCH_BY_LOCATION_ADS', payload: data });
+      });
+      dispatch({ type: 'IS_LOADER', payload: false });
+    }
+  } catch (error) {
+    console.error('Error creating post: ', error);
     dispatch({ type: 'IS_LOADER', payload: false });
   }
 };

@@ -9,18 +9,17 @@ import {
   FlatList,
   TextInput
 } from 'react-native';
-// import { fetchPosts, } from '../store/actions/action';
 import axios from 'axios';
 import { Pinbox } from '../assets/icons';
-import { Typography } from '../utilities/constants/constant.style';
 import { LightThemeColors, DarkThemeColors } from '../utilities/constants';
 import { useTheme } from '../../ThemeContext';
+import { fetchAdsByLocation } from '../store/actions/action';
 
-const PlaceItem = ({ item, handleResultPress }) => {
-  const { theme, toggleTheme } = useTheme();
+const PlaceItem = ({ item, handleResultPress, onClose }) => {
+  const { theme } = useTheme();
   const colors = theme === 'dark' ? DarkThemeColors : LightThemeColors;
   const styles = createStyles(colors);
-  const [pressed, setpressed] = useState(false)
+  // const [pressed, setpressed] = useState(false)
 
   return (
     <TouchableOpacity
@@ -28,9 +27,9 @@ const PlaceItem = ({ item, handleResultPress }) => {
         // backgroundColor: pressed ? colors.Neutral_06 : colors.Primary_01,
         backgroundColor: colors.white,
       }]}
-      onPressIn={() => setpressed(true)}
-      onPressOut={() => setpressed(false)}
-      onPress={() => handleResultPress(item)}
+      // onPressIn={() => setpressed(true)}
+      // onPressOut={() => setpressed(false)}
+      onPress={() => { handleResultPress(item); onClose() }}
     >
       <View style={styles.location_c1}>
         <Pinbox height={32} width={32} />
@@ -47,6 +46,7 @@ const PlacesModal = ({ onClose, isVisible, cameraRef }) => {
   const { theme, toggleTheme } = useTheme();
   const colors = theme === 'dark' ? DarkThemeColors : LightThemeColors;
   const styles = createStyles(colors);
+  let user = useSelector((state) => state.reducer.user);
 
   const dispatch = useDispatch();
   const [locationSearch, setlocationSearch] = useState('');
@@ -54,9 +54,12 @@ const PlacesModal = ({ onClose, isVisible, cameraRef }) => {
 
   const handleResultPress = (item) => {
     const [longitude, latitude] = item.center;
-    // dispatch(fetchPosts([latitude, longitude]));
+    let loc = [latitude, longitude]
+    let collection = user.role == 'provider' ? 'jobs' : 'service'
+    dispatch(fetchAdsByLocation(loc, collection));
     setlocationSearch('');
     setResults([]);
+
     if (cameraRef.current) {
       cameraRef.current.setCamera({
         centerCoordinate: [longitude, latitude],
@@ -64,8 +67,9 @@ const PlacesModal = ({ onClose, isVisible, cameraRef }) => {
         animationDuration: 1000,
       });
     }
-    onClose()
+    // onClose()
   };
+
   const handleSearch = async (text) => {
     setlocationSearch(text);
     if (text.length > 2) {
@@ -115,7 +119,7 @@ const PlacesModal = ({ onClose, isVisible, cameraRef }) => {
             contentContainerStyle={{ maxWidth: '100%' }}
             showsVerticalScrollIndicator={false}
             keyExtractor={(item) => item.id}
-            renderItem={({ item }) => <PlaceItem item={item} handleResultPress={handleResultPress} />}
+            renderItem={({ item }) => <PlaceItem item={item} handleResultPress={handleResultPress} onClose={onClose} />}
           />
         </View>
       </TouchableOpacity>
