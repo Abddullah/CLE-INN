@@ -65,7 +65,7 @@ const ServiceCard = ({
                 />
                 <View style={styles.overlay} />
                 {
-                    isFav === true &&
+                    isFav === true && data.postedBy !== userId &&
                     <TouchableOpacity activeOpacity={.8} style={styles.favIcon}
                         onPress={() => { bookMarkHandler(false) }}
                     >
@@ -73,7 +73,7 @@ const ServiceCard = ({
                     </TouchableOpacity>
                 }
                 {
-                    isFav === false &&
+                    isFav === false && data.postedBy !== userId &&
                     <TouchableOpacity activeOpacity={.8} style={styles.favIcon}
                         onPress={() => { bookMarkHandler(true) }}
                     >

@@ -391,7 +391,6 @@ export const deleteAdById = (adId, collection, navigation) => async dispatch => 
   }
 };
 
-
 export const saveBookMark = (userId, adId) => async (dispatch) => {
   try {
     const userRef = firestore().collection('users').doc(userId);
@@ -431,6 +430,10 @@ export const removeBookMark = (userId, adId) => async (dispatch) => {
 export const fetchBookMarkAds = (bookMarksIds, collection) => async (dispatch) => {
   let adId = collection != 'service' ? 'jobId' : 'serviceId';
   try {
+    if (bookMarksIds.length === 0) {
+      dispatch({ type: 'SET_BOOK_MARKS', payload: [] });
+      return;
+    }
     dispatch({ type: 'IS_LOADER', payload: true });
     const snapshot = await firestore().collection(collection).where(adId, 'in', bookMarksIds).get();
     const bookMarks = snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));

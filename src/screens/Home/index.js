@@ -138,7 +138,6 @@ const Home = ({ navigation }) => {
                             renderItem={({ item }) => (
                                 <ServiceCard
                                     data={item}
-                                    isFav={true}
                                     submitHandler={() => { navigation.navigate('AdFullView', { item: item }) }}
                                 />
                             )}
@@ -222,7 +221,6 @@ const Home = ({ navigation }) => {
                                             <ServiceCard
                                                 index={index}
                                                 data={item}
-                                                isFav={true}
                                                 submitHandler={() => {
                                                     navigation.navigate('AdFullView', { item: item });
                                                 }}
