@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Image, ScrollView } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { t } from 'i18next';
@@ -20,7 +20,7 @@ import CTAButton1 from '../../components/CTA_BUTTON1';
 import CTAButton2 from '../../components/CTA_BUTTON2';
 import moment from 'moment';
 import SmallMap from '../../components/smallMap';
-import { deleteAdById } from '../../store/actions/action';
+import { deleteAdById, fetchUserById } from '../../store/actions/action';
 
 const CleaningAndHygineService = "Cleaning and Hygiene Services";
 
@@ -31,6 +31,7 @@ const AdFullView = ({ navigation }) => {
     const colors = theme === 'dark' ? DarkThemeColors : LightThemeColors;
     const styles = createStyles(colors, theme);
     let user = useSelector((state) => state.reducer.user);
+    let postedByuser = useSelector((state) => state.reducer.postedByuser);
 
     let data = route.params?.item;
     let isBooking = route.params?.isBooking;
@@ -38,8 +39,13 @@ const AdFullView = ({ navigation }) => {
     let collection = user.role == 'provider' ? 'service' : 'jobs'
 
     console.log(data, "data");
+    console.log(postedByuser, "postedByuser");
 
     let images = [Images.cleaning, Images.cleaning, Images.cleaning, Images.cleaning, Images.cleaning];
+
+    useEffect(() => {
+        dispatch(fetchUserById(data.postedBy))
+    }, [data]);
 
     const formatTime = (milliseconds) => {
         if (milliseconds === null) return 'Select Time';
@@ -234,7 +240,7 @@ const AdFullView = ({ navigation }) => {
                 <TouchableOpacity
                     activeOpacity={.8}
                     style={styles.centerStyle}
-                    onPress={() => { navigation.navigate('CustomerInfo', { isJobCreate: data.addType === 'job' ? true : false }) }}
+                    onPress={() => { navigation.navigate('CustomerInfo', { userInfo: postedByuser }) }}
                 >
                     <FontAwesome5 name="info-circle" style={{ fontSize: RFValue(18, screenResolution.screenHeight), color: colors.White_Primary_01, marginLeft: 10 }} />
                     {

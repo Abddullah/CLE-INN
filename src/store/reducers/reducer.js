@@ -3,6 +3,7 @@ const initState = {
   errorMsg: '',
   isLoader: false,
   user: {},
+  postedByuser: null,
   savedCords: [24.963673, 67.06837], // Nagan chowrangi location
   isLocation: true,
   // savedCords: [24.8854, 67.0159], // Golimar location
@@ -102,6 +103,11 @@ const reducer = (state = initState, action) => {
       return {
         ...state,
         bookMarks: action.payload,
+      }
+    case 'SET_POSTED_BY_USER':
+      return {
+        ...state,
+        postedByuser: action.payload,
       }
     default:
       return state;

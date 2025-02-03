@@ -445,4 +445,23 @@ export const fetchBookMarkAds = (bookMarksIds, collection) => async (dispatch) =
     const errorMessage = await getFirebaseErrorMessage(error.code);
     Toast.show({ type: 'error', text1: errorMessage, position: 'bottom' });
   }
-} 
+}
+
+export const fetchUserById = (userId) => async dispatch => {
+  try {
+    dispatch({ type: 'IS_LOADER', payload: true });
+    const userDoc = await firestore().collection('users').doc(userId).get();
+    if (userDoc.exists) {
+      dispatch({ type: 'SET_POSTED_BY_USER', payload: { ...userDoc.data(), id: userDoc.id } });
+    } else {
+      dispatch({ type: 'SET_POSTED_BY_USER', payload: null });
+      Toast.show({ type: 'error', text1: 'User not found', position: 'bottom' });
+    }
+  } catch (error) {
+    console.log(error, 'fetch_user_error');
+    const errorMessage = getFirebaseErrorMessage(error.code);
+    Toast.show({ type: 'error', text1: errorMessage, position: 'bottom' });
+  } finally {
+    dispatch({ type: 'IS_LOADER', payload: false });
+  }
+};
