@@ -125,7 +125,8 @@ const CreateService = ({ navigation }) => {
         if (isEdit != null && !hasEdited) {
             const timeout = setTimeout(() => {
                 setHasEdited(true);
-                totalForEdit();
+                console.log(isEdit);
+                isEdit.addType === 'job' && totalForEdit();
             }, 0);
             editHandler();
             return () => clearTimeout(timeout);
@@ -137,7 +138,7 @@ const CreateService = ({ navigation }) => {
     }, [totalPrice]);
 
     useEffect(() => {
-        initialTotalPrice()
+        isJobCreate && initialTotalPrice()
     }, [hourlyRates, selectedHour, selectedProfessional, aditionalSelectedServices]);
 
     const initialTotalPrice = async () => {
@@ -394,6 +395,7 @@ const CreateService = ({ navigation }) => {
         settimeEndShow(true)
         settimeEndSelected(true)
 
+        !isJobCreate && settotalPrice(isEdit.fixedRates)
         setlocation(isEdit.address)
         setinstructions(isEdit.instructions)
         setdescription(isEdit.description)
@@ -599,7 +601,7 @@ const CreateService = ({ navigation }) => {
             fixedRates: totalPrice,
             description: description,
             images: productImages,
-            createdAt: new Date(date).getTime(),
+            createdAt: new Date().getTime(),
             geoPoint: geoPoint,
             timeSlots: selectedDays,
             addStatus: 'pending',
