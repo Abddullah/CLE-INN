@@ -67,7 +67,7 @@ const PlacesModal = ({ onClose, isVisible, cameraRef }) => {
         animationDuration: 1000,
       });
     }
-    // onClose()
+    onClose()
   };
 
   const handleSearch = async (text) => {
