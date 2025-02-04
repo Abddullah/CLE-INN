@@ -1,33 +1,36 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, ScrollView, TextInput, TouchableOpacity, FlatList, } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
-import CustomHeader from '../../components/Header';
-import { t } from 'i18next';
-import CTAButton1 from '../../components/CTA_BUTTON1';
-import { Typography } from '../../utilities/constants/constant.style';
-import HorizontalList from '../../components/horizontalList';
+import { useSelector } from 'react-redux';
+import { Select } from 'native-base';
 import DatePicker from 'react-native-date-picker';
+import { RFValue } from "react-native-responsive-fontsize";
 import Fontisto from 'react-native-vector-icons/Fontisto';
 import Feather from 'react-native-vector-icons/Feather';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import moment from 'moment';
+import { t } from 'i18next';
+
 import { LightThemeColors, DarkThemeColors } from '../../utilities/constants';
 import { useTheme } from '../../../ThemeContext';
+import { Typography } from '../../utilities/constants/constant.style';
 import screenResolution from '../../utilities/constants/screenResolution';
-const deviceWidth = screenResolution.screenWidth;
-import { RFPercentage, RFValue } from "react-native-responsive-fontsize";
-import { Select } from 'native-base';
+import CustomHeader from '../../components/Header';
+import CTAButton1 from '../../components/CTA_BUTTON1';
+import HorizontalList from '../../components/horizontalList';
 import BookingStatusTab from '../../components/BookingStatusTab';
 import RepeatService from '../../components/RepeatService_Popup';
 import AdditionalServices from '../../components/AdditionalServices';
 import InformationPopup from '../../components/Information_Popup';
 
+const deviceWidth = screenResolution.screenWidth;
+
 const CreateBooking = ({ navigation }) => {
-    const { theme, toggleTheme } = useTheme();
+    const { theme } = useTheme();
     const colors = theme === 'dark' ? DarkThemeColors : LightThemeColors;
     const styles = createStyles(colors, theme, deviceWidth);
     let user = useSelector((state) => state.reducer.user);
     let isError = useSelector((state) => state.reducer.isError);
+
     const [modalVisible, setModalVisible] = useState(true);
     const [selectedHour, setselectedHour] = useState('');
     const [selectedProfessional, setselectedProfessional] = useState('');
@@ -138,10 +141,6 @@ const CreateBooking = ({ navigation }) => {
 
                     <View style={styles.body}>
                         <View style={{ width: '90%', }}>
-                            {/* <View style={styles.heading}>
-                                <Text style={[Typography.text_paragraph_1, styles.headingText]}>{t('howmanyhoursdoyou')}</Text>
-                            </View> */}
-
                             <View style={styles.heading}>
                                 <TouchableOpacity
                                     onPress={() => { setinformationPopup(!informationPopup) }}
@@ -260,7 +259,7 @@ const CreateBooking = ({ navigation }) => {
                                 <BookingStatusTab selectedState={selectedTab} setselectedState={setselectedTab} title={t('yesPlease')} />
                             </View>
 
-                            <AdditionalServices />
+                            {/* <AdditionalServices /> */}
                         </View>
                     </View>
                 </ScrollView >
@@ -510,12 +509,6 @@ const createStyles = (colors, theme, deviceWidth) => {
             alignItems: 'center',
         },
         footer: {
-            // flex: 2,
-            // width: '100%',
-            // justifyContent: 'center',
-            // alignItems: 'center',
-            // marginBottom: 20
-
             width: '100%',
             justifyContent: 'center',
             alignItems: 'center',
@@ -535,7 +528,6 @@ const createStyles = (colors, theme, deviceWidth) => {
             textAlign: 'left'
         },
         editText: {
-            // fontSize: 14,
             textAlign: 'left',
             color: colors.black
         },
@@ -588,11 +580,8 @@ const createStyles = (colors, theme, deviceWidth) => {
             backgroundColor: colors.Neutral_02,
         },
         timeFlatList: {
-            // width: '100%',
             marginTop: 10,
             alignSelf: 'center',
-            // justifyContent:'center',
-            // alignItems: 'center',
         },
         inputContiner: {
             alignItems: 'center',
@@ -627,6 +616,5 @@ const createStyles = (colors, theme, deviceWidth) => {
             justifyContent: 'space-between',
             alignItems: 'flex-start',
         },
-
     });
 };
