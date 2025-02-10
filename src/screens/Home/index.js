@@ -20,24 +20,48 @@ import CustomTabs from '../../components/CustomTabs';
 import ServiceCard from '../../components/ServiceCard';
 import getGreetingMessage from '../../services/greetUserByCurrentTime'
 import CityAndCountry from '../../components/GetCityAndCountry'
-import { fetchAds, fetchAdsByUser, } from '../../store/actions/action'
+import { fetchAds, fetchAdsByUser, isLocationSet, } from '../../store/actions/action'
+import { checkLocationPermission } from '../../services/locationServiceCheck';
+import CTAButton1 from '../../components/CTA_BUTTON1';
 
 const Home = ({ navigation }) => {
     const dispatch = useDispatch()
     const { theme } = useTheme();
     const colors = theme === 'dark' ? DarkThemeColors : LightThemeColors;
     const styles = createStyles(colors, theme);
+    const savedCords = useSelector((state) => state.reducer.savedCords);
+    const isLocation = useSelector((state) => state.reducer.isLocation);
     let user = useSelector((state) => state.reducer.user);
-    let savedCords = useSelector(state => state.reducer.savedCords)
     let allcategories = useSelector((state) => state.reducer.categories);
     let ads = useSelector((state) => state.reducer.allAds);
     let myAds = useSelector((state) => state.reducer.myAds);
     const { message, icon, color } = getGreetingMessage()
 
+    const [isLocationErr, setisLocationErr] = useState(false);
     const [search, setsearch] = useState('');
     const [selectedTab, setselectedTab] = useState();
     const [selectedCat, setselectedCat] = useState('');
     const [subCat, setsubCat] = useState([]);
+
+    useEffect(() => {
+        gpsenable()
+    }, []);
+
+    const gpsenable = () => {
+        checkLocationPermission()
+            .then(async (position) => {
+                let loc = [position.coords.latitude, position.coords.longitude]
+                dispatch(isLocationSet(true, loc));
+            })
+            .catch((error) => {
+                console.log(error, "error");
+                dispatch(isLocationSet(false, []));
+            });
+    }
+
+    useEffect(() => {
+        setisLocationErr(isLocation)
+    }, [isLocation]);
 
     useEffect(() => {
         if (allcategories.length != 0) {
@@ -69,179 +93,198 @@ const Home = ({ navigation }) => {
 
     return (
         <View style={styles.container}>
-            <View style={styles.boxContainer}>
-                <View style={{ flexDirection: 'row', width: '100%', }}>
-                    <Feather name={icon} style={{ fontSize: 20, iconColor: color, }} />
-                    <Text style={[Typography.text_paragraph_1, { color: colors.black, marginLeft: 10 }]}>{message}</Text>
-                    <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{'  ' + user.fullName}</Text>
-                </View>
 
-                <View style={{ flexDirection: 'row', width: '100%' }}>
-                    <FontAwesome5
-                        name="map-marker-alt"
-                        style={{ fontSize: RFValue(18, screenResolution.screenHeight), color: colors.BothPrimary_01, left: 3 }}
+            {
+                !isLocationErr &&
+                <View style={styles.locationError}>
+                    <Text style={[Typography.text_paragraph, { color: colors.black, marginBottom: 20 }]}>{t('locationNotAvailable')}</Text>
+                    <CTAButton1
+                        title={t('turnOnGps')}
+                        submitHandler={async () => { gpsenable() }
+                        }
                     />
-                    <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, marginLeft: 13 }]}>
-                        <CityAndCountry lat={savedCords[0]} lng={savedCords[1]} />
-                    </Text>
                 </View>
+            }
 
-                <View style={{ width: '100%', }}>
-                    <View style={styles.inputContiner}>
-                        <AntDesign name="search1" style={{ fontSize: RFValue(20, screenResolution.screenHeight), color: colors.Primary_01, }} />
-                        <TextInput
-                            // keyboardType='number-pad'
-                            style={styles.input}
-                            value={search}
-                            onChangeText={(e) => { setsearch(e) }}
-                            placeholder={t('search')}
-                            placeholderTextColor={theme === 'dark' ? colors.white : colors.Neutral_01}
-                        />
-                    </View>
-                </View>
-            </View>
-
-            <ScrollView
-                style={{ width: '95%', }}
-                contentContainerStyle={styles.scrollBar}
-                showsVerticalScrollIndicator={false}
-            >
-                {/* //////////////////////////////////////////////////////////////Provider////////////////////////////////////////////////////////// */}
-                {
-                    user.role !== 'user' &&
-                    <View style={styles.buttonContainer}>
-                        <CustomTabs selectedState={selectedTab} setselectedState={setselectedTab} title={t('myjobs')} />
-                        <CustomTabs selectedState={selectedTab} setselectedState={setselectedTab} title={t('myads')} />
-                    </View>
-                }
-
-                {/* //////////////////////////////////////////////////////////////User////////////////////////////////////////////////////////////// */}
-                {
-                    user.role === 'user' &&
-                    <View style={styles.buttonContainer}>
-                        <CustomTabs selectedState={selectedTab} setselectedState={setselectedTab} title={t('services')} />
-                        <CustomTabs selectedState={selectedTab} setselectedState={setselectedTab} title={t('myjobs')} />
-                    </View>
-                }
-
-                {/* My Ads Tab */}
-                {
-                    ((user.role !== 'user' && selectedTab === t('myads')) || (user.role === 'user' && selectedTab === t('myjobs'))) &&
-
-                    <View style={{ width: '95%', alignItems: myAds.length != 1 ? 'center' : 'flex-start', marginTop: 10 }}>
-                        <FlatList
-                            data={myAds}
-                            style={{ marginTop: 10, }}
-                            contentContainerStyle={{ justifyContent: 'center', }}
-                            numColumns={2}
-                            showsVerticalScrollIndicator={false}
-                            renderItem={({ item }) => (
-                                <ServiceCard
-                                    data={item}
-                                    submitHandler={() => { navigation.navigate('AdFullView', { item: item }) }}
-                                />
-                            )}
-                            ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
-                        />
-                    </View>
-
-                }
-
-                {/* all ads Tab */}
-                {
-                    (selectedTab === t('services') || (user.role === 'provider' ? selectedTab === t('myjobs') : selectedTab !== t('myjobs'))) &&
-                    <>
-                        <View style={styles.catContainer}>
-                            <View style={styles.headerSection}>
-                                <SliderBox
-                                    autoplay={true}
-                                    ImageComponent={FastImage}
-                                    images={[Images.cleaning, Images.cleaning, Images.cleaning, Images.cleaning, Images.cleaning]}
-                                    sliderBoxHeight={230}
-                                    onCurrentImagePressed={index => console.warn(`image ${index} pressed`)}
-                                    dotColor={colors.Primary_01}
-                                    inactiveDotColor="#90A4AE"
-                                    resizeMethod={'resize'}
-                                    resizeMode={'cover'}
-                                    circleLoop
-                                    dotStyle={{ width: 8, height: 8, borderRadius: 4, }}
-                                />
-                            </View>
-                            <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{t('specialservices')}</Text>
-                            <ScrollView
-                                horizontal={true}
-                                showsHorizontalScrollIndicator={false}
-                                style={{ flexDirection: 'row', marginTop: 10 }}
-                            >
-                                <FlatList
-                                    data={allcategories}
-                                    horizontal={true}
-                                    showsHorizontalScrollIndicator={false}
-                                    showsVerticalScrollIndicator={false}
-                                    renderItem={({ item }) =>
-                                        <Categories
-                                            selectedCat={selectedCat}
-                                            subCategories={item.subCategories}
-                                            icon={item.image}
-                                            title={item.categoryName}
-                                            submitHandler={(title, subCategories) => {
-                                                selectedCatHandler(title, subCategories)
-                                            }}
-                                        />
-                                    }
-                                />
-                            </ScrollView>
+            {
+                isLocationErr &&
+                <>
+                    <View style={styles.boxContainer}>
+                        <View style={{ flexDirection: 'row', width: '100%', }}>
+                            <Feather name={icon} style={{ fontSize: 20, iconColor: color, }} />
+                            <Text style={[Typography.text_paragraph_1, { color: colors.black, marginLeft: 10 }]}>{message}</Text>
+                            <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{'  ' + user.fullName}</Text>
                         </View>
 
+                        <View style={{ flexDirection: 'row', width: '100%' }}>
+                            <FontAwesome5
+                                name="map-marker-alt"
+                                style={{ fontSize: RFValue(18, screenResolution.screenHeight), color: colors.BothPrimary_01, left: 3 }}
+                            />
+                            <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, marginLeft: 13 }]}>
+                                <CityAndCountry lat={savedCords[0]} lng={savedCords[1]} />
+                            </Text>
+                        </View>
+
+                        <View style={{ width: '100%', }}>
+                            <View style={styles.inputContiner}>
+                                <AntDesign name="search1" style={{ fontSize: RFValue(20, screenResolution.screenHeight), color: colors.Primary_01, }} />
+                                <TextInput
+                                    // keyboardType='number-pad'
+                                    style={styles.input}
+                                    value={search}
+                                    onChangeText={(e) => { setsearch(e) }}
+                                    placeholder={t('search')}
+                                    placeholderTextColor={theme === 'dark' ? colors.white : colors.Neutral_01}
+                                />
+                            </View>
+                        </View>
+                    </View>
+
+                    <ScrollView
+                        style={{ width: '95%', }}
+                        contentContainerStyle={styles.scrollBar}
+                        showsVerticalScrollIndicator={false}
+                    >
+                        {/* //////////////////////////////////////////////////////////////Provider////////////////////////////////////////////////////////// */}
                         {
-                            Object.keys(groupedAds).map((key) => (
-                                <View key={key} style={{ width: '95%', alignItems: 'flex-start' }}>
-                                    <View style={styles.subCatTextContainer}>
-                                        <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, marginTop: 20 }]}>
-                                            {key}
-                                        </Text>
-                                        <TouchableOpacity
-                                            activeOpacity={0.8}
-                                            onPress={() => {
-                                                navigation.navigate('CategoriesList', { subCatTitle: key, ads: groupedAds[key] });
-                                            }}
-                                        >
-                                            <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, marginTop: 20 }]}>
-                                                {t('viewAll')}
-                                            </Text>
-                                        </TouchableOpacity>
+                            user.role !== 'user' &&
+                            <View style={styles.buttonContainer}>
+                                <CustomTabs selectedState={selectedTab} setselectedState={setselectedTab} title={t('myjobs')} />
+                                <CustomTabs selectedState={selectedTab} setselectedState={setselectedTab} title={t('myads')} />
+                            </View>
+                        }
+
+                        {/* //////////////////////////////////////////////////////////////User////////////////////////////////////////////////////////////// */}
+                        {
+                            user.role === 'user' &&
+                            <View style={styles.buttonContainer}>
+                                <CustomTabs selectedState={selectedTab} setselectedState={setselectedTab} title={t('services')} />
+                                <CustomTabs selectedState={selectedTab} setselectedState={setselectedTab} title={t('myjobs')} />
+                            </View>
+                        }
+
+                        {/* My Ads Tab */}
+                        {
+                            ((user.role !== 'user' && selectedTab === t('myads')) || (user.role === 'user' && selectedTab === t('myjobs'))) &&
+
+                            <View style={{ width: '95%', alignItems: myAds.length != 1 ? 'center' : 'flex-start', marginTop: 10 }}>
+                                <FlatList
+                                    data={myAds}
+                                    style={{ marginTop: 10, }}
+                                    contentContainerStyle={{ justifyContent: 'center', }}
+                                    numColumns={2}
+                                    showsVerticalScrollIndicator={false}
+                                    renderItem={({ item }) => (
+                                        <ServiceCard
+                                            data={item}
+                                            submitHandler={() => { navigation.navigate('AdFullView', { item: item }) }}
+                                        />
+                                    )}
+                                    ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
+                                />
+                            </View>
+
+                        }
+
+                        {/* all ads Tab */}
+                        {
+                            (selectedTab === t('services') || (user.role === 'provider' ? selectedTab === t('myjobs') : selectedTab !== t('myjobs'))) &&
+                            <>
+                                <View style={styles.catContainer}>
+                                    <View style={styles.headerSection}>
+                                        <SliderBox
+                                            autoplay={true}
+                                            ImageComponent={FastImage}
+                                            images={[Images.cleaning, Images.cleaning, Images.cleaning, Images.cleaning, Images.cleaning]}
+                                            sliderBoxHeight={230}
+                                            onCurrentImagePressed={index => console.warn(`image ${index} pressed`)}
+                                            dotColor={colors.Primary_01}
+                                            inactiveDotColor="#90A4AE"
+                                            resizeMethod={'resize'}
+                                            resizeMode={'cover'}
+                                            circleLoop
+                                            dotStyle={{ width: 8, height: 8, borderRadius: 4, }}
+                                        />
                                     </View>
-                                    <FlatList
-                                        data={groupedAds[key]}
-                                        contentContainerStyle={{ marginTop: 10, padding: 5, }}
+                                    <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, }]}>{t('specialservices')}</Text>
+                                    <ScrollView
                                         horizontal={true}
                                         showsHorizontalScrollIndicator={false}
-                                        showsVerticalScrollIndicator={false}
-                                        renderItem={({ item, index }) =>
-                                            <ServiceCard
-                                                index={index}
-                                                data={item}
-                                                submitHandler={() => {
-                                                    navigation.navigate('AdFullView', { item: item });
-                                                }}
-                                            />
-                                        }
-                                    />
+                                        style={{ flexDirection: 'row', marginTop: 10 }}
+                                    >
+                                        <FlatList
+                                            data={allcategories}
+                                            horizontal={true}
+                                            showsHorizontalScrollIndicator={false}
+                                            showsVerticalScrollIndicator={false}
+                                            renderItem={({ item }) =>
+                                                <Categories
+                                                    selectedCat={selectedCat}
+                                                    subCategories={item.subCategories}
+                                                    icon={item.image}
+                                                    title={item.categoryName}
+                                                    submitHandler={(title, subCategories) => {
+                                                        selectedCatHandler(title, subCategories)
+                                                    }}
+                                                />
+                                            }
+                                        />
+                                    </ScrollView>
                                 </View>
-                            ))
+
+                                {
+                                    Object.keys(groupedAds).map((key) => (
+                                        <View key={key} style={{ width: '95%', alignItems: 'flex-start' }}>
+                                            <View style={styles.subCatTextContainer}>
+                                                <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, marginTop: 20 }]}>
+                                                    {key}
+                                                </Text>
+                                                <TouchableOpacity
+                                                    activeOpacity={0.8}
+                                                    onPress={() => {
+                                                        navigation.navigate('CategoriesList', { subCatTitle: key, ads: groupedAds[key] });
+                                                    }}
+                                                >
+                                                    <Text style={[Typography.text_paragraph_1, { fontWeight: 'bold', color: colors.black, marginTop: 20 }]}>
+                                                        {t('viewAll')}
+                                                    </Text>
+                                                </TouchableOpacity>
+                                            </View>
+                                            <FlatList
+                                                data={groupedAds[key]}
+                                                contentContainerStyle={{ marginTop: 10, padding: 5, }}
+                                                horizontal={true}
+                                                showsHorizontalScrollIndicator={false}
+                                                showsVerticalScrollIndicator={false}
+                                                renderItem={({ item, index }) =>
+                                                    <ServiceCard
+                                                        index={index}
+                                                        data={item}
+                                                        submitHandler={() => {
+                                                            navigation.navigate('AdFullView', { item: item });
+                                                        }}
+                                                    />
+                                                }
+                                            />
+                                        </View>
+                                    ))
+                                }
+                            </>
                         }
-                    </>
-                }
 
-            </ScrollView>
+                    </ScrollView>
 
-            <TouchableOpacity
-                activeOpacity={.8}
-                style={styles.febbutton}
-                onPress={() => { navigation.navigate('ServiceCreate', { isJobCreate: user.role === 'user' ? true : false }) }}
-            >
-                <Ionicons name="add-outline" style={{ fontSize: RFValue(12, screenResolution.screenWidth), color: colors.white, }} />
-            </TouchableOpacity>
+                    <TouchableOpacity
+                        activeOpacity={.8}
+                        style={styles.febbutton}
+                        onPress={() => { navigation.navigate('ServiceCreate', { isJobCreate: user.role === 'user' ? true : false }) }}
+                    >
+                        <Ionicons name="add-outline" style={{ fontSize: RFValue(12, screenResolution.screenWidth), color: colors.white, }} />
+                    </TouchableOpacity>
+                </>
+            }
+
 
         </View >
     );
@@ -324,6 +367,13 @@ const createStyles = (colors, theme) => {
             flexDirection: 'row',
             width: '97%',
             justifyContent: 'space-between'
+        },
+        locationError: {
+            flex: 1,
+            width: '50%',
+            marginHorizontal: '25%',
+            justifyContent: 'center',
+            alignItems: 'center'
         }
     });
 };

@@ -60,8 +60,8 @@ export default function Map({ navigation }) {
                 let loc = [position.coords.latitude, position.coords.longitude]
                 let nazimabad = [24.9107, 67.0311]
                 let naganChowrangi = [24.963673, 67.06837]
-                dispatch(isLocationSet(true, naganChowrangi));
-                dispatch(fetchAdsByLocation(naganChowrangi, collection));
+                dispatch(isLocationSet(true, loc));
+                dispatch(fetchAdsByLocation(loc, collection));
             })
             .catch((error) => {
                 console.log(error, "error");
